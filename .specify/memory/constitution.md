@@ -1,29 +1,3 @@
-<!--
-Sync Impact Report
-==================
-Version change: (unversioned template) → 1.0.0
-Bump rationale: Initial ratification — all placeholders replaced with project-specific governance.
-
-Modified principles (template slot → new title):
-  - [PRINCIPLE_1_NAME] → I. Provider-Sourced Facts (NON-NEGOTIABLE)
-  - [PRINCIPLE_2_NAME] → II. Structured, Validated LLM Output
-  - [PRINCIPLE_3_NAME] → III. External Integrations Behind Interfaces
-  - [PRINCIPLE_4_NAME] → IV. User Control Over AI Organization
-  - [PRINCIPLE_5_NAME] → V. Transparency & Reproducibility
-Added principles:
-  - VI. Test-Backed Business Logic
-  - VII. Simplicity & Phased Scope
-Added sections:
-  - Security & Configuration Constraints (template SECTION_2)
-  - Development Workflow & Quality Gates (template SECTION_3)
-Removed sections: none
-
-Sources: ../AGENTS.md, ../ARCHITECTURE.md, ../docs/requirements.md,
-../docs/ROADMAP.md, ../docs/DATA_MODEL.md
-
-Follow-up TODOs: none. Ratification date set to first adoption (2026-10-11).
--->
-
 # ResearchPilot Constitution
 
 ## Core Principles
@@ -35,10 +9,7 @@ Follow-up TODOs: none. Ratification date set to first adoption (2026-10-11).
   implementation (e.g., OpenAlex).
 - An LLM MUST NOT generate, complete, correct, or overwrite paper metadata, and MUST NOT be
   used as a source of citations.
-- LLM output is restricted to interpretation: search query expansion, cluster naming and
-  description, classification explanations, summaries, and analysis.
-- Classification explanations and any analysis MUST be grounded only in metadata and
-  abstracts supplied by the application.
+- Runtime LLM usage in this MVP MUST be restricted to search-query suggestions.
 - No paper or citation shown to the user may originate from an LLM.
 
 Rationale: Deterministic systems supply facts; AI supplies interpretation. Invented citations
@@ -51,8 +22,7 @@ destroy the product's core value — trustworthy literature discovery.
 - LLM responses MUST be validated against their expected schema before being stored or used;
   invalid responses MUST be handled as recoverable errors, not silently accepted.
 - Prompts MUST be stored separately from business logic.
-- The pipeline MUST NOT send every paper through an individual LLM call where embeddings or
-  algorithms can do the work; embeddings are preferred for relevance ranking and clustering.
+- Relevance ranking MUST use embeddings and deterministic scoring, not per-paper LLM calls.
 
 Rationale: Structured, validated responses make LLM behavior testable and failures explicit,
 and keep cost and latency bounded.
@@ -60,43 +30,44 @@ and keep cost and latency bounded.
 ### III. External Integrations Behind Interfaces
 
 - Business logic MUST NOT depend directly on OpenAI, OpenAlex, or any other vendor SDK/API.
-- Each external capability MUST sit behind an interface: `PaperProvider`, `LlmProvider`,
-  `EmbeddingProvider`, a replaceable clustering strategy, and (future)
-  `InstitutionalAccessProvider`.
-- Each pipeline step (query expansion, retrieval, normalization, deduplication, relevance,
-  embedding, clustering, cluster interpretation) MUST be a logically separate service.
+- External capabilities MUST sit behind `PaperProvider`, `QuerySuggestionProvider`, and
+  `EmbeddingProvider` interfaces. Business logic MUST NOT import vendor implementations.
+- Query suggestion, retrieval, normalization, deduplication, and embedding-based relevance
+  MUST remain logically separate operations; separate deployment units are not required.
 - Providers MUST return data through common normalized models (e.g., `Paper`).
-- A failure in one provider SHOULD NOT fail the entire search; failures MUST be surfaced
-  and logged.
+- Provider failures MUST be surfaced and logged with sanitized errors. Failed searches
+  MUST preserve the previous result set; provider failure policy belongs in reviewed specs.
 
 Rationale: Providers, models, and algorithms will change; isolating them keeps the domain
-stable and allows future institutional access, extra providers, and exports without redesign.
+stable without requiring speculative interfaces for excluded capabilities.
 
-### IV. User Control Over AI Organization
+### IV. User Control Over Search Queries
 
-- User edits (renaming, moving papers, creating/deleting/merging subtopics, marking papers
-  irrelevant) MUST take precedence over AI-generated categorization.
-- AI processes MUST NOT silently overwrite user modifications; user-modified state MUST be
-  tracked explicitly (e.g., `userModified`, `generatedByAi`).
-- Papers that do not clearly fit a cluster MUST be placed in "Uncategorized" rather than
-  forced into an inaccurate subtopic.
+- User-edited and manually created queries MUST survive suggestion regeneration.
+- Query origin and user modifications MUST be tracked explicitly; AI generation MUST NOT
+  silently overwrite user-controlled query text or enabled state.
+- Searches MUST use exactly the enabled stored queries captured when the attempt starts.
+- Failed suggestion generation MUST leave the current query list unchanged and surface
+  an error; manual queries MUST remain usable.
 
-Rationale: The user has final control. AI organization is a starting point, not a verdict.
+Rationale: AI proposes search terms; the researcher controls what is actually searched.
 
 ### V. Transparency & Reproducibility
 
 - For each paper, the provider, DOI (if available), original publication URL, and
   open-access URL (if available) MUST be retained and displayable.
-- For each project, the original research question, generated search queries, search
-  filters, providers queried, and search timestamp MUST be persisted.
-- Users MUST be able to see why a paper was considered relevant and why it belongs to its
-  subtopic.
-- Long-running searches MUST expose status (`CREATED` → `SEARCHING` → `PROCESSING` →
-  `CLUSTERING` → `ANALYZING` → `COMPLETED` / `FAILED`).
+- Each search attempt MUST persist an input snapshot containing the research question,
+  enabled queries, filters, paper limit, providers queried, and search timestamp.
+- Searches MUST expose visible pending, success, and failure states with sanitized errors.
+- Embedding-based relevance scores MUST disclose their algorithmic origin and MUST NOT
+  be presented as evidence of scientific quality or validated relevance accuracy.
+- Failed retrieval or ranking MUST preserve prior results. Saved provider-derived reference
+  snapshots MUST survive later searches and application restarts.
 - Backend logs MUST record provider requests/errors, result counts, duplicates removed,
   stage durations, and LLM calls (with token usage when available).
 
-Rationale: Researchers must be able to trust and audit how a research map was produced.
+Rationale: Researchers must be able to audit discovery without fabricated explanations
+or losing previously retained work.
 
 ### VI. Test-Backed Business Logic
 
@@ -104,17 +75,25 @@ Rationale: Researchers must be able to trust and audit how a research map was pr
 - Tests MUST NOT call live external services; provider interfaces MUST be exercised through
   fakes or stubs.
 - The full test suite MUST pass before a task is considered complete.
+- Requirements MUST have stable IDs and traceable test mappings. Prompt changes, audit
+  findings, commands, environments, and actual test outcomes MUST be recorded truthfully.
+- Proposed tests and documentation checks MUST NOT be reported as application verification.
+- Generic template wording that calls tests optional MUST NOT weaken these requirements.
 
 Rationale: Interface-isolated, deterministic tests are what make providers safely replaceable
 and keep pipeline regressions visible.
 
 ### VII. Simplicity & Phased Scope
 
-- Only the currently requested roadmap phase (see `docs/ROADMAP.md`) MAY be implemented.
-- Features marked future or out-of-scope (e.g., institutional SSO, EZproxy, Scopus,
-  paywalled PDF download, PDF vector stores, research-gap analysis, citation graphs,
-  collaboration, Zotero sync, multiple LLM providers) MUST NOT be implemented; interfaces
-  MAY be shaped so they can be added later.
+- Scope MUST be determined by this rebuild's `docs/scope.md` and approved
+  `specs/*/spec.md`, not the parent project's requirements or roadmap. Only the currently
+  approved feature slice MAY be implemented; draft artifacts are not approval.
+- The reduced MVP covers projects, editable query suggestions, OpenAlex retrieval and
+  deduplication, embedding-based ranking, and saved references, delivered in reviewed slices.
+- Clustering/subtopics, categorization explanations, manual paper organization, Scopus,
+  multi-provider retrieval, manual citations, reference notes, reading status, citation
+  numbering, authentication, public deployment, collaboration, exports/Zotero,
+  institutional access, PDF ingestion, and embedding caches MUST NOT be implemented.
 - Prefer simple implementations over premature abstractions; abstractions beyond those
   required by Principle III MUST be justified in the plan.
 - New dependencies MUST NOT be added unless necessary, and their need MUST be stated.
@@ -128,34 +107,53 @@ Rationale: Phased delivery keeps the MVP shippable; speculative design adds cost
   from environment variables and MUST NOT be committed.
 - API keys MUST NEVER be exposed to the frontend or written to logs.
 - Provider-specific configuration MUST live outside business logic.
-- Persistence uses a relational database (PostgreSQL); `Paper` holds globally reusable
-  scholarly metadata, while project-specific data (relevance, explanations, relevance flags)
-  lives on `ProjectPaper`.
+- Persistence MUST use PostgreSQL. Provider-owned paper metadata MUST remain separate
+  from project-specific relevance and search state; saved references MUST be durable
+  provider-derived snapshots, not LLM-generated or manually fabricated metadata.
+- Deployment MUST remain local, single-user, and same-origin; no public deployment or
+  account system is authorized by this MVP.
 - The system MUST NOT assume institutional authentication permits permanently downloading,
   storing, or redistributing licensed publisher content.
-- The system MUST support 100–250 papers per project without significant UI slowdown.
+- Searches MUST be bounded to at most 250 papers. Measurable performance budgets and
+  reference hardware MUST be approved in feature specs or verification plans before
+  performance acceptance is claimed.
 
 ## Development Workflow & Quality Gates
 
-- Work follows the Spec Kit flow: specify → (clarify) → plan → tasks → implement.
+- Work MUST follow human review gates: constitution → specification → clarification →
+  plan → tasks → tests/implementation → verification. Approval at one gate MUST NOT be
+  inferred as approval of later gates.
 - Every `plan.md` MUST include a Constitution Check confirming compliance with Principles
   I–VII; any deviation MUST be recorded in Complexity Tracking with justification.
 - A task is complete only when: tests for new business logic exist, the full suite passes,
   no secrets are committed, and no out-of-scope features were introduced.
 - Reviews MUST verify that no LLM output flows into authoritative metadata fields and that
   vendor SDKs are only referenced inside provider implementations.
+- Constitution amendments MUST trigger re-review of dependent specs, plans, contracts,
+  tasks, and checklists before their prior compliance claims are reused.
 
 ## Governance
 
-- This constitution supersedes other practices for ResearchPilot. Where `AGENTS.md`,
-  `docs/requirements.md`, or `docs/ROADMAP.md` conflict with it, the constitution prevails
-  until amended.
-- Amendments are made via `/speckit-constitution`, MUST document the change in a Sync Impact
-  Report, and MUST be reviewed for impact on dependent templates and active specs/plans.
+- This constitution supersedes other practices for ResearchPilot-SDD. Where `AGENTS.md`,
+  generic templates, draft artifacts, or parent-project documents conflict with it, this
+  constitution MUST prevail until amended.
+- Amendments MUST use `/speckit-constitution`, receive explicit human approval, record
+  the approver and date, and undergo impact review of dependent artifacts. A temporary
+  Sync Impact Report MUST be produced for review and removed before commit; the durable
+  amendment record MUST preserve the version change, approval, and follow-up obligations.
 - Versioning follows semantic versioning: MAJOR for removed or redefined principles; MINOR
   for new principles/sections or materially expanded guidance; PATCH for clarifications.
 - Compliance is checked at plan time (Constitution Check), at task completion, and during
   code review. Unjustified complexity or violations block completion.
 - Runtime development guidance lives in `AGENTS.md`.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-11 | **Last Amended**: 2026-10-11
+Amendment record: **1.0.0 → 2.0.0**, approved by the user on **2026-10-11** by
+selecting option A (reply: "a") for `docs/constitution-amendment.md`. This major
+amendment removes clustering/interpretation mandates, replaces categorization control
+with query control, and makes the rebuild's reduced scope authoritative. Provider facts,
+validated structured output, PostgreSQL, secrets protection, and mandatory testing remain.
+Dependent drafts MUST be re-reviewed; no feature specification, product decision, plan,
+contract, or task is approved by this amendment. Generic optional-test wording remains
+overridden by Principle VI.
+
+**Version**: 2.0.0 | **Ratified**: 2026-10-11 | **Last Amended**: 2026-10-11
