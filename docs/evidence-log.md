@@ -25,11 +25,16 @@ correctness. Application tests were not runnable because no implementation exist
 - User request (verbatim): "We have setup the SDD. Now setup the github repo, private repo mind you, then start continue working on the SDD"
 - Initialized this rebuild as a Git repository on `main`; original repository untouched.
 - Target GitHub repository: `mgustafsn/ResearchPilot-SDD`, explicitly private.
+- Created and pushed the initial commit `0ef298b`. `gh repo view` confirmed
+  `visibility: PRIVATE`, `isPrivate: true`, and default branch `main`.
 - Added root ignore rules for local environment files, credentials, and runtime artifacts.
 - Pre-publication scan of 50 staged files for common credential/private-key patterns:
   PASS, no matches. This limited pattern scan is not a comprehensive security audit.
 - Began `speckit-clarify` for active feature 001. Constitution amendment and feature
   approval remain pending; this request is not recorded as their ratification.
+- Ran `.specify/scripts/bash/check-prerequisites.sh --json --paths-only` successfully;
+  it resolved `specs/001-project-management/spec.md`. `.specify/feature.json` remains
+  deliberately machine-local under the installed Spec Kit ignore rules.
 - No application tests executed: this checkout still contains planning artifacts only.
 
 ## Decision log
