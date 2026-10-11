@@ -1,0 +1,27 @@
+# Local credentials and configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python, test, and development artifacts
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Local build/runtime artifacts
+node_modules/
+dist/
+build/
+*.log
+*.sqlite
+*.sqlite3
+.DS_Store
