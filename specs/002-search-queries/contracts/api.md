@@ -1,6 +1,7 @@
-# Query API/UI contract — proposed
+# Query API/UI contract — approved
 
-**Status**: Draft, awaiting explicit approval. Same-origin JSON under `/api`;
+**Status**: Approved by the user on 2026-10-12 (reply: "approve query plan and contracts").
+Not an implemented API or task/implementation authorization. Same-origin JSON under `/api`;
 loopback/local single-user only. Existing project input/output/PUT/DELETE contract
 is unchanged. Query state is never writable through project PUT.
 

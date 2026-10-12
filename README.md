@@ -55,10 +55,11 @@ citation numbering, authentication, exports, and PDF ingestion are excluded.
    Its tasks are approved and feature 001 implementation is authorized; the
     user confirmed proceeding with unchecked checklist items and subsequently
     accepted it with BUG-PRJ-001 deferred. Feature 002's specification is approved;
-    review its proposed [plan](specs/002-search-queries/plan.md),
+    its [plan](specs/002-search-queries/plan.md),
     [API contract](specs/002-search-queries/contracts/api.md), and
     [provider contract](specs/002-search-queries/contracts/provider.md).
-    Plan/contract approval, task approval, and implementation remain separate gates.
+    Plan/API/provider contracts are approved; task review/approval remains pending
+    before implementation. No live smoke test is authorized by those approvals.
 3. Review later specifications in order after their prerequisites:
    - [001 Projects](specs/001-project-management/spec.md)
    - [002 Queries](specs/002-search-queries/spec.md)

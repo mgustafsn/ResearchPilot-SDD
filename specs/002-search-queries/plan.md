@@ -2,9 +2,10 @@
 
 **Feature identifier**: `002-search-queries` (actual Git branch: `main`)
 **Date**: 2026-10-12 | **Spec**: [spec.md](spec.md)
-**Status**: Proposed plan and contracts, awaiting explicit human approval.
-The specification is approved; no 002 implementation, dependency changes, or live
-AI calls are authorized by this draft. Tasks require their own subsequent review.
+**Status**: Approved by the user on 2026-10-12 (reply: "approve query plan and contracts").
+The model, budgets, design, contracts, and proposed verification protocol are
+approved; tasks require separate review before implementation. No live smoke test
+or paid call is authorized by this approval, and no verification result is implied.
 
 ## Summary
 

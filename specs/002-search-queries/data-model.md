@@ -1,6 +1,7 @@
-# Feature 002 data model — proposed
+# Feature 002 data model — approved design
 
-**Status**: Draft design awaiting approval. Implement only via the reviewed new
+**Status**: Approved with the plan on 2026-10-12; task review remains pending.
+Implement only via the reviewed new
 `migrations/002_search_queries.sql`; never edit an already-applied 001 migration.
 No tables for papers, search runs, ranking, references, or deleted-text history.
 

@@ -1,7 +1,7 @@
-# Feature 002 validation guide — proposed, not implemented
+# Feature 002 validation guide — approved plan, not implemented
 
-The specification is approved. This guide, plan, and contracts are drafts awaiting
-human review; commands/test paths for feature 002 are not successful-run evidence.
+The specification, plan, contracts, and this guide are approved. Task review remains
+pending; commands/test paths for feature 002 are not successful-run evidence.
 Feature 001 is implemented and accepted with BUG-PRJ-001 deferred. Its incomplete
 human-audit evidence and publication-year defect are not resolved by this slice.
 

@@ -1,8 +1,10 @@
-# Feature 002 design research — proposals for review
+# Feature 002 design research — approved plan rationale
 
 **Date**: 2026-10-12. Based on approved specification, existing implementation,
 read-only repository analysis, and official documentation. No live model calls,
 dependency installation, application changes, or performance experiments performed.
+The user approved the design choices with the plan/contracts on 2026-10-12;
+implementation/task review and actual verification remain separate gates.
 Two read-only research agents were used because the planning skill explicitly
 requests research delegation; neither wrote files or inspected credentials.
 
@@ -23,7 +25,7 @@ requests research delegation; neither wrote files or inspected credentials.
 | Keep ProjectInput/Output unchanged | Existing API exact-shape tests and full PUT semantics remain valid; query state belongs to nested endpoints | Putting writable query state in full project PUT risks overwriting it and changes the 001 contract |
 | Async request/view identity checks | Existing frontend applies some delayed responses without project/revision guards; generation makes that unsafe | Disabling Generate alone cannot protect navigation or concurrent manual changes |
 
-These are draft plan choices awaiting approval, not ratified facts about runtime
+These choices are approved design decisions, not verified facts about runtime
 performance, model quality, or the original implementation.
 
 ## Verified official sources
@@ -77,7 +79,7 @@ connection limits are local design proposals, not OpenAI performance guarantees.
 
 ## Phase 0 outcome
 
-The proposed design has concrete choices for each technical unknown. All choices
-require plan/contract approval; no implementation authorization is inferred.
+The design has concrete approved choices for each technical unknown. Task approval
+is still required; no implementation authorization is inferred from plan approval.
 Runtime suggestion quality, external latency/availability, and actual final test
 results remain verification work, not invented research findings.

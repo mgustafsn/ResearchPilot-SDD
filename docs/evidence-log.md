@@ -515,6 +515,20 @@ correctness. Application tests were not runnable because no implementation exist
   tasks. `git diff --check`: PASS. No application tests ran for this documentation
   phase. No configured after-plan hooks found.
 
+## Feature 002 plan and contract approval — 2026-10-12
+
+- User approval (verbatim): "approve query plan and contracts".
+- Recorded approval of `specs/002-search-queries/plan.md`, API/provider contracts,
+  supporting design/validation guide, and the 002 verification protocol. Approved
+  choices include pinned GPT-4.1 Mini, structured JSON, one call/no retries,
+  512-token cap, 20 s total deadline, parent revision/lock design, and local query
+  CRUD p95 below 500 ms under the documented reference-host protocol.
+- Task generation/review/approval and implementation remain separate gates. No
+  paid/live smoke call is authorized by this decision. No runtime code, migration,
+  prompt file, dependency, or test was added or changed; no test result is claimed.
+- BUG-PRJ-001 remains deferred and uncorrected. Feature 001's missing detailed
+  audit evidence is not supplied by this approval; feature 003 remains unapproved.
+
 ## Prompt iteration record template
 
 | ID/date | Feature/requirement | Exact prompt and context artifact versions | Model/tool version | Expected output | Actual output/evidence | Failure | Revised prompt | Outcome |

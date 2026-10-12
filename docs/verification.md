@@ -72,7 +72,7 @@ or approved merely because the 001 budget was approved.
 
 ## Query-management performance proposal
 
-**Draft for 002 plan approval; no 002 benchmark has run.** Use the same approved
+**Approved with the 002 plan on 2026-10-12; no 002 benchmark has run.** Use the same approved
 reference machine as 001 (Ryzen 7 5700X3D, 31 GiB reported RAM, Linux
 7.2.9-2-cachyos x86_64) and actual PostgreSQL 17/loopback HTTP. Proposed query CRUD
 p95 budget: below 500 ms over 100 requests, not a live-provider latency promise.

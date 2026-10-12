@@ -1,7 +1,8 @@
-# QuerySuggestionProvider / OpenAI adapter contract — proposed
+# QuerySuggestionProvider / OpenAI adapter contract — approved
 
-**Status**: Draft for human review. No live API call or runtime prompt file has
-been created by this contract. It is not approval of paid calls or a benchmark.
+**Status**: Approved by the user on 2026-10-12 (reply: "approve query plan and contracts").
+No live API call or runtime prompt file has been created by this contract. Task
+review remains pending; approval is not a live-smoke permission or a benchmark result.
 
 ## Common interface and composition
 
