@@ -4,8 +4,8 @@
 **Spec**: [spec.md](spec.md)
 **Status**: Approved by the user on 2026-10-12 (reply: "approve plan and API contract").
 Tasks were reconciled and separately approved on 2026-10-12; the user authorized
-implementation of feature 001. The workflow's unchecked-checklist confirmation
-remains pending. None of these approvals constitutes acceptance evidence.
+implementation of feature 001 and confirmed proceeding with unchecked checklist
+items on the same date. None of these approvals constitutes acceptance evidence.
 
 ## Summary
 

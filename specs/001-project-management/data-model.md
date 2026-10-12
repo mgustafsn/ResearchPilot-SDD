@@ -1,8 +1,9 @@
-# Data model: Projects — draft
+# Data model: Projects — approved design
 
 Re-reviewed on 2026-10-12 against the approved specification and constitution 2.0.0;
 this design was approved with the plan on the same date. Only the Project table
-is created in slice 001; task review and implementation remain pending.
+is created in slice 001. Tasks are approved and implementation exists; human audit
+and acceptance remain pending.
 
 | Field | Storage / meaning | Rule |
 |---|---|---|

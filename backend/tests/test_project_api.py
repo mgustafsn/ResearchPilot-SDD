@@ -1,5 +1,7 @@
 """Project route contract tests with isolated real PostgreSQL."""
 
+import os
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
@@ -119,3 +121,46 @@ def test_FR_PRJ_007_failed_commit_preserves_original(client, db, method, caplog)
     assert response.status_code == 503
     assert "CANARY-SECRET" not in response.text + caplog.text
     assert client.get(path).json() == original
+
+
+@pytest.mark.parametrize("method", ["post", "put", "delete"])
+@pytest.mark.parametrize("failure_stage", ["execute", "commit"])
+def test_FR_PRJ_007_NFR_PRJ_001_failed_mutations_are_atomic(
+    client, db, method, failure_stage, caplog
+):
+    original = client.post("/api/projects", json=VALID).json()
+    path = "/api/projects" if method == "post" else f"/api/projects/{original['id']}"
+
+    def fail(*args):
+        raise OperationalError("SQL CANARY-SECRET", {}, RuntimeError("CANARY-SECRET"))
+
+    hook = "before_cursor_execute" if failure_stage == "execute" else "commit"
+    event.listen(db.engine, hook, fail, once=True)
+    options = {"json": dict(VALID, title="Changed")} if method != "delete" else {}
+    response = getattr(client, method)(path, **options)
+    assert response.status_code == 503
+    assert "CANARY-SECRET" not in response.text + caplog.text
+    assert client.get("/api/projects").json() == [original]
+    assert client.post("/api/projects", json=dict(VALID, title="Retry")).status_code == 201
+
+
+def test_NFR_PRJ_001_credentials_absent_from_assets_api_and_logs(client, monkeypatch, caplog):
+    monkeypatch.setenv("OPENAI_API_KEY", "CANARY-ENV-SECRET")
+    passwords = ["CANARY-ENV-SECRET", os.environ.get("POSTGRES_PASSWORD", "")]
+    for path in ["/", "/static/app.js", "/static/styles.css", "/api/projects"]:
+        response = client.get(path)
+        assert response.status_code == 200
+        for password in passwords:
+            if password:
+                assert password not in response.text + caplog.text
+    # This slice must not acquire provider or LLM dependencies by accident.
+    for path in Path("backend/researchpilot").glob("*.py"):
+        source = path.read_text()
+        assert "import openai" not in source and "import openalex" not in source
+
+
+def test_FR_PRJ_007_validation_explains_how_to_correct_input(client):
+    response = client.post("/api/projects", json=dict(VALID, maxPaperCount=True))
+    assert response.json()["error"]["fields"] == [
+        {"field": "maxPaperCount", "message": "Use a whole number."}
+    ]

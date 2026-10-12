@@ -2,7 +2,7 @@
 
 **Feature Branch**: Proposed `001-project-management` (not created)
 **Created**: 2026-10-11
-**Status**: Approved by the user on 2026-10-12 (reply: "approve project specification."); plan, API contract, and tasks separately approved on the same date, with implementation of feature 001 authorized. Workflow checklist confirmation and acceptance evidence remain pending.
+**Status**: Approved by the user on 2026-10-12 (reply: "approve project specification."); plan, API contract, and tasks separately approved on the same date. Implementation is authorized and checklist continuation confirmed; human audit and acceptance remain pending.
 **Input**: Derive the project-management slice from the existing ResearchPilot for the reduced SDD rebuild.
 
 ## Clarifications
@@ -83,7 +83,8 @@ The five-slice MVP feature boundaries and exclusions in `../../docs/scope.md`
 were approved on 2026-10-12. The clarified product decisions and this specification
 as a whole are approved. The plan and API contract were separately approved on
 the same date. Tasks were subsequently approved and implementation authorized;
-workflow checklist confirmation and actual implementation/acceptance remain pending.
+checklist continuation was confirmed and implementation is underway. Human audit
+and actual acceptance remain pending.
 
 Local single-user deployment, no account system, no migration from the old application.
 Validation mostly retains baseline behavior; the project fields, optional keywords/year

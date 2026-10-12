@@ -1,0 +1,41 @@
+name: Project management checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: researchpilot
+          POSTGRES_PASSWORD: disposable-ci-only
+          POSTGRES_DB: researchpilot_sdd_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U researchpilot -d researchpilot_sdd_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      # These are disposable CI-only credentials, never application secrets.
+      DATABASE_URL: postgresql+psycopg://researchpilot:disposable-ci-only@127.0.0.1:5432/researchpilot_sdd
+      TEST_DATABASE_URL: postgresql+psycopg://researchpilot:disposable-ci-only@127.0.0.1:5432/researchpilot_sdd_test
+      ALLOW_TEST_DATABASE_RESET: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.0"
+      - run: uv python install 3.12
+      - run: uv sync --locked --python 3.12
+      - run: uv run playwright install --with-deps chromium
+      - run: uv run ruff check backend
+      - run: node --check frontend/app.js
+      - run: uv run pytest -m "not performance" -q --junitxml=test-results/results.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: project-test-results
+          path: test-results/

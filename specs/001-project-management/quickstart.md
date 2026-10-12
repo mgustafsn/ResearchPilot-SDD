@@ -1,14 +1,14 @@
-# Verification quickstart — planned, not runnable yet
+# Verification quickstart — implemented slice 001
 
-There is currently no application, pyproject, launcher, database, or test suite here.
-These are intended acceptance steps after implementation, not successful-run evidence.
-Re-reviewed on 2026-10-12. Commands below are proposed interfaces for the approved
-implementation tasks, not commands executed during plan review.
+Application and test interfaces below are implemented. Automated run results are
+recorded in `../../docs/evidence-log.md` and `../../docs/evidence/`; human keyboard
+review and feature acceptance remain pending. Do not treat this guide as evidence
+that an unrecorded manual scenario passed.
 
 ## Prerequisites and local startup
 
 - Linux, Python 3.12+, uv, Docker with Compose, and Node for syntax checks.
-- After implementation, configure the environment from the credential-free
+- Configure the environment from the credential-free
   `.env.example`: `DATABASE_URL` points only to this rebuild's PostgreSQL database.
   Keep actual local credentials in ignored environment configuration. No OpenAI or
   OpenAlex configuration is needed for slice 001.
@@ -17,19 +17,19 @@ implementation tasks, not commands executed during plan review.
   test environment. Test fixtures must refuse other names, missing opt-in, or a
   target equal to `DATABASE_URL`. Never use the original database.
 
-Planned commands from the repository root:
+Commands from the repository root:
 
 ```bash
 uv sync
 uv run playwright install chromium
-docker compose up -d db
+docker compose up -d --wait db
 ./scripts/start-local.sh
 ```
 
 The launcher reads local environment configuration without printing credentials,
 applies versioned migrations, and serves `http://127.0.0.1:8000`. Do not bind the
-application or database to all network interfaces. Document the implemented launcher
-behavior and versions before treating this guide as runnable.
+application or database to all network interfaces. The launcher runs versioned
+migrations before serving and startup failures use sanitized configuration messages.
 
 ## Acceptance journey
 
@@ -48,15 +48,16 @@ behavior and versions before treating this guide as runnable.
 
 ## Automated checks and evidence
 
-Once the implemented, safeguarded disposable test environment is configured:
+Create the disposable database once, then configure the safeguarded test environment:
 
 ```bash
-uv run pytest backend/tests
+docker compose exec -T db sh -c 'exec createdb -U "$POSTGRES_USER" researchpilot_sdd_test'
+uv run --env-file .env pytest backend/tests -q
 uv run ruff check backend
 node --check frontend/app.js
 ```
 
-The full suite must include actual PostgreSQL migration/reconnect/rollback tests,
+The full suite includes actual PostgreSQL migration/reconnect/rollback tests,
 browser journeys, injected storage failures, and the approved-host performance
 fixture. Browser tests use their own local server and disposable PostgreSQL data.
 Timing protocol and host inventory are in `../../docs/verification.md`; route and

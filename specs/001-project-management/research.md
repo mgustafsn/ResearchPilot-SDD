@@ -1,4 +1,4 @@
-# Design rationale — draft
+# Design rationale — approved for slice 001
 
 This is repository-based analysis, not external research or executed experimentation.
 Source provenance is in `../../docs/baseline.md`.
@@ -22,8 +22,8 @@ no dependencies were installed.
 
 The constitution amendment, project fields/validation/deletion, paper-limit change,
 and performance host/budget are approved. No unresolved technical question blocks
-this 001 design. The plan/API contract are now approved; task reconciliation and
-human task approval still block implementation.
+this 001 design. The plan/API contract/tasks are approved and implemented;
+human audit and acceptance remain pending.
 Team ownership remains a course-evidence item, not an invented implementation decision.
 Later plans must decide query/embedding models, timeout/lease values, provider request
 budgets, and paper/query normalization. No runtime AI model is needed for project CRUD.

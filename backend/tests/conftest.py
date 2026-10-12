@@ -27,8 +27,9 @@ def require_safe_test_database(test_url=None, app_url=None, opt_in=None):
     opt_in = opt_in if opt_in is not None else os.environ.get("ALLOW_TEST_DATABASE_RESET", "")
     try:
         target = make_url(test_url)
-        if (opt_in != "1" or target.database != "researchpilot_sdd_test"
-                or target.get_backend_name() != "postgresql"):
+        if (opt_in != "1" or not app_url or target.database != "researchpilot_sdd_test"
+                or target.get_backend_name() != "postgresql"
+                or target.host not in {"127.0.0.1", "localhost", "::1"}):
             raise ValueError
         if app_url:
             application = make_url(app_url)

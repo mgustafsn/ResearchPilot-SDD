@@ -2,7 +2,7 @@
 
 A specification-driven rebuild of a deliberately smaller ResearchPilot MVP.
 Feature 001 project creation/listing/reopening/editing/deletion is implemented.
-Full verification, human usability review, and acceptance remain pending.
+Automated verification is available; human usability review and acceptance remain pending.
 
 ## Local development
 
@@ -11,6 +11,8 @@ Install with `uv sync` and `uv run playwright install chromium`.
 Copy `.env.example` to ignored `.env`, set local PostgreSQL credentials and URLs,
 and run `docker compose up -d --wait db`. URL-encode credentials in the URLs.
 The application URL should name `researchpilot_sdd`, not the original database.
+Runtime configuration rejects nonlocal hosts, non-PostgreSQL URLs, and unrelated
+database names; this is not an authentication system or a public deployment.
 
 For tests, create the separate disposable database:
 
@@ -25,6 +27,13 @@ your test configuration. Fixtures refuse other names and application targets.
 Tests truncate **only the explicitly configured disposable database**. Keep local
 credentials out of commits, browser responses, and logs. The startup script will
 serve `http://127.0.0.1:8000`: run `./scripts/start-local.sh`.
+
+The full suite includes the approved reference-host performance test. On other
+hardware or in CI, run `uv run --env-file .env pytest -m "not performance" -q` and
+do not claim reference-host performance acceptance. CI runs these repeatable tests,
+PostgreSQL integration/browser checks, Ruff, and JavaScript syntax checks.
+Actual test/performance evidence is under `docs/evidence/`; the evidence log
+distinguishes automated results from remaining human review gates.
 
 ## Scope
 
@@ -41,7 +50,8 @@ citation numbering, authentication, exports, and PDF ingestion are excluded.
 2. Feature 001's [plan](specs/001-project-management/plan.md) and
    [API contract](specs/001-project-management/contracts/api.md) are approved.
    Its tasks are approved and feature 001 implementation is authorized; the
-   implementation workflow's unchecked-checklist confirmation remains pending.
+   user confirmed proceeding with unchecked checklist items. Human audit and
+   feature acceptance are still required before planning feature 002.
 3. Review later specifications in order after their prerequisites:
    - [001 Projects](specs/001-project-management/spec.md)
    - [002 Queries](specs/002-search-queries/spec.md)

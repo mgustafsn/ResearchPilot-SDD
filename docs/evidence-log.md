@@ -281,6 +281,54 @@ correctness. Application tests were not runnable because no implementation exist
 - Tests use synthetic project inputs and explicitly disposable PostgreSQL only.
   No human audit, feature acceptance, or later-slice approval is implied.
 
+## Implementation milestone 4 — automated verification — 2026-10-12
+
+- Milestone 3 commit `d7c0959` pushed successfully to private GitHub `main`.
+- Added execution/commit fault injection for create/update/delete with successful
+  retry and no partial writes; failed multi-statement migrations leave no partial
+  table/version. Added canary and generated-password response/asset/log checks,
+  malicious HTML text-only rendering, Escape focus return, and failed deletion UI.
+  These new regressions passed existing behavior; no fake red-phase claim is made.
+- AUD-IMPL-002 (FR-PRJ-007): generic field errors did not explain how to correct
+  numeric input. Added a failing correction-message regression before adding safe
+  field-specific messages for numeric/text/length/year/JSON errors; no raw input,
+  arbitrary unknown keys, SQL, or exception context reaches the response.
+- AUD-IMPL-003 (NFR-PRJ-001): test guard could allow reset without an application
+  target to compare. Added a failing regression, then required a configured
+  application URL and local test host in addition to the explicit opt-in/name checks.
+  Combined regression command on PostgreSQL/API tests: 2 failed, 45 passed in 2.22s.
+- AUD-IMPL-004 (local scope/original isolation): runtime storage accepted unrelated
+  database names and nonlocal/SQLite targets. Before fixing, `pytest ... -k
+  runtime_refuses -q --tb=no`: 3 failed, 23 deselected. Added safe runtime refusal
+  for non-PostgreSQL, nonloopback, or non-dedicated DB names, retaining only this
+  rebuild's application/test databases. No authentication/public deployment added.
+- RUN-005-GREEN: `PERFORMANCE_OUTPUT=docs/evidence/project-performance.json uv run --env-file .env pytest -q -s --junitxml=docs/evidence/project-tests.xml`:
+  **110 passed in 10.39s**, one known Starlette/httpx test-client deprecation warning.
+  Actual JUnit output is in `docs/evidence/project-tests.xml`; raw sanitized timing
+  evidence is in `docs/evidence/project-performance.json`.
+- NFR-PRJ-003: **p95 2.39 ms**, below the approved 500 ms target. Actual approved
+  Ryzen 7 5700X3D host, Linux 7.2.9-2-cachyos, PostgreSQL 17.11, real loopback HTTP,
+  100 seeded projects, 10 untimed reads, 20 five-operation cycles, 100 retained
+  successful samples, nearest-rank 95th value. Report includes versions/load,
+  baseline commit `d7c0959`, dirty-tree disclosure, timestamp, and source hashes.
+  This small controlled sample does not establish load scalability or scientific
+  ranking accuracy. It covers only the approved project-operation budget.
+- CI-parity command `uv run --env-file .env pytest -m "not performance" -q`:
+  109 passed, 1 deselected in 9.44s. Ruff, JS syntax, and diff whitespace checks:
+  PASS. GitHub workflow added for PostgreSQL/browser/unit/API/lint checks with
+  synthetic disposable CI-only credentials; remote execution is not yet claimed.
+- Evidence verification: JUnit 110 tests/0 failures/0 errors, 100 timing samples,
+  all source hashes match; actual generated credential absent from all 75 current
+  publishable files. This is a bounded leak check, not a comprehensive secret audit.
+- Added `docs/evidence/project-traceability.md` with actual FR/NFR test mappings.
+  T020–022 complete. T023 awaits workflow publication/observation; T024 human audit,
+  T025 final post-audit verification, and T026 explicit acceptance remain unchecked.
+- AI static audit by OpenCode/GPT-6.1 Sol: project inputs rendered through textContent,
+  DB/API errors sanitized, environment configuration isolated, no provider/LLM SDK
+  paths, only 001 schema plus migration bookkeeping, loopback deployment retained.
+  Remaining limitation: no human reviewer keyboard/usability findings yet. Built-in
+  checklist markers were not changed by implementation; no human review fabricated.
+
 ## Prompt iteration record template
 
 | ID/date | Feature/requirement | Exact prompt and context artifact versions | Model/tool version | Expected output | Actual output/evidence | Failure | Revised prompt | Outcome |

@@ -1,12 +1,13 @@
 """PostgreSQL-specific evidence for FR-PRJ-002–007 and SC-PRJ-003."""
 
 import pytest
+import researchpilot.persistence as persistence
 from conftest import require_safe_test_database
 from fastapi.testclient import TestClient
 from researchpilot.api import create_app
 from researchpilot.persistence import Database
 from sqlalchemy import text
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, ProgrammingError
 
 
 @pytest.mark.parametrize("url,app,opt_in", [
@@ -14,6 +15,9 @@ from sqlalchemy.exc import IntegrityError
     ("postgresql+psycopg://localhost/researchpilot_sdd", "", "1"),
     ("sqlite:///researchpilot_sdd_test", "", "1"),
     ("bad-secret-url", "", "1"),
+    ("postgresql+psycopg://localhost/researchpilot_sdd_test", "", "1"),
+    ("postgresql+psycopg://remote.invalid/researchpilot_sdd_test",
+     "postgresql://localhost/researchpilot_sdd", "1"),
     ("postgresql+psycopg://one:secret@localhost/researchpilot_sdd_test",
      "postgresql://two:other@127.0.0.1:5432/researchpilot_sdd_test", "1"),
 ])
@@ -25,6 +29,15 @@ def test_NFR_PRJ_001_safety_refuses_unsafe_targets(url, app, opt_in):
 def test_NFR_PRJ_001_safety_allows_separate_database():
     url = "postgresql+psycopg://localhost/researchpilot_sdd_test"
     assert require_safe_test_database(url, "postgresql://localhost/researchpilot_sdd", "1") == url
+
+
+@pytest.mark.parametrize("url", [
+    "sqlite:///projects.sqlite", "postgresql+psycopg://localhost/original_project",
+    "postgresql+psycopg://remote.invalid/researchpilot_sdd",
+])
+def test_NFR_PRJ_001_runtime_refuses_nonlocal_or_unrelated_database(url):
+    with pytest.raises(RuntimeError, match="^Use the dedicated local ResearchPilot database$"):
+        Database(url)
 
 
 def test_FR_PRJ_006_migrations_are_versioned_and_repeatable(db_url):
@@ -114,3 +127,15 @@ def test_FR_PRJ_006_008_update_delete_survive_app_restart(db, db_url, monkeypatc
     with TestClient(create_app()) as third:
         assert third.get(path).status_code == 404
         assert third.get("/api/projects").json() == [other]
+
+
+def test_FR_PRJ_007_migration_failure_is_atomic(db, monkeypatch, tmp_path):
+    migration = tmp_path / "002_intentionally_invalid.sql"
+    migration.write_text("CREATE TABLE partial_migration (id integer); SELECT invalid_column;")
+    monkeypatch.setattr(persistence, "MIGRATIONS", tmp_path)
+    with pytest.raises(ProgrammingError):
+        db.migrate()
+    with db.engine.connect() as connection:
+        partial = connection.execute(text("SELECT to_regclass('partial_migration')")).scalar_one()
+        assert partial is None
+        assert connection.execute(text("SELECT count(*) FROM schema_migrations")).scalar_one() == 1

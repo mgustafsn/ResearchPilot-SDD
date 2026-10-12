@@ -51,7 +51,30 @@ def create_app(database=None):
         allowed = set(ProjectInput.model_fields) | {"project_id"}
         for error in exception.errors():
             name = next((part for part in error["loc"] if part in allowed), "request")
-            fields.append({"field": name, "message": "Invalid or missing value."})
+            kind, context = error["type"], error.get("ctx", {})
+            messages = {
+                "missing": "This field is required.", "int_type": "Use a whole number.",
+                "string_type": "Use text.", "list_type": "Use a list of keywords.",
+                "extra_forbidden": "Unknown fields are not allowed.",
+                "json_invalid": "The request must contain valid JSON.",
+                "uuid_parsing": "Use a valid project ID.",
+                "uuid_type": "Use a valid project ID.",
+            }
+            message = messages.get(kind, "Invalid or missing value.")
+            if kind in {"string_too_short", "string_too_long", "too_long"}:
+                minimum, maximum = context.get("min_length"), context.get("max_length")
+                if minimum is not None:
+                    message = f"Use at least {minimum} characters."
+                elif maximum is not None:
+                    unit = "keywords" if name == "keywords" and kind == "too_long" else "characters"
+                    message = f"Use at most {maximum} {unit}."
+            elif kind in {"greater_than_equal", "less_than_equal"}:
+                key = "ge" if kind == "greater_than_equal" else "le"
+                direction = "at least" if key == "ge" else "at most"
+                message = f"Use a value {direction} {context[key]}."
+            elif kind == "value_error" and name == "yearTo":
+                message = "End year must not precede start year."
+            fields.append({"field": name, "message": message})
         return error_response(
             422, "VALIDATION_ERROR", "Please check the highlighted fields.", fields
         )

@@ -2,7 +2,9 @@
 
 Re-reviewed on 2026-10-12 against the approved 001 specification and constitution
 2.0.0. Approved by the user on 2026-10-12 (reply: "approve plan and API contract");
-this is not an implemented API or implementation authorization.
+approval alone does not establish implementation or acceptance. This API is now
+implemented for slice 001; actual evidence and remaining review gates are recorded
+in `../../../docs/evidence-log.md`.
 
 Same origin, prefix `/api`, JSON requests/responses. No authentication in local scope.
 Bind server to loopback; this is not a secure public-deployment contract.

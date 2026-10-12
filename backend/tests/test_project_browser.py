@@ -122,3 +122,33 @@ def test_FR_PRJ_008_NFR_PRJ_002_confirm_cancel_and_isolation(page, live_server):
         assert len(deletes) == 1
         page.reload()
         expect(page.get_by_role("button", name="Other project", exact=True)).to_be_visible()
+
+
+def test_NFR_PRJ_001_user_text_never_executes(page, live_server):
+    payload = '<img src=x onerror="window.injected=true">'
+    with live_server() as base:
+        page.goto(base)
+        create_project(page, title=payload)
+        expect(page.locator("#detail-title")).to_have_text(payload)
+        expect(page.locator("#detail img")).to_have_count(0)
+        expect(page.locator("#project-list img")).to_have_count(0)
+        assert page.evaluate("window.injected") is None
+
+
+def test_FR_PRJ_007_failed_delete_and_escape_keep_project(page, live_server):
+    with live_server() as base:
+        page.goto(base)
+        create_project(page)
+        page.get_by_role("button", name="Delete project", exact=True).click()
+        page.keyboard.press("Escape")
+        expect(page.get_by_role("dialog")).not_to_be_visible()
+        expect(page.get_by_role("button", name="Delete project", exact=True)).to_be_focused()
+        page.route("**/api/projects/*", lambda route: route.fulfill(status=503,
+            content_type="application/json", body='{"error":{"message":"Storage unavailable",'
+            '"fields":[]}}') if route.request.method == "DELETE" else route.continue_())
+        page.get_by_role("button", name="Delete project", exact=True).click()
+        page.get_by_role("button", name="Delete permanently", exact=True).click()
+        expect(page.get_by_role("alert")).to_contain_text("Storage unavailable")
+        expect(page.locator("#detail-title")).to_have_text("Browser project")
+        page.reload()
+        expect(page.get_by_role("button", name="Browser project", exact=True)).to_be_visible()

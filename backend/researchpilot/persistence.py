@@ -4,13 +4,25 @@ import os
 from pathlib import Path
 
 from sqlalchemy import MetaData, Table, create_engine, text
+from sqlalchemy.engine import make_url
 
 MIGRATIONS = Path(__file__).resolve().parents[2] / "migrations"
 
 
 class Database:
     def __init__(self, url: str):
-        self.engine = create_engine(url, echo=False, hide_parameters=True, pool_pre_ping=True)
+        try:
+            target = make_url(url)
+            if (target.get_backend_name() != "postgresql"
+                    or target.host not in {"127.0.0.1", "localhost", "::1"}
+                    or target.database not in {"researchpilot_sdd", "researchpilot_sdd_test"}):
+                raise ValueError
+        except Exception:
+            raise RuntimeError("Use the dedicated local ResearchPilot database") from None
+        self.engine = create_engine(
+            target.set(drivername="postgresql+psycopg"), echo=False,
+            hide_parameters=True, pool_pre_ping=True,
+        )
 
     def migrate(self):
         with self.engine.begin() as connection:

@@ -1,0 +1,648 @@
+{
+  "run_timestamp": "2026-10-12T11:35:39.432889+00:00",
+  "requirement": "NFR-PRJ-003",
+  "threshold_ms": 500,
+  "p95_ms": 2.390799998465809,
+  "request_count": 100,
+  "seeded_projects": 100,
+  "warmup_read_requests": 10,
+  "percentile_method": "nearest-rank, 95th of 100 sorted durations",
+  "transport": "real loopback HTTP, persistent HTTPX client, PostgreSQL",
+  "python": "3.13.15",
+  "os": "Linux-7.2.9-2-cachyos-x86_64-with-glibc2.44",
+  "cpu": "AMD Ryzen 7 5700X3D 8-Core Processor",
+  "load_average": [
+    1.0947265625,
+    1.24267578125,
+    1.17138671875
+  ],
+  "postgresql": "PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+  "versions": {
+    "fastapi": "0.143.0",
+    "sqlalchemy": "2.1.4",
+    "psycopg": "3.3.6",
+    "httpx": "0.28.1",
+    "playwright": "1.63.0"
+  },
+  "baseline_commit": "d7c0959bdd4e79eda3dd63b3ec6ad42192c4e66a",
+  "dirty_working_tree": true,
+  "source_hashes": {
+    "backend/researchpilot/__init__.py": "41f98f6411c93ef5da189140ee3ffda93b439c9c0c372e12770436f57f3027e2",
+    "backend/researchpilot/api.py": "8d6d3044f4a39de9f97531277efb737d24e8ea1925f67de23e38e099b80ae7e1",
+    "backend/researchpilot/domain.py": "343218186fadc272d2dc7eded53e6c518f77d9c8a8a0612bb375306c31d3dae7",
+    "backend/researchpilot/persistence.py": "47aba6b2df7dcfc362ae29ec9b0b02c285425c94cde16574d9ac9cab0602adf4",
+    "backend/researchpilot/service.py": "8c5e7f0b59316a269d10918b980ec72c360345a30b65bdcdc44af9415c0688d2",
+    "backend/tests/conftest.py": "8071215124979e2a829988b4c50b5249f1df70c0ea05e3c422ecac20b5283797",
+    "backend/tests/test_project_api.py": "ddb7769f76a41b93215d6a23ae36eabfda2e4048a31b928a952931f3355906b5",
+    "backend/tests/test_project_browser.py": "08e0c8dd78f6307352b68fe2cfb2cd2205e3bf57468e59bd9069c741d041edb2",
+    "backend/tests/test_project_performance.py": "31994d24979a6ce6de52a2563840f43829666738756af85dc579ca0bbeeaef32",
+    "backend/tests/test_project_postgres.py": "fdcde42929a1a5730d06fff33dbb4d336c5b049a1952a015227a8f505c6a2a46",
+    "backend/tests/test_projects.py": "fcc8d97a89f1cffa6bf9af6d89111512539d55fd5f1eb71533e95aae1574d502",
+    "frontend/app.js": "0b4e8945d683e85412467eeb032d8e34c4c4af6fb343b2b369a5589897abdef1",
+    "frontend/index.html": "9afd7e5abb65bbd291e0527d1d235e5f3474bebc977bc495fb0acef5c1eeedf6",
+    "frontend/styles.css": "291d3aa0e931a26d522fa25a457e8a03eb9a6ec89e539312a123bfae2d714655",
+    "migrations/001_projects.sql": "b29880c495f6eeb9b2aca0d10045d9f4bb8e0b9407e8ccdb69532d7e46dfb2f6"
+  },
+  "samples": [
+    {
+      "cycle": 1,
+      "operation": "create",
+      "duration_ms": 3.0676279984618304,
+      "status": 201
+    },
+    {
+      "cycle": 1,
+      "operation": "list",
+      "duration_ms": 2.4004679999052314,
+      "status": 200
+    },
+    {
+      "cycle": 1,
+      "operation": "detail",
+      "duration_ms": 1.8626149994815933,
+      "status": 200
+    },
+    {
+      "cycle": 1,
+      "operation": "update",
+      "duration_ms": 2.978627999254968,
+      "status": 200
+    },
+    {
+      "cycle": 1,
+      "operation": "delete",
+      "duration_ms": 2.1354839991545305,
+      "status": 204
+    },
+    {
+      "cycle": 2,
+      "operation": "create",
+      "duration_ms": 2.4612939996586647,
+      "status": 201
+    },
+    {
+      "cycle": 2,
+      "operation": "list",
+      "duration_ms": 2.219062998847221,
+      "status": 200
+    },
+    {
+      "cycle": 2,
+      "operation": "detail",
+      "duration_ms": 1.4339899989863625,
+      "status": 200
+    },
+    {
+      "cycle": 2,
+      "operation": "update",
+      "duration_ms": 2.3338810005952837,
+      "status": 200
+    },
+    {
+      "cycle": 2,
+      "operation": "delete",
+      "duration_ms": 1.7271469987463206,
+      "status": 204
+    },
+    {
+      "cycle": 3,
+      "operation": "create",
+      "duration_ms": 2.3341019987128675,
+      "status": 201
+    },
+    {
+      "cycle": 3,
+      "operation": "list",
+      "duration_ms": 2.163137000025017,
+      "status": 200
+    },
+    {
+      "cycle": 3,
+      "operation": "detail",
+      "duration_ms": 1.4727119996678084,
+      "status": 200
+    },
+    {
+      "cycle": 3,
+      "operation": "update",
+      "duration_ms": 2.2580770000786288,
+      "status": 200
+    },
+    {
+      "cycle": 3,
+      "operation": "delete",
+      "duration_ms": 1.8071690010401653,
+      "status": 204
+    },
+    {
+      "cycle": 4,
+      "operation": "create",
+      "duration_ms": 2.3113990009733243,
+      "status": 201
+    },
+    {
+      "cycle": 4,
+      "operation": "list",
+      "duration_ms": 2.28235400027188,
+      "status": 200
+    },
+    {
+      "cycle": 4,
+      "operation": "detail",
+      "duration_ms": 1.478242998928181,
+      "status": 200
+    },
+    {
+      "cycle": 4,
+      "operation": "update",
+      "duration_ms": 2.2982840000622673,
+      "status": 200
+    },
+    {
+      "cycle": 4,
+      "operation": "delete",
+      "duration_ms": 1.68871399910131,
+      "status": 204
+    },
+    {
+      "cycle": 5,
+      "operation": "create",
+      "duration_ms": 2.2295029993983917,
+      "status": 201
+    },
+    {
+      "cycle": 5,
+      "operation": "list",
+      "duration_ms": 2.1809999998367857,
+      "status": 200
+    },
+    {
+      "cycle": 5,
+      "operation": "detail",
+      "duration_ms": 1.3161949991626898,
+      "status": 200
+    },
+    {
+      "cycle": 5,
+      "operation": "update",
+      "duration_ms": 2.240695001091808,
+      "status": 200
+    },
+    {
+      "cycle": 5,
+      "operation": "delete",
+      "duration_ms": 2.178896000259556,
+      "status": 204
+    },
+    {
+      "cycle": 6,
+      "operation": "create",
+      "duration_ms": 2.359199999773409,
+      "status": 201
+    },
+    {
+      "cycle": 6,
+      "operation": "list",
+      "duration_ms": 2.100227000482846,
+      "status": 200
+    },
+    {
+      "cycle": 6,
+      "operation": "detail",
+      "duration_ms": 1.4539969997713342,
+      "status": 200
+    },
+    {
+      "cycle": 6,
+      "operation": "update",
+      "duration_ms": 2.247868000267772,
+      "status": 200
+    },
+    {
+      "cycle": 6,
+      "operation": "delete",
+      "duration_ms": 1.7893950007419335,
+      "status": 204
+    },
+    {
+      "cycle": 7,
+      "operation": "create",
+      "duration_ms": 2.250322000691085,
+      "status": 201
+    },
+    {
+      "cycle": 7,
+      "operation": "list",
+      "duration_ms": 2.1038039994891733,
+      "status": 200
+    },
+    {
+      "cycle": 7,
+      "operation": "detail",
+      "duration_ms": 1.417286999640055,
+      "status": 200
+    },
+    {
+      "cycle": 7,
+      "operation": "update",
+      "duration_ms": 2.3819529997126665,
+      "status": 200
+    },
+    {
+      "cycle": 7,
+      "operation": "delete",
+      "duration_ms": 1.770328999555204,
+      "status": 204
+    },
+    {
+      "cycle": 8,
+      "operation": "create",
+      "duration_ms": 2.3805099990568124,
+      "status": 201
+    },
+    {
+      "cycle": 8,
+      "operation": "list",
+      "duration_ms": 2.1810910002386663,
+      "status": 200
+    },
+    {
+      "cycle": 8,
+      "operation": "detail",
+      "duration_ms": 1.4485070005321177,
+      "status": 200
+    },
+    {
+      "cycle": 8,
+      "operation": "update",
+      "duration_ms": 2.310736999788787,
+      "status": 200
+    },
+    {
+      "cycle": 8,
+      "operation": "delete",
+      "duration_ms": 1.8021600008069072,
+      "status": 204
+    },
+    {
+      "cycle": 9,
+      "operation": "create",
+      "duration_ms": 2.2718529999110615,
+      "status": 201
+    },
+    {
+      "cycle": 9,
+      "operation": "list",
+      "duration_ms": 2.138329000445083,
+      "status": 200
+    },
+    {
+      "cycle": 9,
+      "operation": "detail",
+      "duration_ms": 1.4550590003636898,
+      "status": 200
+    },
+    {
+      "cycle": 9,
+      "operation": "update",
+      "duration_ms": 2.3291030011023395,
+      "status": 200
+    },
+    {
+      "cycle": 9,
+      "operation": "delete",
+      "duration_ms": 1.7893550011649495,
+      "status": 204
+    },
+    {
+      "cycle": 10,
+      "operation": "create",
+      "duration_ms": 2.2582469991903054,
+      "status": 201
+    },
+    {
+      "cycle": 10,
+      "operation": "list",
+      "duration_ms": 2.1395320000010543,
+      "status": 200
+    },
+    {
+      "cycle": 10,
+      "operation": "detail",
+      "duration_ms": 1.4882319992466364,
+      "status": 200
+    },
+    {
+      "cycle": 10,
+      "operation": "update",
+      "duration_ms": 2.286541001012665,
+      "status": 200
+    },
+    {
+      "cycle": 10,
+      "operation": "delete",
+      "duration_ms": 1.8554309990577167,
+      "status": 204
+    },
+    {
+      "cycle": 11,
+      "operation": "create",
+      "duration_ms": 2.380009000262362,
+      "status": 201
+    },
+    {
+      "cycle": 11,
+      "operation": "list",
+      "duration_ms": 2.2756010002922267,
+      "status": 200
+    },
+    {
+      "cycle": 11,
+      "operation": "detail",
+      "duration_ms": 1.4696369999001035,
+      "status": 200
+    },
+    {
+      "cycle": 11,
+      "operation": "update",
+      "duration_ms": 2.247636999527458,
+      "status": 200
+    },
+    {
+      "cycle": 11,
+      "operation": "delete",
+      "duration_ms": 1.7551810014992952,
+      "status": 204
+    },
+    {
+      "cycle": 12,
+      "operation": "create",
+      "duration_ms": 2.3470069991162745,
+      "status": 201
+    },
+    {
+      "cycle": 12,
+      "operation": "list",
+      "duration_ms": 2.2088140012783697,
+      "status": 200
+    },
+    {
+      "cycle": 12,
+      "operation": "detail",
+      "duration_ms": 1.373875000354019,
+      "status": 200
+    },
+    {
+      "cycle": 12,
+      "operation": "update",
+      "duration_ms": 2.2849590004625497,
+      "status": 200
+    },
+    {
+      "cycle": 12,
+      "operation": "delete",
+      "duration_ms": 1.733799999783514,
+      "status": 204
+    },
+    {
+      "cycle": 13,
+      "operation": "create",
+      "duration_ms": 2.233791001344798,
+      "status": 201
+    },
+    {
+      "cycle": 13,
+      "operation": "list",
+      "duration_ms": 2.234712999779731,
+      "status": 200
+    },
+    {
+      "cycle": 13,
+      "operation": "detail",
+      "duration_ms": 1.5765599982842105,
+      "status": 200
+    },
+    {
+      "cycle": 13,
+      "operation": "update",
+      "duration_ms": 2.390799998465809,
+      "status": 200
+    },
+    {
+      "cycle": 13,
+      "operation": "delete",
+      "duration_ms": 1.8274280009791255,
+      "status": 204
+    },
+    {
+      "cycle": 14,
+      "operation": "create",
+      "duration_ms": 2.318412000022363,
+      "status": 201
+    },
+    {
+      "cycle": 14,
+      "operation": "list",
+      "duration_ms": 2.338631000384339,
+      "status": 200
+    },
+    {
+      "cycle": 14,
+      "operation": "detail",
+      "duration_ms": 1.3958660001662793,
+      "status": 200
+    },
+    {
+      "cycle": 14,
+      "operation": "update",
+      "duration_ms": 2.3099059999367455,
+      "status": 200
+    },
+    {
+      "cycle": 14,
+      "operation": "delete",
+      "duration_ms": 1.8570039992482634,
+      "status": 204
+    },
+    {
+      "cycle": 15,
+      "operation": "create",
+      "duration_ms": 2.297342000019853,
+      "status": 201
+    },
+    {
+      "cycle": 15,
+      "operation": "list",
+      "duration_ms": 2.3799390000931453,
+      "status": 200
+    },
+    {
+      "cycle": 15,
+      "operation": "detail",
+      "duration_ms": 1.328768999883323,
+      "status": 200
+    },
+    {
+      "cycle": 15,
+      "operation": "update",
+      "duration_ms": 2.359991000048467,
+      "status": 200
+    },
+    {
+      "cycle": 15,
+      "operation": "delete",
+      "duration_ms": 1.7551700002513826,
+      "status": 204
+    },
+    {
+      "cycle": 16,
+      "operation": "create",
+      "duration_ms": 2.2737079998478293,
+      "status": 201
+    },
+    {
+      "cycle": 16,
+      "operation": "list",
+      "duration_ms": 2.092933000312769,
+      "status": 200
+    },
+    {
+      "cycle": 16,
+      "operation": "detail",
+      "duration_ms": 1.349549000224215,
+      "status": 200
+    },
+    {
+      "cycle": 16,
+      "operation": "update",
+      "duration_ms": 2.288585001224419,
+      "status": 200
+    },
+    {
+      "cycle": 16,
+      "operation": "delete",
+      "duration_ms": 1.8263959991600132,
+      "status": 204
+    },
+    {
+      "cycle": 17,
+      "operation": "create",
+      "duration_ms": 2.6533399995969376,
+      "status": 201
+    },
+    {
+      "cycle": 17,
+      "operation": "list",
+      "duration_ms": 2.171983000152977,
+      "status": 200
+    },
+    {
+      "cycle": 17,
+      "operation": "detail",
+      "duration_ms": 1.318049000474275,
+      "status": 200
+    },
+    {
+      "cycle": 17,
+      "operation": "update",
+      "duration_ms": 2.244601999336737,
+      "status": 200
+    },
+    {
+      "cycle": 17,
+      "operation": "delete",
+      "duration_ms": 1.8516529999033082,
+      "status": 204
+    },
+    {
+      "cycle": 18,
+      "operation": "create",
+      "duration_ms": 2.309043999048299,
+      "status": 201
+    },
+    {
+      "cycle": 18,
+      "operation": "list",
+      "duration_ms": 2.256603998830542,
+      "status": 200
+    },
+    {
+      "cycle": 18,
+      "operation": "detail",
+      "duration_ms": 1.3479249992087716,
+      "status": 200
+    },
+    {
+      "cycle": 18,
+      "operation": "update",
+      "duration_ms": 2.2356350000336533,
+      "status": 200
+    },
+    {
+      "cycle": 18,
+      "operation": "delete",
+      "duration_ms": 1.8315460001758765,
+      "status": 204
+    },
+    {
+      "cycle": 19,
+      "operation": "create",
+      "duration_ms": 2.3457339993910864,
+      "status": 201
+    },
+    {
+      "cycle": 19,
+      "operation": "list",
+      "duration_ms": 2.193433998399996,
+      "status": 200
+    },
+    {
+      "cycle": 19,
+      "operation": "detail",
+      "duration_ms": 1.350559999991674,
+      "status": 200
+    },
+    {
+      "cycle": 19,
+      "operation": "update",
+      "duration_ms": 2.3571349993289914,
+      "status": 200
+    },
+    {
+      "cycle": 19,
+      "operation": "delete",
+      "duration_ms": 1.783484000043245,
+      "status": 204
+    },
+    {
+      "cycle": 20,
+      "operation": "create",
+      "duration_ms": 2.2498220005218172,
+      "status": 201
+    },
+    {
+      "cycle": 20,
+      "operation": "list",
+      "duration_ms": 2.188534999731928,
+      "status": 200
+    },
+    {
+      "cycle": 20,
+      "operation": "detail",
+      "duration_ms": 1.380718000291381,
+      "status": 200
+    },
+    {
+      "cycle": 20,
+      "operation": "update",
+      "duration_ms": 2.241496000351617,
+      "status": 200
+    },
+    {
+      "cycle": 20,
+      "operation": "delete",
+      "duration_ms": 1.825924999138806,
+      "status": 204
+    }
+  ]
+}
