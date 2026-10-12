@@ -1,12 +1,13 @@
-# Proposed constitution amendment — approval required
+# Constitution amendment — ratified; dependent reviews required
 
-The existing `.specify/memory/constitution.md` is user work and has not been changed.
-It is version 1.0.0 and references parent-project requirements rather than this
-rebuild's reduced scope. A plan cannot pass its Constitution Check unchanged.
+The amendment from 1.0.0 to 2.0.0 was approved by the user on 2026-10-11
+(reply: "a"), as recorded in `.specify/memory/constitution.md`. The original proposal
+below is retained as rationale; it is no longer a pending constitution-approval gate.
+Ratification does not approve dependent feature specifications or designs.
 
 ## Proposed change
 
-After human approval, use the constitution skill to make a major amendment to 2.0.0:
+The proposal approved for constitution 2.0.0 was:
 
 1. Preserve provider-owned authoritative metadata and structured validated LLM output.
 2. Restrict runtime LLM usage in this MVP to query suggestions. Remove mandates for
@@ -29,10 +30,11 @@ After human approval, use the constitution skill to make a major amendment to 2.
 
 ## Impact
 
-All five feature specifications are drafts under the proposed reduced scope.
-Feature 001's plan remains BLOCKED until this amendment and its product decisions
-are approved. Review installed templates for consistency (especially optional-test
-wording) when amending; project tests remain mandatory despite generic template text.
-
-Approval, ratification date, approver, and final version must be recorded when the
-amendment actually happens. This proposal does not itself amend the constitution.
+On 2026-10-12 the user approved the five-slice scope boundaries and feature 001
+specification. Feature 001's plan, rationale, data model, API contract, quickstart,
+and checklist were re-reviewed against constitution 2.0.0 for the plan review;
+human plan/contract approval was subsequently recorded on the same date. Task
+reconciliation was completed for review on the same date; task approval remains pending.
+Later feature drafts must be re-reviewed before their own approval gates. Mandatory
+tests override any generic template optional-test wording. No runtime compliance
+or implementation acceptance is claimed by these documentation reviews.

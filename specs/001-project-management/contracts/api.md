@@ -1,4 +1,8 @@
-# Project API contract — draft
+# Project API contract — approved
+
+Re-reviewed on 2026-10-12 against the approved 001 specification and constitution
+2.0.0. Approved by the user on 2026-10-12 (reply: "approve plan and API contract");
+this is not an implemented API or implementation authorization.
 
 Same origin, prefix `/api`, JSON requests/responses. No authentication in local scope.
 Bind server to loopback; this is not a secure public-deployment contract.
@@ -43,6 +47,14 @@ Handle framework validation errors consistently with this envelope.
 GET list order: updatedAt descending, UUID ascending for ties. Mutations are atomic;
 failed writes do not alter persisted data. Deleting an absent project returns 404.
 UI confirmation is not an additional server flag.
+
+The UI calls `title` "Project name", offers paper count 100 initially, and provides
+labeled keyboard-accessible controls for all project operations. Failed saves keep
+form values visible alongside text errors. Before DELETE, warn that the project and
+its contents will be permanently removed with no undo; cancellation sends no request.
+Browser assets/API responses contain no environment secrets. User text is rendered
+as text rather than HTML. Backend error logging excludes raw database exceptions,
+SQL parameters, database URLs, and credentials.
 
 Feature 003 will amend PUT/DELETE to return 409 SEARCH_ACTIVE during an owned active
 attempt. This future behavior is not required in the first implementation slice.

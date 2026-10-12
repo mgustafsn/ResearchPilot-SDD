@@ -33,6 +33,35 @@ IDs each test verifies. Acceptance scenario IDs supplement, not replace, require
 All tests, results and metrics are currently planned. Do not claim code coverage,
 test pass counts, security compliance or ranking accuracy before measurement.
 
+## Project-management performance reference
+
+Approved by the user on 2026-10-12: measure local CRUD p95 below 500 ms over
+100 requests with 100 stored projects, excluding startup and external services.
+Reference host observed via `lscpu`, `uname -srmo`, and `free -h`:
+AMD Ryzen 7 5700X3D (8 cores/16 threads), 31 GiB reported RAM,
+Linux 7.2.9-2-cachyos x86_64.
+
+Protocol approved with the 001 plan on 2026-10-12; execution remains pending:
+
+- Run a real local HTTP server with PostgreSQL 17 on this host, using an explicitly
+  disposable test database, not the application or original database.
+- Seed 100 projects. Warm up the process/connection pool with 10 untimed read
+  requests. Send 20 cycles of POST, GET list, GET detail, PUT, DELETE sequentially,
+  using the newly created project in each cycle. Each cycle ends with 100 projects;
+  POST temporarily raises the count to 101. Do not time fixture setup or startup.
+- Time from immediately before sending the request until its full response body is
+  received using a monotonic clock and one persistent HTTP client. Include server
+  validation, database work/commit, serialization, and loopback transport. Record
+  failed requests and fail the run rather than omit them from the sample.
+- Retain all 100 raw durations and operation labels. Sort durations ascending and
+  take the 95th value (nearest-rank p95); require it below 500 ms. Report per-operation
+  timings separately without claiming a per-operation acceptance budget.
+- Record commit, commands, Python/dependency/PostgreSQL/browser versions, database
+  configuration without credentials, machine load, OS, and CPU/RAM. Use the same
+  protocol for any comparison; report deviations rather than silently changing it.
+
+No benchmark has been run; the approved budget is not acceptance evidence.
+
 ## Comparing vibe coding with SDD
 
 - Freeze baseline working-tree state and rebuild commit before comparison.

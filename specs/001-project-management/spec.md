@@ -2,8 +2,18 @@
 
 **Feature Branch**: Proposed `001-project-management` (not created)
 **Created**: 2026-10-11
-**Status**: Draft — human approval required
+**Status**: Approved by the user on 2026-10-12 (reply: "approve project specification."); plan, API contract, and tasks separately approved on the same date, with implementation of feature 001 authorized. Workflow checklist confirmation and acceptance evidence remain pending.
 **Input**: Derive the project-management slice from the existing ResearchPilot for the reduced SDD rebuild.
+
+## Clarifications
+
+### Session 2026-10-12
+
+- Q: Should we keep this five-feature scope for the first version? → A: Keep projects, editable queries, OpenAlex retrieval, embedding ranking, and saved references, with the listed exclusions; review each slice separately before implementation.
+- Q: Should each project have a required name and research question, plus optional keywords and publication-year filters, and a paper limit defaulting to 100? → A: Yes; retain all proposed fields, optional keywords and year bounds, and an integer paper limit of 1–250 with UI default 100.
+- Q: Should deleting a project permanently remove its queries, search results, and saved references after you confirm? → A: Yes; require a confirmation warning that the project and its contents will be permanently deleted, with no undo; other projects and the original application remain untouched.
+- Q: Should we use the proposed limits below and reject invalid entries without changing saved data? → A: Yes; approve the stated name/question/keyword/year limits, trimming and case-insensitive keyword deduplication, duplicate project names, readable errors, preservation of form input, and no stored changes on invalid input.
+- Q: Should we test project operations on this Linux machine and require 95% of requests to finish within 500 milliseconds? → A: Yes; use the current Linux machine and a p95 latency below 500 ms over 100 requests with 100 stored projects, excluding startup and external services; record machine specifications and actual results.
 
 ## User Scenarios & Testing
 
@@ -42,18 +52,18 @@ behavior is added by feature 003, not implemented speculatively here.
 
 - **FR-PRJ-001**: Users MUST create, list, read, fully update, and delete projects.
 - **FR-PRJ-002**: Trim name/question; name MUST contain 1–200 characters, question 1–5000.
-- **FR-PRJ-003**: Accept at most 30 keywords, each trimmed to 1–100 characters; remove case-insensitive duplicates, retaining first spelling/order.
+- **FR-PRJ-003**: Keywords are optional; accept an empty list or at most 30 keywords, each trimmed to 1–100 characters; remove case-insensitive duplicates, retaining first spelling/order.
 - **FR-PRJ-004**: Optional year bounds MUST be integers 1–9999, excluding booleans; start MUST NOT exceed end. A missing bound means unbounded on that side.
-- **FR-PRJ-005**: Maximum paper count MUST be an integer 1–250, excluding booleans; the UI initially offers 100. This is a reduced-scope proposal.
+- **FR-PRJ-005**: Maximum paper count MUST be an integer 1–250, excluding booleans; the UI initially offers 100. The range and UI default were approved on 2026-10-12.
 - **FR-PRJ-006**: Persist IDs, fields, and creation/update timestamps across restart. Duplicate project names are permitted; order lists by newest update then ID.
-- **FR-PRJ-007**: Reject unknown input fields and invalid values without changing stored data. Show readable validation/not-found/storage errors.
-- **FR-PRJ-008**: Require explicit UI confirmation for deletion; delete owned queries, results, attempts, and references when those features exist, not other projects' records.
+- **FR-PRJ-007**: Reject unknown input fields and invalid values without changing stored data. Show readable validation/not-found/storage errors; preserve form input on failed saves so users can correct it.
+- **FR-PRJ-008**: Require explicit UI confirmation warning that deletion permanently removes the project and its contents with no undo; delete owned queries, results, attempts, and references when those features exist, not other projects' records. Never modify the original application's data.
 
 ### Non-Functional Requirements
 
 - **NFR-PRJ-001**: No credential values appear in browser assets, API responses, or application logs.
 - **NFR-PRJ-002**: All project operations are keyboard accessible, fields have labels, and errors are conveyed as text rather than color alone.
-- **NFR-PRJ-003**: Proposed local CRUD p95 latency is below 500 ms over 100 requests with 100 stored projects, excluding application startup and external services. Reference environment must be approved before measurement.
+- **NFR-PRJ-003**: Local CRUD p95 latency MUST be below 500 ms over 100 requests with 100 stored projects, excluding application startup and external services. The current Linux machine was approved as the reference host on 2026-10-12: AMD Ryzen 7 5700X3D (8 cores/16 threads), 31 GiB reported RAM, Linux 7.2.9-2-cachyos x86_64. Record runtime/database versions, measurement method, machine conditions, and actual results at execution; see `../../docs/verification.md`.
 
 ### Key Entities
 
@@ -69,6 +79,16 @@ created/updated timestamps. Project owns future queries, results, attempts, and 
 
 ## Assumptions
 
+The five-slice MVP feature boundaries and exclusions in `../../docs/scope.md`
+were approved on 2026-10-12. The clarified product decisions and this specification
+as a whole are approved. The plan and API contract were separately approved on
+the same date. Tasks were subsequently approved and implementation authorized;
+workflow checklist confirmation and actual implementation/acceptance remain pending.
+
 Local single-user deployment, no account system, no migration from the old application.
-Validation mostly retains baseline behavior; required 1–250 paper count and deletion
-confirmation are proposed product decisions. See `../../docs/scope.md`.
+Validation mostly retains baseline behavior; the project fields, optional keywords/year
+bounds, and 1–250 paper count with UI default 100 were approved on 2026-10-12.
+Permanent deletion with an explicit warning/confirmation and no undo was also approved
+on 2026-10-12. The stated name/question/keyword/year limits, normalization,
+duplicate project names, and invalid-input behavior were approved on the same date.
+See `../../docs/scope.md`.

@@ -9,9 +9,9 @@ These checkboxes are review gates, not implementation/test results.
 - [x] Acceptance scenarios include invalid inputs, persistence, update and deletion.
 - [x] Scope and assumptions are explicit; implementation technology is kept in plan.md.
 - [x] Success criteria identify observable outcomes.
-- [ ] Human approves narrowed paper limit, required count, and deletion behavior.
-- [ ] Performance host and budget are approved.
-- [ ] Constitution scope conflicts are resolved and amendment ratified.
+- [x] Human approves narrowed paper limit, required count, and deletion behavior.
+- [x] Performance host and budget are approved.
+- [x] Constitution scope conflicts are resolved and amendment ratified.
 - [ ] Human approves specification, contracts, design and task ordering.
 - [ ] Every requirement has a reviewed test mapping and acceptance evidence.
 
