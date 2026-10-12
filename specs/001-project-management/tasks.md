@@ -1,8 +1,8 @@
 # Tasks: Research-project management
 
 **Status**: Approved by the user on 2026-10-12 (reply: "approve tasks and start project management. Remember to commit and push to github regularly").
-Implementation of feature 001 is authorized; all tasks remain unstarted. The
-implementation workflow's unchecked-checklist confirmation gate is pending.
+Implementation of feature 001 is in progress. The user confirmed proceeding with
+unchecked checklist items on 2026-10-12 (reply: "yes"); actual acceptance remains pending.
 **Input**: spec.md, plan.md, research.md, data-model.md, contracts/api.md.
 Tests are mandatory under constitution Principle VI, regardless of optional-test
 wording in the installed template. Write and review failing behavior tests before
@@ -14,17 +14,17 @@ queries, retrieval, ranking, references, future tables, accounts, or provider SD
 
 **Goal**: Confirm authorization and establish the reviewed local toolchain only.
 
-- [ ] T001 Verify constitution, specification, plan/API contract, and explicit task approval in `docs/evidence-log.md`; recheck Principles I–VII in `specs/001-project-management/plan.md`, record the baseline Git state and observed tools, and stop if task approval is missing. Later slices remain unapproved.
-- [ ] T002 Initialize `pyproject.toml`, generate a new `uv.lock`, preserve existing `.gitignore` rules, and create `backend/researchpilot/__init__.py` and the approved test/frontend layout; include only the plan's justified runtime/dev dependencies, pytest/Playwright configuration, Ruff configuration, and backend import configuration.
+- [X] T001 Verify constitution, specification, plan/API contract, and explicit task approval in `docs/evidence-log.md`; recheck Principles I–VII in `specs/001-project-management/plan.md`, record the baseline Git state and observed tools, and stop if task approval is missing. Later slices remain unapproved.
+- [X] T002 Initialize `pyproject.toml`, generate a new `uv.lock`, preserve existing `.gitignore` rules, and create `backend/researchpilot/__init__.py` and the approved test/frontend layout; include only the plan's justified runtime/dev dependencies, pytest/Playwright configuration, Ruff configuration, and backend import configuration.
 - [ ] T003 Add credential-free `.env.example`, PostgreSQL 17 service `db` and durable volume in `compose.yaml`, and `scripts/start-local.sh`; read environment configuration without printing credentials, bind HTTP to `127.0.0.1:8000` and any exposed database port to loopback, run migrations before serving, and document setup/prerequisites in `README.md`. Do not connect to the original database.
 
 ## Phase 2: Foundational prerequisites
 
 **Goal**: Safe isolated fixtures and versioned durable storage. Blocks both stories.
 
-- [ ] T004 Add isolated unit/API fixtures and real-server browser/PostgreSQL fixtures in `backend/tests/conftest.py`; require `TEST_DATABASE_URL` database name `researchpilot_sdd_test`, `ALLOW_TEST_DATABASE_RESET=1`, and a target distinct from `DATABASE_URL` before any test cleanup. Add refusal tests in `backend/tests/test_project_postgres.py` for missing opt-in, wrong name, and equivalent application target; never log URLs/credentials. Optional SQLite tests cannot replace PostgreSQL checks.
-- [ ] T005 Write migration, version tracking, repeat-startup preservation, rollback, connection disposal/recreation, and basic database constraint tests in `backend/tests/test_project_postgres.py` before storage implementation; record expected behavioral failures in `docs/evidence-log.md` (FR-PRJ-002–006/007, SC-PRJ-003).
-- [ ] T006 Create only the Project table in `migrations/001_projects.sql` and SQLAlchemy/database lifecycle in `backend/researchpilot/persistence.py`; identity is "Server generated; stable across edits" and timestamps are "Server owned; createdAt unchanged on update". Use PostgreSQL UUID, timezone-aware timestamps, JSON keywords, nullable years, required count, database length/range/year-order checks, applied migration versions, and transactional rollback. Wire migration startup to `scripts/start-local.sh` without clearing application data; pass T004–005 checks.
+- [X] T004 Add isolated unit/API fixtures and real-server browser/PostgreSQL fixtures in `backend/tests/conftest.py`; require `TEST_DATABASE_URL` database name `researchpilot_sdd_test`, `ALLOW_TEST_DATABASE_RESET=1`, and a target distinct from `DATABASE_URL` before any test cleanup. Add refusal tests in `backend/tests/test_project_postgres.py` for missing opt-in, wrong name, and equivalent application target; never log URLs/credentials. Optional SQLite tests cannot replace PostgreSQL checks.
+- [X] T005 Write migration, version tracking, repeat-startup preservation, rollback, connection disposal/recreation, and basic database constraint tests in `backend/tests/test_project_postgres.py` before storage implementation; record expected behavioral failures in `docs/evidence-log.md` (FR-PRJ-002–006/007, SC-PRJ-003).
+- [X] T006 Create only the Project table in `migrations/001_projects.sql` and SQLAlchemy/database lifecycle in `backend/researchpilot/persistence.py`; identity is "Server generated; stable across edits" and timestamps are "Server owned; createdAt unchanged on update". Use PostgreSQL UUID, timezone-aware timestamps, JSON keywords, nullable years, required count, database length/range/year-order checks, applied migration versions, and transactional rollback. Wire migration startup to `scripts/start-local.sh` without clearing application data; pass T004–005 checks.
 
 ## Phase 3: US1 — Create and reopen a project (P1)
 

@@ -25,3 +25,6 @@ build/
 *.sqlite
 *.sqlite3
 .DS_Store
+*.egg-info/
+test-results/
+playwright-report/

@@ -190,6 +190,44 @@ correctness. Application tests were not runnable because no implementation exist
   pattern scan found no matches. `git diff --check`: PASS (no output). These are
   documentation checks, not application tests or a comprehensive secret audit.
 
+## Implementation milestone 1 — local PostgreSQL foundations — 2026-10-12
+
+- User confirmed unchecked-checklist continuation (verbatim): "yes". Checklists
+  remain read-only in the implementation workflow; no acceptance evidence inferred.
+- Starting commit `26927cc`, branch `main`, working tree clean. Principles I–VII
+  rechecked: only approved 001, no paper/LLM/provider code, mandatory tests,
+  PostgreSQL, loopback, environment secrets, and original-repository isolation.
+- Observed tools: uv 0.13.0, system Python 3.14.7, project interpreter selected by
+  uv CPython 3.13.15, Docker 29.9.0, Compose 5.6.0, Node v26.11.1. PostgreSQL
+  container reports 17.11; exact Python dependencies are pinned in the new uv.lock.
+- Created isolated Compose project `researchpilot-sdd-001`, new durable volume,
+  loopback port 55432, application DB `researchpilot_sdd`, and disposable DB
+  `researchpilot_sdd_test`. Generated local credentials only in ignored `.env`,
+  permission 0600. No original database/repository was used or modified.
+- Commands: `uv sync`, `docker compose up -d --wait db`, and dedicated `createdb`
+  command from README: PASS. `uv run playwright install chromium`: PASS with an
+  unsupported-OS warning; Playwright downloaded its Ubuntu 24.04 fallback Chromium
+  153.0.8010.12. Browser runtime execution remains to be tested in the UI increment.
+- RUN-001-RED: `uv run --env-file .env pytest backend/tests/test_project_postgres.py -q`:
+  6 passed, 1 failed, 11 setup errors. Missing migration behavior intentionally
+  raised NotImplementedError; safety guards passed. No absent-service/import issue
+  caused the failures. Migration implementation followed this recorded red phase.
+- AUD-IMPL-001: pytest's initial long traceback unexpectedly included credentialed
+  fixture argument values. No credentials were committed or included in application
+  browser/log output. Rotated generated local DB credentials immediately, added
+  redacted URL fixture representations and short pytest tracebacks. Do not retain
+  the raw red-run output in committed evidence; counts/errors above are sanitized.
+- Added transactional versioned SQL migration, startup serialization, actual
+  PostgreSQL constraint/reconnect/rollback tests, and test-target refusal checks.
+- RUN-001-GREEN: `uv run --env-file .env pytest -q`: 18 passed in 0.54s.
+  `uv run ruff check backend`: PASS after fixing two import and two line-length
+  findings. `bash -n scripts/start-local.sh`: PASS. No API/browser acceptance
+  results claimed yet. Full application startup smoke remains part of T003/API.
+- T001/T002/T004/T005/T006 implemented with the current suite passing. T003 local
+  configuration exists but stays unchecked until API/startup smoke is demonstrated.
+  Real-server browser fixture is authored; it will be exercised with the API/UI.
+- No prompt files changed (001 uses no runtime LLM). No features beyond 001 added.
+
 ## Prompt iteration record template
 
 | ID/date | Feature/requirement | Exact prompt and context artifact versions | Model/tool version | Expected output | Actual output/evidence | Failure | Revised prompt | Outcome |

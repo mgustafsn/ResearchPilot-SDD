@@ -1,7 +1,30 @@
 # ResearchPilot-SDD
 
 A specification-driven rebuild of a deliberately smaller ResearchPilot MVP.
-This checkout currently contains planning artifacts, not an implemented application.
+Feature 001 is being implemented in reviewed increments. PostgreSQL migrations and
+safe disposable-database tests are implemented; the project UI/API are not ready yet.
+
+## Local development
+
+Requires uv, Python 3.12+, Docker Compose, and Node for JavaScript syntax checks.
+Install with `uv sync` and `uv run playwright install chromium`.
+Copy `.env.example` to ignored `.env`, set local PostgreSQL credentials and URLs,
+and run `docker compose up -d --wait db`. URL-encode credentials in the URLs.
+The application URL should name `researchpilot_sdd`, not the original database.
+
+For tests, create the separate disposable database:
+
+```bash
+docker compose exec -T db sh -c 'exec createdb -U "$POSTGRES_USER" researchpilot_sdd_test'
+uv run --env-file .env pytest -q
+uv run ruff check backend
+```
+
+Set `TEST_DATABASE_URL` to that database and `ALLOW_TEST_DATABASE_RESET=1` only in
+your test configuration. Fixtures refuse other names and application targets.
+Tests truncate **only the explicitly configured disposable database**. Keep local
+credentials out of commits, browser responses, and logs. The startup script will
+serve `http://127.0.0.1:8000` once the API increment is implemented.
 
 ## Scope
 
