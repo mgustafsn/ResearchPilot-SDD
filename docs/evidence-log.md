@@ -442,6 +442,21 @@ correctness. Application tests were not runnable because no implementation exist
   and no duplicate section headings. `git diff --check`: PASS. No feature 002
   implementation, application tests, dependency installation, or live AI calls ran.
 
+## Feature 002 specification approval — 2026-10-12
+
+- User approval (verbatim): "approve query specification".
+- Marked `specs/002-search-queries/spec.md` approved, including the five recorded
+  clarification decisions, FR-QRY-001–010, and the clarified distinction between
+  stored-query selection in 002 and scholarly search integration in 003.
+- Updated README/scope gate status without changing approved requirements. Query
+  generation failure preserves the existing list and manual entry; this is approved
+  behavior, not proof of implementation or approval for live AI calls.
+- Plan, provider/model configuration, timeout/request budgets, contracts, task
+  ordering, and implementation still require their separate review gates. Feature
+  001's publication-year issue remains open/deferred; no audit evidence was invented.
+- No application code, prompts, schemas, dependencies, or tests changed. No new
+  application test outcome is claimed for this approval-record update.
+
 ## Prompt iteration record template
 
 | ID/date | Feature/requirement | Exact prompt and context artifact versions | Model/tool version | Expected output | Actual output/evidence | Failure | Revised prompt | Outcome |

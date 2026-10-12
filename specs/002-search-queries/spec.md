@@ -2,7 +2,7 @@
 
 **Feature Branch**: Proposed `002-search-queries` (not created)
 **Created**: 2026-10-11
-**Status**: Draft — five clarification decisions recorded; human specification approval required
+**Status**: Approved by the user on 2026-10-12 (reply: "approve query specification"); plan, contracts, tasks, and implementation require separate review gates.
 **Input**: Retain description-driven query suggestions and user control; exclude categorization.
 
 ## Clarifications
@@ -80,4 +80,5 @@ Depends on approved feature 001, accepted by the user with BUG-PRJ-001 deferred 
 year-input nonconformance are not silently resolved by this feature. Only query
 suggestion uses runtime LLM text generation.
 Model and timeout choices belong in the reviewed plan. Failure preservation differs
-from the original fallback behavior and needs approval.
+from the original fallback behavior and is approved as part of this specification;
+this does not approve provider configuration or implementation.
