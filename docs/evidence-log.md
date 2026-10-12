@@ -457,6 +457,64 @@ correctness. Application tests were not runnable because no implementation exist
 - No application code, prompts, schemas, dependencies, or tests changed. No new
   application test outcome is claimed for this approval-record update.
 
+## Feature 002 plan preparation — 2026-10-12
+
+- User request (verbatim): "Lets start that" after the proposed implementation-plan
+  review. This authorizes drafting/review, not plan approval or feature 002 coding.
+- Loaded `speckit-plan`; `.specify/scripts/bash/setup-plan.sh --json` succeeded and
+  resolved 002 paths. The copied generic template was replaced with the feature
+  design. Actual branch remains `main`; feature identifier is `002-search-queries`.
+  No extension hooks were configured.
+- Reviewed constitution 2.0.0, approved spec, scope, existing database/service/API,
+  dependencies, CI, known issue and verification artifacts. No original repository
+  or credential file was read as source material.
+- The planning skill explicitly asks for research agents; delegated two independent
+  read-only research tasks, with no implementation/dependency/secret access:
+  `general` session `ses_ecfeb1312ffe7fPfbPMir0n5mN` checked official OpenAI model,
+  structured-output/endpoint/privacy documentation; `explore` session
+  `ses_ecfeadc7affeWbn2qfcqQzVzwT` inspected current persistence/integration risks.
+  Child model versions were not separately pinned/reported. Their findings are
+  research/design recommendations, not runtime tests or human approval.
+- Created draft `plan.md`, `research.md`, `data-model.md`, `contracts/api.md`,
+  `contracts/provider.md`, and `quickstart.md` under `specs/002-search-queries/`.
+  No `tasks.md` or application implementation was generated in this phase.
+- Proposed pinned `gpt-4.1-mini-2025-04-14`, strict JSON Chat Completions over
+  existing HTTPX (promoted to runtime only after implementation approval), one
+  call/no retries, 512 completion tokens, actual async 20 s deadline, phase limits,
+  64 KiB body bound, and two upstream connections. Model/budgets are unapproved
+  proposals; no SDK/new package family or live API calls were introduced.
+- PROMPT-QRY-001: candidate `query_suggestions_v1` prompt is recorded verbatim in
+  the provider contract as a proposal, not a created runtime prompt or executed
+  LLM call. Context is user-role JSON data, not privileged instructions; output
+  permits query text only, never authoritative paper/citation metadata.
+- Privacy disclosure: proposed `store:false` does not mean zero retention. Official
+  docs describe default abuse-monitoring retention up to 30 days with exceptions;
+  external generation sends stored question/keywords only on explicit action.
+  Manual management requires no API key; live smoke testing needs separate consent.
+- AUD-QRY-PLAN-001 (FR-QRY-007/008/009): proposed parent-first locks and one combined
+  revision, separate context/generation counters, and bounded slots/key uniqueness.
+  No external call under a DB transaction, no lease/job/history schema. First
+  committed concurrent generation wins; newer edits/delete prevent stale overwrite.
+- AUD-QRY-PLAN-002: existing migration-count assertions, projects-only truncation,
+  project update/delete, and frontend delayed-response behavior need reviewed
+  integration changes. Preserve existing project JSON shapes/timestamps/PUT rules,
+  explicit test-target safeguards, and unchanged deferred year conversion.
+- AUD-QRY-PLAN-003: corrected stale verification-strategy claims that no 001 tests
+  or benchmark had run. Added an explicitly unapproved 002 query-CRUD timing
+  protocol; no query benchmark or quality evaluation was run.
+- Mapped all FR-QRY-001–010 to proposed fake-provider/mock-HTTP/unit/API/PostgreSQL/
+  browser evidence. Scholarly search/provider-spy acceptance remains in 003, not 002.
+- Pre/post-design Constitution Check: Principles I–VII compatible at design level;
+  environment-only secrets, local PostgreSQL, source/prompt/test evidence and review
+  gates retained. Not human approval, full 001 compliance, or application acceptance.
+- No code, dependencies, migration, runtime prompt, CI configuration, or live API
+  request changed. Plan/contract approval and separate tasks review remain pending.
+- Documentation validation PASS: six 002 planning artifacts, ten requirement/test
+  mappings, 26 Markdown files checked for local links/headings and limited common
+  credential patterns; no unresolved template markers or prematurely generated
+  tasks. `git diff --check`: PASS. No application tests ran for this documentation
+  phase. No configured after-plan hooks found.
+
 ## Prompt iteration record template
 
 | ID/date | Feature/requirement | Exact prompt and context artifact versions | Model/tool version | Expected output | Actual output/evidence | Failure | Revised prompt | Outcome |
