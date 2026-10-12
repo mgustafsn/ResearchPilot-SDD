@@ -395,6 +395,53 @@ correctness. Application tests were not runnable because no implementation exist
   T024/T025 still outstanding. Neither their audit evidence nor full compliance
   is fabricated by this acceptance. Feature 002 clarification begins separately.
 
+## Feature 002 clarification decisions — 2026-10-12
+
+- User chose "A" for suggestion regeneration: replace only untouched AI queries;
+  preserve manual queries and generated queries edited or enabled/disabled by the
+  user, including their stored text and enabled state. Recorded the exact question
+  and accepted answer in `specs/002-search-queries/spec.md`.
+- Applied the decision to FR-QRY-004 and AC-QRY-003. User ownership remains tracked
+  after a subsequent restoration of the original text/state; regeneration cannot
+  silently reclaim user-controlled queries. This is a product-decision approval,
+  not approval of the whole specification, plan, tasks, or implementation.
+- No application code, runtime prompts, or dependencies changed; no application
+  test outcome is claimed by this documentation update.
+- User chose "A" for duplicate suggestions: validate a 3–6 unique normalized batch
+  first, then skip collisions with preserved queries; allow zero new additions and
+  a combined list larger than six. Updated FR-QRY-001/002 and AC-QRY-001 without
+  changing the approved protection of user-owned text or enabled state.
+- User chose "A" for query-list size: at most 20 saved queries per project,
+  counting enabled and disabled entries together. Manual additions over the limit
+  fail without writes; regeneration fills free slots without removing user-owned
+  queries. Added FR-QRY-008, SC-QRY-004, and explicit capacity edge cases; batch
+  order determines which suggestions fit. Whole-spec/plan/task approval is pending.
+- User chose "a" for changed research context: retain all queries/enabled states,
+  show a refresh notice, and make no automatic provider call or query deletion.
+  Added FR-QRY-009/SC-QRY-005. The notice is durable until successful generation
+  for the current question/keywords; failed/stale generation cannot clear it.
+- User chose "A" for deleted suggestions: delete the stored entry without a
+  text-suppression history; permit the same text in a later explicit generation.
+  Disabling preserves the user-owned entry/state; pending generation is rejected
+  if deletion changes the revision. Added FR-QRY-010/SC-QRY-006.
+- Clarification loop complete: five questions asked/answered. Updated sections:
+  Clarifications, User Scenarios & Testing, Edge Cases, Functional Requirements,
+  Key Entities, and Success Criteria. No feature 002 checklist exists to toggle;
+  no before/after clarification hooks are configured.
+- AUD-QRY-SPEC-001: draft success criteria implied that 002 needed implemented
+  scholarly searches. Clarified AC-QRY-005/SC-QRY-001/003 so 002 verifies stored-query
+  selection with fixtures and actual search/provider-spy acceptance belongs to 003.
+  This scope-consistency correction remains part of the draft awaiting review.
+- Coverage: scope, domain/state, interaction and edge cases resolved; interface
+  boundaries, terminology, completion signals and placeholders clear at spec level.
+  Exact provider/model configuration, timeout/request limits, error contracts,
+  safe concurrency persistence and measurable performance protocol are deferred to
+  plan review, not silently approved by these five product decisions.
+- Documentation assertions PASS: five recorded clarification answers, ten query
+  functional requirements, 46 globally unique requirement IDs, valid local links
+  and no duplicate section headings. `git diff --check`: PASS. No feature 002
+  implementation, application tests, dependency installation, or live AI calls ran.
+
 ## Prompt iteration record template
 
 | ID/date | Feature/requirement | Exact prompt and context artifact versions | Model/tool version | Expected output | Actual output/evidence | Failure | Revised prompt | Outcome |
