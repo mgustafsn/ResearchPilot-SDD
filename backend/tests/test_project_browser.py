@@ -1,6 +1,12 @@
 """AC-PRJ-001–004 and NFR-PRJ-002 against Chromium and real PostgreSQL."""
 
+import pytest
 from playwright.sync_api import expect
+
+
+@pytest.fixture(autouse=True)
+def browser_timeouts(page):
+    page.set_default_timeout(3000)
 
 
 def fill_project(page, title="Browser project", question="A browser research question"):
@@ -64,3 +70,55 @@ def test_NFR_PRJ_002_keyboard_create(page, live_server):
         page.get_by_role("button", name="Save project", exact=True).focus()
         page.keyboard.press("Enter")
         expect(page.locator("#detail-title")).to_have_text("Keyboard project")
+
+
+def create_project(page, title="Browser project"):
+    page.get_by_role("button", name="New project", exact=True).click()
+    fill_project(page, title=title)
+    page.get_by_role("button", name="Save project", exact=True).click()
+    expect(page.locator("#detail-title")).to_have_text(title)
+
+
+def test_FR_PRJ_006_007_edit_reopen_and_failed_edit(page, live_server):
+    with live_server() as base:
+        page.goto(base)
+        create_project(page)
+        page.get_by_role("button", name="Edit project", exact=True).click()
+        fill_project(page, title="Edited project")
+        page.get_by_role("button", name="Save project", exact=True).click()
+        expect(page.locator("#detail-title")).to_have_text("Edited project")
+        page.reload()
+        page.get_by_role("button", name="Edited project", exact=True).click()
+        page.get_by_role("button", name="Edit project", exact=True).click()
+        fill_project(page, title="")
+        page.get_by_role("button", name="Save project", exact=True).click()
+        expect(page.get_by_role("alert")).to_be_visible()
+        expect(page.get_by_label("Project name", exact=True)).to_have_value("")
+        page.get_by_role("button", name="Cancel", exact=True).click()
+        expect(page.locator("#detail-title")).to_have_text("Edited project")
+
+
+def test_FR_PRJ_008_NFR_PRJ_002_confirm_cancel_and_isolation(page, live_server):
+    with live_server() as base:
+        page.goto(base)
+        create_project(page)
+        create_project(page, title="Other project")
+        page.get_by_role("button", name="Browser project", exact=True).click()
+        deletes = []
+        page.on("request", lambda request: deletes.append(request.url)
+                if request.method == "DELETE" else None)
+        page.get_by_role("button", name="Delete project", exact=True).click()
+        dialog = page.get_by_role("dialog")
+        expect(dialog).to_contain_text("permanently")
+        expect(dialog).to_contain_text("no undo")
+        dialog.get_by_role("button", name="Cancel deletion", exact=True).press("Enter")
+        expect(dialog).not_to_be_visible()
+        assert deletes == []
+        expect(page.locator("#detail-title")).to_have_text("Browser project")
+        page.get_by_role("button", name="Delete project", exact=True).click()
+        dialog.get_by_role("button", name="Delete permanently", exact=True).press("Enter")
+        expect(page.get_by_role("button", name="Browser project", exact=True)).to_have_count(0)
+        expect(page.get_by_role("button", name="Other project", exact=True)).to_be_visible()
+        assert len(deletes) == 1
+        page.reload()
+        expect(page.get_by_role("button", name="Other project", exact=True)).to_be_visible()

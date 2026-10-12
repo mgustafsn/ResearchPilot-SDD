@@ -1,8 +1,8 @@
 # ResearchPilot-SDD
 
 A specification-driven rebuild of a deliberately smaller ResearchPilot MVP.
-Feature 001 is being implemented in reviewed increments. Creating, listing, and
-reopening persisted projects now work. Editing/deletion and full acceptance are next.
+Feature 001 project creation/listing/reopening/editing/deletion is implemented.
+Full verification, human usability review, and acceptance remain pending.
 
 ## Local development
 

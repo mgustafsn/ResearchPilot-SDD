@@ -53,7 +53,15 @@
         <dt>Publication years</dt><dd id="detail-years"></dd>
         <dt>Paper limit</dt><dd id="detail-limit"></dd>
       </dl>
+      <button id="edit-project" type="button">Edit project</button>
+      <button id="delete-project" type="button">Delete project</button>
     </section>
+    <dialog id="delete-dialog" aria-labelledby="delete-heading" aria-describedby="delete-warning">
+      <h2 id="delete-heading">Delete project?</h2>
+      <p id="delete-warning">This will permanently delete the project and its contents. There is no undo.</p>
+      <button id="cancel-delete" type="button" autofocus>Cancel deletion</button>
+      <button id="confirm-delete" type="button">Delete permanently</button>
+    </dialog>
   </main>
 </body>
 </html>

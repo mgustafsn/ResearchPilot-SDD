@@ -20,3 +20,6 @@ dt { font-weight: 600; }
 dd { margin: 0 0 .8rem; }
 #detail-title, #detail-question, dd { white-space: pre-wrap; overflow-wrap: anywhere; }
 [hidden] { display: none !important; }
+dialog { max-width: 32rem; border: 2px solid #7593a3; border-radius: .6rem; padding: 1.5rem; }
+dialog::backdrop { background: #182b3580; }
+#confirm-delete { background: #fff1f1; color: #a01f2b; border-color: #a72c32; }

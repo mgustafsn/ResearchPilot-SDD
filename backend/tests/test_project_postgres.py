@@ -98,3 +98,19 @@ def test_FR_PRJ_006_SC_PRJ_003_api_app_restart_retains_project(db, db_url, monke
         invalid = second.post("/api/projects", json=dict(values, maxPaperCount=0))
         assert invalid.status_code == 422
         assert second.get("/api/projects").json() == [project]
+
+
+def test_FR_PRJ_006_008_update_delete_survive_app_restart(db, db_url, monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", str(db_url))
+    values = {"title": "Retained", "researchQuestion": "Question", "maxPaperCount": 100}
+    with TestClient(create_app()) as first:
+        project = first.post("/api/projects", json=values).json()
+        other = first.post("/api/projects", json=dict(values, title="Other")).json()
+        path = f"/api/projects/{project['id']}"
+        changed = first.put(path, json=dict(values, title="Updated")).json()
+    with TestClient(create_app()) as second:
+        assert second.get(path).json() == changed
+        assert second.delete(path).status_code == 204
+    with TestClient(create_app()) as third:
+        assert third.get(path).status_code == 404
+        assert third.get("/api/projects").json() == [other]

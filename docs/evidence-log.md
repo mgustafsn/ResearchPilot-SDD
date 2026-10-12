@@ -259,6 +259,28 @@ correctness. Application tests were not runnable because no implementation exist
   implemented tests pass. These are automated/browser results, not a human keyboard
   audit, ranking evidence, or full feature acceptance. No later slice implemented.
 
+## Implementation milestone 3 — edit/delete — 2026-10-12
+
+- Milestone 2 commit `8b74762` pushed successfully to private GitHub `main`.
+- RUN-004-RED: `uv run --env-file .env pytest backend/tests/test_project_api.py backend/tests/test_project_browser.py -q --tb=no`:
+  9 failed, 13 passed in 11.95s. Expected missing PUT/DELETE routes and edit/delete
+  controls; existing create/reopen workflows still passed. New tests preceded logic.
+- Implemented full transactional PUT and DELETE with stable identity/createdAt,
+  success-only updatedAt, strict input checks, approved status/error shapes, and
+  project isolation. No future-owned tables or search locks were added.
+- Implemented edit form population and a keyboard-accessible native confirmation
+  dialog explicitly warning of permanent deletion/no undo. Cancel sends no DELETE;
+  confirmed deletion does not remove another project's records.
+- Added real PostgreSQL application restart checks for successful update/deletion
+  and commit-failure rollback tests for both mutations. Raw injected exception/SQL
+  strings remain absent from API responses and captured application logs.
+- RUN-004-GREEN: `uv run --env-file .env pytest -q`: 93 passed in 7.25s with the
+  same single test-client deprecation warning. `uv run ruff check backend`,
+  `node --check frontend/app.js`, and `git diff --check`: PASS after an import-order
+  correction. All T015–019 tasks completed; final verification/human gates pending.
+- Tests use synthetic project inputs and explicitly disposable PostgreSQL only.
+  No human audit, feature acceptance, or later-slice approval is implied.
+
 ## Prompt iteration record template
 
 | ID/date | Feature/requirement | Exact prompt and context artifact versions | Model/tool version | Expected output | Actual output/evidence | Failure | Revised prompt | Outcome |

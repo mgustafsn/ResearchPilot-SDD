@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from uuid import UUID
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -78,6 +78,15 @@ def create_app(database=None):
     @app.get("/api/projects/{project_id}", response_model=ProjectOutput)
     def read_project(project_id: UUID, request: Request):
         return request.app.state.projects.read(project_id)
+
+    @app.put("/api/projects/{project_id}", response_model=ProjectOutput)
+    def update_project(project_id: UUID, data: ProjectInput, request: Request):
+        return request.app.state.projects.update(project_id, data)
+
+    @app.delete("/api/projects/{project_id}", status_code=204)
+    def delete_project(project_id: UUID, request: Request):
+        request.app.state.projects.delete(project_id)
+        return Response(status_code=204)
 
     @app.get("/", include_in_schema=False)
     def homepage():

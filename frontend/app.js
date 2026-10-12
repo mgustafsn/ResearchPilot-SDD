@@ -3,6 +3,7 @@
 const byId = (id) => document.getElementById(id);
 const fieldNames = ["title", "researchQuestion", "keywords", "yearFrom", "yearTo", "maxPaperCount"];
 let selectedProject = null;
+let editingId = null;
 
 function clearErrors() {
   byId("error").hidden = true;
@@ -66,6 +67,7 @@ async function loadProjects() {
 
 function showDetail(project) {
   selectedProject = project;
+  editingId = null;
   byId("detail-title").textContent = project.title;
   byId("detail-question").textContent = project.researchQuestion;
   byId("detail-keywords").textContent = project.keywords.join(", ") || "None";
@@ -84,6 +86,7 @@ async function openProject(id) {
 byId("new-project").addEventListener("click", () => {
   clearErrors();
   byId("project-form").reset();
+  editingId = null;
   byId("form-heading").textContent = "New project";
   byId("form-section").hidden = false;
   byId("detail").hidden = true;
@@ -109,13 +112,56 @@ byId("project-form").addEventListener("submit", async (event) => {
   };
   byId("save-project").disabled = true;
   try {
-    const project = await request("/api/projects", {method: "POST", body: JSON.stringify(data)});
+    const path = editingId ? `/api/projects/${editingId}` : "/api/projects";
+    const project = await request(path, {
+      method: editingId ? "PUT" : "POST", body: JSON.stringify(data),
+    });
     showDetail(project);
     await loadProjects();
   } catch (error) {
     showError(error);
   } finally {
     byId("save-project").disabled = false;
+  }
+});
+
+byId("edit-project").addEventListener("click", () => {
+  if (!selectedProject) return;
+  clearErrors();
+  editingId = selectedProject.id;
+  for (const name of fieldNames) {
+    byId(name).value = name === "keywords" ? selectedProject.keywords.join("\n")
+      : selectedProject[name] ?? "";
+  }
+  byId("form-heading").textContent = "Edit project";
+  byId("detail").hidden = true;
+  byId("form-section").hidden = false;
+  byId("title").focus();
+});
+
+byId("delete-project").addEventListener("click", () => {
+  clearErrors();
+  if (selectedProject) byId("delete-dialog").showModal();
+});
+
+byId("cancel-delete").addEventListener("click", () => byId("delete-dialog").close());
+
+byId("confirm-delete").addEventListener("click", async () => {
+  if (!selectedProject) return;
+  const target = selectedProject.id;
+  byId("confirm-delete").disabled = true;
+  try {
+    await request(`/api/projects/${target}`, {method: "DELETE"});
+    byId("delete-dialog").close();
+    selectedProject = null;
+    byId("detail").hidden = true;
+    await loadProjects();
+    byId("new-project").focus();
+  } catch (error) {
+    byId("delete-dialog").close();
+    showError(error);
+  } finally {
+    byId("confirm-delete").disabled = false;
   }
 });
 

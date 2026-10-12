@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from sqlalchemy import insert, select
+from sqlalchemy import delete, insert, select, update
 
 from researchpilot.domain import ProjectOutput
 
@@ -57,3 +57,21 @@ class ProjectService:
         if row is None:
             raise ProjectNotFound
         return project_output(row)
+
+    def update(self, project_id, data):
+        table = self.database.projects
+        with self.database.engine.begin() as connection:
+            row = connection.execute(update(table).where(table.c.id == project_id).values(
+                **input_values(data), updated_at=datetime.now(UTC),
+            ).returning(table)).mappings().first()
+            if row is None:
+                raise ProjectNotFound
+            result = project_output(row)
+        return result
+
+    def delete(self, project_id):
+        table = self.database.projects
+        with self.database.engine.begin() as connection:
+            result = connection.execute(delete(table).where(table.c.id == project_id))
+            if result.rowcount == 0:
+                raise ProjectNotFound
