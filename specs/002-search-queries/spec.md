@@ -2,7 +2,7 @@
 
 **Feature Branch**: Proposed `002-search-queries` (not created)
 **Created**: 2026-10-11
-**Status**: Draft — human approval required
+**Status**: Draft — clarification/review active; human specification approval required
 **Input**: Retain description-driven query suggestions and user control; exclude categorization.
 
 ## User Scenarios & Testing
@@ -55,6 +55,9 @@ Project/query-list revision: concurrency identity used to reject stale generatio
 
 ## Assumptions
 
-Depends on approved feature 001. Only query suggestion uses runtime LLM text generation.
+Depends on approved feature 001, accepted by the user with BUG-PRJ-001 deferred on
+2026-10-12; see `../../docs/known-issues.md`. Its outstanding audit evidence and
+year-input nonconformance are not silently resolved by this feature. Only query
+suggestion uses runtime LLM text generation.
 Model and timeout choices belong in the reviewed plan. Failure preservation differs
 from the original fallback behavior and needs approval.

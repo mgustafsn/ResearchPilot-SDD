@@ -1,8 +1,9 @@
 # Verification quickstart — implemented slice 001
 
 Application and test interfaces below are implemented. Automated run results are
-recorded in `../../docs/evidence-log.md` and `../../docs/evidence/`; human keyboard
-review and feature acceptance remain pending. Do not treat this guide as evidence
+recorded in `../../docs/evidence-log.md` and `../../docs/evidence/`; the user accepted
+the feature with BUG-PRJ-001 deferred. Detailed human keyboard-review evidence and
+post-audit verification remain outstanding. Do not treat this guide as evidence
 that an unrecorded manual scenario passed.
 
 ## Prerequisites and local startup

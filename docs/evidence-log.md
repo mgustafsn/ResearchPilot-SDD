@@ -371,6 +371,30 @@ correctness. Application tests were not runnable because no implementation exist
 - Explicit feature acceptance with this known limitation still needs confirmation;
   the reported defect is not marked fixed/compliant and feature 002 is not started.
 
+## Feature 001 acceptance with limitation; feature 002 review entry — 2026-10-12
+
+- User reply (verbatim): "Yesw", interpreted as yes to the immediately preceding
+  explicit question accepting project management with the known publication-year
+  issue so feature 002 can be reviewed. No claim that BUG-PRJ-001 is fixed, that
+  every requirement passes, or that missing detailed human audit evidence exists.
+- Feature 001 accepted with BUG-PRJ-001 deferred. T024 detailed human-audit evidence
+  and T025 final post-audit verification remain outstanding. User self-reported
+  trying available functionality; exact browser/keyboard cases remain unspecified.
+- Feature 002 specification review may begin; approval of its spec/plan/tasks or
+  implementation is not inferred. No application code, schemas, prompts, secrets,
+  or dependencies changed as part of this transition.
+- Machine-local `.specify/feature.json` now points to `specs/002-search-queries`;
+  it remains ignored by Git. No branch was created; the working branch is `main`.
+- Re-read constitution 2.0.0 and feature 002 draft. Next review focuses on editable
+  query suggestions and preservation of user-controlled text/enabled state; no
+  scholarly retrieval/ranking/reference implementation is authorized here.
+- Re-ran `uv run --env-file .env pytest -q`: 110 passed, one known test-client
+  warning in 10.41s. This does not cover or resolve the newly reported browser-year
+  issue. `git diff --check`: PASS. Feature path prerequisite check resolved 002.
+- T026 records user acceptance with the known limitation; 24/26 tasks checked,
+  T024/T025 still outstanding. Neither their audit evidence nor full compliance
+  is fabricated by this acceptance. Feature 002 clarification begins separately.
+
 ## Prompt iteration record template
 
 | ID/date | Feature/requirement | Exact prompt and context artifact versions | Model/tool version | Expected output | Actual output/evidence | Failure | Revised prompt | Outcome |

@@ -25,6 +25,7 @@ and source hashes. No coverage percentage or security certification is claimed.
 - T024: human keyboard/usability audit, with truthful reviewer identity/findings.
 - T025: final post-audit verification and completion of review gates; automated
   execution evidence is already available but cannot substitute for the human audit.
-- T026: explicit user acceptance before feature 002 planning/implementation.
+- T026: user acceptance recorded on 2026-10-12 with BUG-PRJ-001 deferred; this
+  permits feature 002 review, not a claim of full feature 001 compliance.
 - Built-in checklist markers remain read-only under the implementation skill;
   their stale approval marker is not an unrecorded revocation of approved artifacts.

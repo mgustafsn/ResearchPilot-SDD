@@ -2,7 +2,8 @@
 
 A specification-driven rebuild of a deliberately smaller ResearchPilot MVP.
 Feature 001 project creation/listing/reopening/editing/deletion is implemented.
-Automated verification is available; human usability review and acceptance remain pending.
+The user accepted feature 001 with a known limitation. Detailed human-audit evidence
+and final post-audit verification remain outstanding; full compliance is not claimed.
 User review identified a [publication-year input issue](docs/known-issues.md),
 deferred to a future iteration. Existing green tests do not cover that reported case.
 
@@ -52,8 +53,9 @@ citation numbering, authentication, exports, and PDF ingestion are excluded.
 2. Feature 001's [plan](specs/001-project-management/plan.md) and
    [API contract](specs/001-project-management/contracts/api.md) are approved.
    Its tasks are approved and feature 001 implementation is authorized; the
-   user confirmed proceeding with unchecked checklist items. Human audit and
-   feature acceptance are still required before planning feature 002.
+    user confirmed proceeding with unchecked checklist items and subsequently
+    accepted it with BUG-PRJ-001 deferred. Feature 002 specification review is now
+    active; its specification, plan, and implementation remain unapproved.
 3. Review later specifications in order after their prerequisites:
    - [001 Projects](specs/001-project-management/spec.md)
    - [002 Queries](specs/002-search-queries/spec.md)

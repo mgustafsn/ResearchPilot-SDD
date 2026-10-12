@@ -2,7 +2,10 @@
 
 **Status**: Approved by the user on 2026-10-12 (reply: "approve tasks and start project management. Remember to commit and push to github regularly").
 Implementation of feature 001 is in progress. The user confirmed proceeding with
-unchecked checklist items on 2026-10-12 (reply: "yes"); actual acceptance remains pending.
+unchecked checklist items on 2026-10-12 (reply: "yes"). The user subsequently
+accepted feature 001 with BUG-PRJ-001 deferred (reply: "Yesw", interpreted as yes).
+Detailed human-audit evidence and final post-audit verification remain outstanding;
+this is acceptance with a known limitation, not full requirement compliance.
 **Input**: spec.md, plan.md, research.md, data-model.md, contracts/api.md.
 Tests are mandatory under constitution Principle VI, regardless of optional-test
 wording in the installed template. Write and review failing behavior tests before
@@ -65,7 +68,7 @@ then confirm deletion and restart. Another project remains unchanged (AC-PRJ-005
 - [X] T023 Add `.github/workflows/ci.yml` for unit/API/browser tests, disposable PostgreSQL 17 tests, Ruff, and `node --check frontend/app.js`; configure safe test opt-in without application secrets and treat approved-host latency acceptance separately. Update actual runnable commands in `README.md` and `specs/001-project-management/quickstart.md`.
 - [ ] T024 Perform and record secret/rendering/dependency-boundary and human keyboard audits in `docs/evidence-log.md`; exercise labels, focus, error text, retained forms, and deletion confirmation, recording reviewer identity, findings, remaining limitations, and regression-backed fixes (NFR-PRJ-001/002).
 - [ ] T025 Run the full application suite, PostgreSQL migration/restart/fault tests, approved-host performance fixture, Ruff, JS syntax check, and complete quickstart; record exact commands, tool/host versions, working-tree/commit identifiers where available, outputs, failed runs and fixes in `docs/evidence-log.md`, and update only evidence-supported gates in `specs/001-project-management/checklists/requirements.md` (SC-PRJ-001–004).
-- [ ] T026 Present the working feature and recorded evidence for explicit human acceptance in `docs/evidence-log.md`; update `README.md` with truthful status and do not begin planning or implementation of feature 002 until this sign-off. Do not mark acceptance complete without the user's approval.
+- [X] T026 Present the working feature and recorded evidence for explicit human acceptance in `docs/evidence-log.md`; update `README.md` with truthful status and do not begin planning or implementation of feature 002 until this sign-off. Do not mark acceptance complete without the user's approval.
 
 ## Dependencies and checkpoints
 

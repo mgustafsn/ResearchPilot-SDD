@@ -21,4 +21,6 @@
   user's browser behavior before selecting the fix.
 
 Existing green backend and browser tests did not establish this input behavior.
-Deferral is not a claim of requirement compliance or full feature acceptance.
+The user accepted feature 001 with this known limitation on 2026-10-12 (reply:
+"Yesw", interpreted as yes to the explicit acceptance question). The issue remains
+open; acceptance/deferral is not a claim of full requirement compliance or a fix.
