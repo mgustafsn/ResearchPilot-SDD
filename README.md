@@ -3,6 +3,8 @@
 A specification-driven rebuild of a deliberately smaller ResearchPilot MVP.
 Feature 001 project creation/listing/reopening/editing/deletion is implemented.
 Automated verification is available; human usability review and acceptance remain pending.
+User review identified a [publication-year input issue](docs/known-issues.md),
+deferred to a future iteration. Existing green tests do not cover that reported case.
 
 ## Local development
 

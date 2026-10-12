@@ -355,6 +355,22 @@ correctness. Application tests were not runnable because no implementation exist
   unchanged at 8/10, local links/headings valid, measured source hashes still match).
   `git diff --check`: PASS. No configured after-implementation hooks found.
 
+## User project-management review finding — 2026-10-12
+
+- User feedback (verbatim): "I'vet tried all that you can do, publication years allow for characters other than numbers then default to \"Any - Any\" if letters were put in. This should be fixed in future MVPs".
+- Human reviewer: user; self-reported review of available functionality. Exact
+  browser/version, typing sequence, and individual keyboard/audit scenarios were
+  not supplied, so no more detailed manual test evidence is inferred.
+- Recorded BUG-PRJ-001 (FR-PRJ-004/007, AC-PRJ-004) in `docs/known-issues.md`:
+  invalid publication-year entry may silently become unbounded. User explicitly
+  deferred the fix; no application code or approved requirements were changed.
+- Inspected current number controls and empty-value-to-null conversion. This is
+  a possible mechanism, not an independently reproduced/confirmed root cause.
+  The earlier 110-test result remains historical evidence, not verification of
+  this newly reported case. No new application tests were executed.
+- Explicit feature acceptance with this known limitation still needs confirmation;
+  the reported defect is not marked fixed/compliant and feature 002 is not started.
+
 ## Prompt iteration record template
 
 | ID/date | Feature/requirement | Exact prompt and context artifact versions | Model/tool version | Expected output | Actual output/evidence | Failure | Revised prompt | Outcome |
