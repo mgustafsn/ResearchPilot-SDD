@@ -329,6 +329,32 @@ correctness. Application tests were not runnable because no implementation exist
   Remaining limitation: no human reviewer keyboard/usability findings yet. Built-in
   checklist markers were not changed by implementation; no human review fabricated.
 
+## GitHub verification and remaining human gates — 2026-10-12
+
+- Verification commit `077b2b1` pushed successfully. GitHub Actions run
+  https://github.com/mgustafsn/ResearchPilot-SDD/actions/runs/38243969348
+  completed successfully for full SHA `077b2b18ade38c6369a8279a1445fd914b828cae`.
+  `gh run watch 38243969348 --exit-status` returned success; test job took 1m12s.
+- Remote logs confirm CPython 3.12.15, Ruff PASS, JavaScript syntax PASS, and
+  **109 passed, 1 deselected, 1 warning in 11.69s**. Real PostgreSQL 17 and Chromium
+  browser tests ran; approved-host performance was deliberately deselected.
+  JUnit evidence was uploaded as `project-test-results` by the workflow.
+- CI annotations retained: Node 20-based action versions are forced onto Node 24
+  by GitHub; ubuntu-latest has a scheduled Ubuntu 26 migration. Neither prevented
+  this run. They are future maintenance considerations, not erased failures.
+- T023 complete. **23/26 tasks completed**; T024 human keyboard/usability review,
+  T025 final post-audit verification, and T026 explicit acceptance remain pending.
+  The AI/static/browser audit cannot impersonate a human reviewer. Feature 002
+  planning/implementation is still blocked by feature 001 acceptance.
+- To review locally, run `./scripts/start-local.sh` and open
+  `http://127.0.0.1:8000`; test creating/reopening/editing, validation, keyboard
+  navigation, cancelled deletion, confirmed deletion, and persistence on restart.
+  Existing ignored local configuration and dedicated PostgreSQL are ready on this
+  machine. The original repository/database remain untouched.
+- Final documentation assertions: PASS (23 completed/3 pending tasks, checklist
+  unchanged at 8/10, local links/headings valid, measured source hashes still match).
+  `git diff --check`: PASS. No configured after-implementation hooks found.
+
 ## Prompt iteration record template
 
 | ID/date | Feature/requirement | Exact prompt and context artifact versions | Model/tool version | Expected output | Actual output/evidence | Failure | Revised prompt | Outcome |
