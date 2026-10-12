@@ -1,0 +1,22 @@
+:root { color-scheme: light; font: 16px/1.5 system-ui, sans-serif; color: #182b35; background: #f5f8fa; }
+body { max-width: 880px; margin: 0 auto; padding: 1.5rem; }
+header { border-bottom: 2px solid #c4d5de; margin-bottom: 1.5rem; }
+header h1 { margin-bottom: 0; }
+header p { color: #45616f; }
+section { background: white; border: 1px solid #d5e0e6; border-radius: .6rem; padding: 1.25rem; margin: 1rem 0; }
+h2 { margin-top: 0; }
+label { display: block; font-weight: 600; margin-top: .8rem; }
+input, textarea { box-sizing: border-box; width: 100%; padding: .6rem; font: inherit; border: 1px solid #7593a3; border-radius: .25rem; }
+button { font: inherit; border: 1px solid #276a85; border-radius: .3rem; padding: .45rem .8rem; background: #eaf4f8; color: #124158; cursor: pointer; }
+button:disabled { opacity: .6; cursor: wait; }
+:focus-visible { outline: 3px solid #1366a0; outline-offset: 3px; }
+ul { list-style: none; padding: 0; }
+li { margin: .5rem 0; }
+li button { text-align: left; overflow-wrap: anywhere; }
+#error { padding: .8rem; border: 2px solid #a72c32; background: #fff1f1; }
+.field-error { display: block; color: #a01f2b; }
+[aria-invalid="true"] { border: 2px solid #a72c32; }
+dt { font-weight: 600; }
+dd { margin: 0 0 .8rem; }
+#detail-title, #detail-question, dd { white-space: pre-wrap; overflow-wrap: anywhere; }
+[hidden] { display: none !important; }

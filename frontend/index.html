@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ResearchPilot — Projects</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <header><h1>ResearchPilot</h1><p>Your local research projects</p></header>
+  <main>
+    <section aria-labelledby="projects-heading">
+      <h2 id="projects-heading">Projects</h2>
+      <button id="new-project" type="button">New project</button>
+      <p id="empty-state" hidden>No projects yet.</p>
+      <p id="loading" role="status">Loading projects…</p>
+      <ul id="project-list"></ul>
+    </section>
+    <div id="error" role="alert" tabindex="-1" hidden></div>
+    <section id="form-section" aria-labelledby="form-heading" hidden>
+      <h2 id="form-heading">New project</h2>
+      <form id="project-form" novalidate>
+        <label for="title">Project name</label>
+        <input id="title" name="title" required aria-describedby="error-title">
+        <span class="field-error" id="error-title"></span>
+        <label for="researchQuestion">Research question</label>
+        <textarea id="researchQuestion" name="researchQuestion" required
+          aria-describedby="error-researchQuestion" rows="4"></textarea>
+        <span class="field-error" id="error-researchQuestion"></span>
+        <label for="keywords">Keywords (one per line, optional)</label>
+        <textarea id="keywords" name="keywords" rows="3" aria-describedby="error-keywords"></textarea>
+        <span class="field-error" id="error-keywords"></span>
+        <label for="yearFrom">Publication start year (optional)</label>
+        <input id="yearFrom" name="yearFrom" type="number" aria-describedby="error-yearFrom">
+        <span class="field-error" id="error-yearFrom"></span>
+        <label for="yearTo">Publication end year (optional)</label>
+        <input id="yearTo" name="yearTo" type="number" aria-describedby="error-yearTo">
+        <span class="field-error" id="error-yearTo"></span>
+        <label for="maxPaperCount">Paper limit</label>
+        <input id="maxPaperCount" name="maxPaperCount" type="number" value="100" required
+          aria-describedby="error-maxPaperCount">
+        <span class="field-error" id="error-maxPaperCount"></span>
+        <p><button id="save-project" type="submit">Save project</button>
+          <button id="cancel-form" type="button">Cancel</button></p>
+      </form>
+    </section>
+    <section id="detail" aria-labelledby="detail-title" hidden>
+      <h2 id="detail-title" tabindex="-1"></h2>
+      <p id="detail-question"></p>
+      <dl>
+        <dt>Keywords</dt><dd id="detail-keywords"></dd>
+        <dt>Publication years</dt><dd id="detail-years"></dd>
+        <dt>Paper limit</dt><dd id="detail-limit"></dd>
+      </dl>
+    </section>
+  </main>
+</body>
+</html>

@@ -228,6 +228,37 @@ correctness. Application tests were not runnable because no implementation exist
   Real-server browser fixture is authored; it will be exercised with the API/UI.
 - No prompt files changed (001 uses no runtime LLM). No features beyond 001 added.
 
+## Implementation milestone 2 — create/list/reopen — 2026-10-12
+
+- Milestone 1 commit `0d57390` pushed successfully to private GitHub `main`.
+- RUN-002-RED: `uv run --env-file .env pytest backend/tests/test_projects.py backend/tests/test_project_api.py -q --tb=no`:
+  40 failed, 20 passed. Baseline schema/HTTP scaffolds lacked normalization,
+  constraints, strict numeric validation, structured errors, and create/read storage.
+  Tests were present and services available before implementation.
+- Implemented strict Pydantic project inputs/output, deterministic keyword
+  normalization, isolated SQLAlchemy project operations, sanitized error envelopes,
+  list ordering, and same-origin FastAPI routes. Pydantic is already a FastAPI
+  dependency; no new external integration or LLM prompt was added.
+- RUN-003-RED: `uv run --env-file .env pytest backend/tests/test_project_browser.py -q --tb=no`:
+  4 failed in 98.15s against an intentionally minimal page without controls.
+  Actual Chromium fallback runtime launched and local PostgreSQL/API worked;
+  browser failures exposed the missing UI rather than browser installation problems.
+- Implemented labeled project form/list/detail, paper count 100, keyboard focus,
+  readable field errors, retained failed-save input, and text-only rendering.
+- Added actual application lifespan shutdown/recreation and new PostgreSQL
+  connection test; persisted API project values survive with stable ID/timestamps.
+- Actual `scripts/start-local.sh` smoke: migrated the new application database,
+  served UI/API on `127.0.0.1:8000`, returned an empty project list, and shut down
+  cleanly. No original database was used and no application project data was created.
+- RUN-003-GREEN: `uv run --env-file .env pytest -q`: 83 passed in 4.62s, with one
+  Starlette/httpx test-client deprecation warning. `uv run ruff check backend`:
+  PASS after correcting line-length findings. `node --check frontend/app.js` and
+  `git diff --check`: PASS. Warning is retained, not hidden or treated as a failure;
+  no unplanned httpx2 dependency was added.
+- T003 and T007–014 completed at the create/reopen checkpoint; all currently
+  implemented tests pass. These are automated/browser results, not a human keyboard
+  audit, ranking evidence, or full feature acceptance. No later slice implemented.
+
 ## Prompt iteration record template
 
 | ID/date | Feature/requirement | Exact prompt and context artifact versions | Model/tool version | Expected output | Actual output/evidence | Failure | Revised prompt | Outcome |

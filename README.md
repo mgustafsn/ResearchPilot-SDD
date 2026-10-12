@@ -1,8 +1,8 @@
 # ResearchPilot-SDD
 
 A specification-driven rebuild of a deliberately smaller ResearchPilot MVP.
-Feature 001 is being implemented in reviewed increments. PostgreSQL migrations and
-safe disposable-database tests are implemented; the project UI/API are not ready yet.
+Feature 001 is being implemented in reviewed increments. Creating, listing, and
+reopening persisted projects now work. Editing/deletion and full acceptance are next.
 
 ## Local development
 
@@ -24,7 +24,7 @@ Set `TEST_DATABASE_URL` to that database and `ALLOW_TEST_DATABASE_RESET=1` only 
 your test configuration. Fixtures refuse other names and application targets.
 Tests truncate **only the explicitly configured disposable database**. Keep local
 credentials out of commits, browser responses, and logs. The startup script will
-serve `http://127.0.0.1:8000` once the API increment is implemented.
+serve `http://127.0.0.1:8000`: run `./scripts/start-local.sh`.
 
 ## Scope
 

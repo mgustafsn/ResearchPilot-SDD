@@ -1,0 +1,59 @@
+"""Project business operations, independent of scholarly/AI providers."""
+
+from datetime import UTC, datetime
+from uuid import uuid4
+
+from sqlalchemy import insert, select
+
+from researchpilot.domain import ProjectOutput
+
+
+class ProjectNotFound(Exception):
+    pass
+
+
+def project_output(row):
+    return ProjectOutput(
+        id=row["id"], title=row["title"], researchQuestion=row["research_question"],
+        keywords=row["keywords"], yearFrom=row["year_from"], yearTo=row["year_to"],
+        maxPaperCount=row["max_paper_count"], createdAt=row["created_at"],
+        updatedAt=row["updated_at"],
+    )
+
+
+def input_values(data):
+    return dict(title=data.title, research_question=data.researchQuestion, keywords=data.keywords,
+                year_from=data.yearFrom, year_to=data.yearTo, max_paper_count=data.maxPaperCount)
+
+
+class ProjectService:
+    def __init__(self, database):
+        self.database = database
+
+    def create(self, data):
+        table = self.database.projects
+        now = datetime.now(UTC)
+        with self.database.engine.begin() as connection:
+            row = connection.execute(insert(table).values(
+                **input_values(data), id=uuid4(), created_at=now, updated_at=now,
+            ).returning(table)).mappings().one()
+            result = project_output(row)
+        return result  # Returned only after the transaction commits successfully.
+
+    def list(self):
+        table = self.database.projects
+        with self.database.engine.connect() as connection:
+            rows = connection.execute(select(table).order_by(
+                table.c.updated_at.desc(), table.c.id.asc(),
+            )).mappings().all()
+        return [project_output(row) for row in rows]
+
+    def read(self, project_id):
+        table = self.database.projects
+        with self.database.engine.connect() as connection:
+            row = connection.execute(
+                select(table).where(table.c.id == project_id)
+            ).mappings().first()
+        if row is None:
+            raise ProjectNotFound
+        return project_output(row)

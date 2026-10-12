@@ -2,6 +2,8 @@
 
 import pytest
 from conftest import require_safe_test_database
+from fastapi.testclient import TestClient
+from researchpilot.api import create_app
 from researchpilot.persistence import Database
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
@@ -81,3 +83,18 @@ def test_FR_PRJ_007_transaction_rolls_back(db):
             raise RuntimeError("injected")
     with db.engine.connect() as connection:
         assert connection.execute(text("SELECT count(*) FROM projects")).scalar_one() == 0
+
+
+def test_FR_PRJ_006_SC_PRJ_003_api_app_restart_retains_project(db, db_url, monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", str(db_url))
+    values = {"title": "Restart project", "researchQuestion": "Restart question",
+              "maxPaperCount": 100, "keywords": [" LLM ", "llm"], "yearFrom": 2020}
+    with TestClient(create_app()) as first:
+        response = first.post("/api/projects", json=values)
+        assert response.status_code == 201
+        project = response.json()
+    with TestClient(create_app()) as second:
+        assert second.get(f"/api/projects/{project['id']}").json() == project
+        invalid = second.post("/api/projects", json=dict(values, maxPaperCount=0))
+        assert invalid.status_code == 422
+        assert second.get("/api/projects").json() == [project]

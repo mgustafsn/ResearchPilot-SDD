@@ -10,6 +10,7 @@ from pathlib import Path
 
 import httpx
 import pytest
+from fastapi.testclient import TestClient
 from researchpilot.persistence import Database
 from sqlalchemy import text
 from sqlalchemy.engine import make_url
@@ -99,3 +100,11 @@ def live_server(db, db_url):
                 process.kill()
                 process.wait()
     return start
+
+
+@pytest.fixture
+def client(db):
+    from researchpilot.api import create_app
+
+    with TestClient(create_app(db)) as client:
+        yield client
