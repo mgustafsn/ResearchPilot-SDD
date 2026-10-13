@@ -23,3 +23,7 @@ dd { margin: 0 0 .8rem; }
 dialog { max-width: 32rem; border: 2px solid #7593a3; border-radius: .6rem; padding: 1.5rem; }
 dialog::backdrop { background: #182b3580; }
 #confirm-delete { background: #fff1f1; color: #a01f2b; border-color: #a72c32; }
+#query-list input[type="checkbox"] { width: auto; margin-right: .5rem; }
+#query-list li { padding: .5rem; border-bottom: 1px solid #d5e0e6; overflow-wrap: anywhere; }
+#query-list label { margin-top: 0; }
+#query-refresh { padding: .6rem; background: #fff4ce; border: 1px solid #856821; }

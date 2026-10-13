@@ -566,6 +566,70 @@ correctness. Application tests were not runnable because no implementation exist
   checks. `git diff --check`: PASS. No configured after-tasks hooks found. These
   checks are not application verification, and no application tests ran.
 
+## Feature 002 implementation authorization — 2026-10-13
+
+- User approval (verbatim): "approve query tasks and start implementation".
+- Approved all 36 reviewed tasks and implementation of feature 002 only. Start
+  with manual controls, then structured suggestions. Continue regular verified
+  commits/pushes. No live/paid provider smoke call or BUG-PRJ-001 fix authorized.
+- Baseline commit `6d11deb`, actual branch `main`, clean worktree. Implementation
+  prerequisite check resolved feature 002/tasks. No 002 checklist files or extension
+  hooks exist; no unchecked checklist confirmation is required for this feature.
+  Existing 001 audit/checklist limitations remain recorded, not overwritten.
+- Existing ignore rules cover credentials, Python/browser/build artifacts and
+  Docker context. Checked dedicated Compose service: not running at entry; startup
+  is limited to this rebuild's named service/volume, never the original database.
+- Promoted already-present HTTPX to runtime and added deliberate missing-behavior
+  contract scaffolds. Config example contains no secret values; ignored user
+  configuration is not overwritten. No live HTTP/model call is introduced.
+
+## Feature 002 milestone 1 — manual query controls — 2026-10-13
+
+- Restarted only the dedicated Compose PostgreSQL service successfully; preserved
+  its volume and user configuration. `uv sync` promoted existing HTTPX with no new
+  package family. Baseline full suite: 110 passed in 10.85s, one known test-client
+  deprecation warning. No application/production data cleanup was performed.
+- QRY-RED-001: `uv run --env-file .env pytest backend/tests/test_queries.py -q --tb=no`:
+  36 failed, 2 passed; missing constraints/normalization/notice/selection behavior
+  in intentional importable scaffolds. Added ownership/merge tests before those
+  helpers: 3 failed, 38 passed. Then implemented strict common models, immutable
+  context, metadata validation, batch/merge/selection rules and provider protocol.
+- QRY-RED-002: PostgreSQL query-schema tests: 8 failed before migration/reflection/
+  revision changes. Added migration 002, shared reflection, parent locks and
+  effective/context revision hooks. Preserved existing project JSON/timestamps/PUT
+  rules; tests now expect the reviewed two migration versions and real pre-failure
+  rollback counts. Explicit multi-table fixture cleanup retains all safeguards.
+- QRY-RED-003: manual API tests: 7 failed before query routes/service implementation.
+  Added real same-revision concurrency/failed-commit tests: 2 failed, 8 passed
+  before manual query logic. Implemented transactional CRUD, uniqueness/capacity/
+  revision checks, typed sanitized errors, sticky ownership and exact stored selection.
+- QRY-RED-004: real Chromium/injected-provider browser tests: 3 failed in 10.61s
+  against the page without query controls. Implemented labeled manual controls,
+  ownership/state display, retained invalid drafts, text rendering, and context
+  notices. View/revision guards prevent obsolete callbacks clearing newer drafts.
+- Added actual application close/recreate PostgreSQL persistence, restored generated
+  ownership, no-op behavior and enabled-only service-selection regressions. Provider
+  fakes/barrier helpers exist only in tests; no production fake setting or live
+  adapter call is implemented. Runtime adapter and prompt creation remain pending.
+- QRY-GREEN-001: `uv run --env-file .env pytest -q`: **180 passed in 15.50s**, one
+  known Starlette/httpx test-client warning. Existing project/browser/performance
+  regressions are included. `uv run ruff check backend`, `node --check frontend/app.js`,
+  and `git diff --check`: PASS after fixing import/line-length findings.
+- T001–016 completed for the manual-control milestone; T017–036 pending. Full
+  feature 002 acceptance, live-model quality, external latency, query-specific
+  performance protocol, and human audit are not claimed. BUG-PRJ-001 is unchanged.
+- No runtime LLM prompt has changed or executed yet. Ordinary manual query actions
+  never call an AI/scholarly provider. Secrets remain in ignored environment state.
+- Bounded pre-publication checks: 16 completed/20 pending tasks, generated database
+  credential absent from publishable files, original publication-year conversion
+  unchanged. This is not a comprehensive secret audit or a reproduction/fix of
+  the deferred browser issue.
+- Application migration smoke applied 002 to this rebuild's application database
+  and verified every original field of its one existing project unchanged; no
+  application records were deleted or shown. First bare `uv run` Python import
+  failed before DB access because backend is not installed as a package; retried
+  successfully with `PYTHONPATH=backend`, as the launcher already configures.
+
 ## Prompt iteration record template
 
 | ID/date | Feature/requirement | Exact prompt and context artifact versions | Model/tool version | Expected output | Actual output/evidence | Failure | Revised prompt | Outcome |

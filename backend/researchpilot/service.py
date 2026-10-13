@@ -61,8 +61,19 @@ class ProjectService:
     def update(self, project_id, data):
         table = self.database.projects
         with self.database.engine.begin() as connection:
+            previous = connection.execute(
+                select(table).where(table.c.id == project_id).with_for_update()
+            ).mappings().first()
+            if previous is None:
+                raise ProjectNotFound
+            values = input_values(data)
+            changed = any(previous[name] != value for name, value in values.items())
+            context_changed = any(previous[name] != values[name]
+                                  for name in ("research_question", "keywords"))
             row = connection.execute(update(table).where(table.c.id == project_id).values(
-                **input_values(data), updated_at=datetime.now(UTC),
+                **values, updated_at=datetime.now(UTC),
+                mutation_revision=previous["mutation_revision"] + int(changed),
+                query_context_revision=previous["query_context_revision"] + int(context_changed),
             ).returning(table)).mappings().first()
             if row is None:
                 raise ProjectNotFound
@@ -72,6 +83,11 @@ class ProjectService:
     def delete(self, project_id):
         table = self.database.projects
         with self.database.engine.begin() as connection:
+            parent = connection.execute(
+                select(table.c.id).where(table.c.id == project_id).with_for_update()
+            ).first()
+            if parent is None:
+                raise ProjectNotFound
             result = connection.execute(delete(table).where(table.c.id == project_id))
             if result.rowcount == 0:
                 raise ProjectNotFound

@@ -47,7 +47,7 @@ def test_FR_PRJ_006_migrations_are_versioned_and_repeatable(db_url):
         database.migrate()
         with database.engine.connect() as connection:
             versions = connection.execute(text("SELECT version FROM schema_migrations")).scalars()
-            assert list(versions) == ["001_projects.sql"]
+            assert sorted(versions) == ["001_projects.sql", "002_search_queries.sql"]
     finally:
         database.close()
 
@@ -130,6 +130,8 @@ def test_FR_PRJ_006_008_update_delete_survive_app_restart(db, db_url, monkeypatc
 
 
 def test_FR_PRJ_007_migration_failure_is_atomic(db, monkeypatch, tmp_path):
+    with db.engine.connect() as connection:
+        before = connection.execute(text("SELECT count(*) FROM schema_migrations")).scalar_one()
     migration = tmp_path / "002_intentionally_invalid.sql"
     migration.write_text("CREATE TABLE partial_migration (id integer); SELECT invalid_column;")
     monkeypatch.setattr(persistence, "MIGRATIONS", tmp_path)
@@ -138,4 +140,5 @@ def test_FR_PRJ_007_migration_failure_is_atomic(db, monkeypatch, tmp_path):
     with db.engine.connect() as connection:
         partial = connection.execute(text("SELECT to_regclass('partial_migration')")).scalar_one()
         assert partial is None
-        assert connection.execute(text("SELECT count(*) FROM schema_migrations")).scalar_one() == 1
+        after = connection.execute(text("SELECT count(*) FROM schema_migrations")).scalar_one()
+        assert after == before

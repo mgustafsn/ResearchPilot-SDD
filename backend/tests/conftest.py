@@ -1,17 +1,22 @@
 """All destructive fixture operations require an explicitly disposable database."""
 
+import asyncio
 import os
 import socket
 import subprocess
 import sys
+import threading
 import time
 from contextlib import contextmanager
 from pathlib import Path
 
 import httpx
 import pytest
+import uvicorn
 from fastapi.testclient import TestClient
 from researchpilot.persistence import Database
+from researchpilot.query_domain import SuggestionBatch
+from researchpilot.query_provider import SuggestionProviderError, SuggestionResult
 from sqlalchemy import text
 from sqlalchemy.engine import make_url
 
@@ -19,6 +24,25 @@ from sqlalchemy.engine import make_url
 class SecretDatabaseURL(str):
     def __repr__(self):
         return "'<redacted database URL>'"
+
+
+class FakeSuggestionProvider:
+    """Test-only controlled provider; never performs HTTP or logs its context."""
+
+    def __init__(self, queries=("AI tutoring", "Education", "Learning"), blocked=False):
+        self.queries = queries
+        self.contexts = []
+        self.started = threading.Event()
+        self.release = threading.Event()
+        if not blocked:
+            self.release.set()
+
+    async def suggest(self, context):
+        self.contexts.append(context)
+        self.started.set()
+        if not await asyncio.to_thread(self.release.wait, 5):
+            raise SuggestionProviderError("timeout")
+        return SuggestionResult(batch=SuggestionBatch(queries=list(self.queries)))
 
 
 def require_safe_test_database(test_url=None, app_url=None, opt_in=None):
@@ -57,7 +81,7 @@ def db(db_url):
     database = Database(db_url)
     database.migrate()
     with database.engine.begin() as connection:
-        connection.execute(text("TRUNCATE projects"))
+        connection.execute(text("TRUNCATE search_queries, projects"))
     try:
         yield database
     finally:
@@ -107,5 +131,41 @@ def live_server(db, db_url):
 def client(db):
     from researchpilot.api import create_app
 
-    with TestClient(create_app(db)) as client:
+    with TestClient(create_app(db, suggestion_provider=None)) as client:
         yield client
+
+
+@pytest.fixture
+def query_server(db):
+    from researchpilot.api import create_app
+
+    @contextmanager
+    def start(provider=None):
+        with socket.socket() as sock:
+            sock.bind(("127.0.0.1", 0))
+            port = sock.getsockname()[1]
+        base = f"http://127.0.0.1:{port}"
+        server = uvicorn.Server(uvicorn.Config(
+            create_app(db, suggestion_provider=provider), host="127.0.0.1", port=port,
+            log_level="warning", access_log=False,
+        ))
+        thread = threading.Thread(target=server.run, daemon=True)
+        thread.start()
+        try:
+            with httpx.Client(base_url=base, trust_env=False) as http:
+                for _ in range(100):
+                    try:
+                        if http.get("/api/projects").status_code == 200:
+                            break
+                    except httpx.TransportError:
+                        pass
+                    time.sleep(0.05)
+                else:
+                    raise RuntimeError("Injected-provider server readiness failed")
+            yield base
+        finally:
+            server.should_exit = True
+            thread.join(timeout=5)
+            if thread.is_alive():
+                raise RuntimeError("Injected-provider test server failed to shut down")
+    return start

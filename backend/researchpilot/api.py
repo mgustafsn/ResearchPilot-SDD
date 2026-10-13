@@ -2,6 +2,7 @@
 
 import logging
 import os
+import re
 from contextlib import asynccontextmanager
 from pathlib import Path
 from uuid import UUID
@@ -14,6 +15,8 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from researchpilot.domain import ProjectInput, ProjectOutput
 from researchpilot.persistence import Database
+from researchpilot.query_domain import QueryAddInput, QueryListOutput, QueryPatchInput
+from researchpilot.query_service import QueryError, QueryService
 from researchpilot.service import ProjectNotFound, ProjectService
 
 FRONTEND = Path(__file__).resolve().parents[2] / "frontend"
@@ -25,7 +28,7 @@ def error_response(status, code, message, fields=None):
                                    "fields": fields or []}}, status_code=status)
 
 
-def create_app(database=None):
+def create_app(database=None, suggestion_provider=None):
     @asynccontextmanager
     async def lifespan(app):
         owned = database is None
@@ -38,6 +41,7 @@ def create_app(database=None):
                 raise RuntimeError("Database startup failed; check local configuration") from None
             app.state.database = storage
             app.state.projects = ProjectService(storage)
+            app.state.queries = QueryService(storage, suggestion_provider)
             yield
         finally:
             if owned and storage is not None:
@@ -48,7 +52,8 @@ def create_app(database=None):
     @app.exception_handler(RequestValidationError)
     async def validation_error(request, exception):
         fields = []
-        allowed = set(ProjectInput.model_fields) | {"project_id"}
+        allowed = set(ProjectInput.model_fields) | set(QueryAddInput.model_fields) | {
+            "project_id", "query_id"}
         for error in exception.errors():
             name = next((part for part in error["loc"] if part in allowed), "request")
             kind, context = error["type"], error.get("ctx", {})
@@ -74,6 +79,8 @@ def create_app(database=None):
                 message = f"Use a value {direction} {context[key]}."
             elif kind == "value_error" and name == "yearTo":
                 message = "End year must not precede start year."
+            elif kind == "value_error" and name == "text":
+                message = "Use 1–160 characters of query text."
             fields.append({"field": name, "message": message})
         return error_response(
             422, "VALIDATION_ERROR", "Please check the highlighted fields.", fields
@@ -89,6 +96,10 @@ def create_app(database=None):
         logger.warning("Project storage operation failed")
         return error_response(503, "STORAGE_UNAVAILABLE",
                               "Storage is temporarily unavailable. Please try again.")
+
+    @app.exception_handler(QueryError)
+    async def query_error(request, exception):
+        return error_response(exception.status, exception.code, exception.message)
 
     @app.get("/api/projects", response_model=list[ProjectOutput])
     def list_projects(request: Request):
@@ -110,6 +121,25 @@ def create_app(database=None):
     def delete_project(project_id: UUID, request: Request):
         request.app.state.projects.delete(project_id)
         return Response(status_code=204)
+
+    @app.get("/api/projects/{project_id}/queries", response_model=QueryListOutput)
+    def list_queries(project_id: UUID, request: Request):
+        return request.app.state.queries.list(project_id)
+
+    @app.post("/api/projects/{project_id}/queries", response_model=QueryListOutput, status_code=201)
+    def add_query(project_id: UUID, data: QueryAddInput, request: Request):
+        return request.app.state.queries.add(project_id, data)
+
+    @app.patch("/api/projects/{project_id}/queries/{query_id}", response_model=QueryListOutput)
+    def patch_query(project_id: UUID, query_id: UUID, data: QueryPatchInput, request: Request):
+        return request.app.state.queries.patch(project_id, query_id, data)
+
+    @app.delete("/api/projects/{project_id}/queries/{query_id}", response_model=QueryListOutput)
+    def delete_query(project_id: UUID, query_id: UUID, expectedRevision: str, request: Request):
+        if not re.fullmatch(r"[0-9]+", expectedRevision) or len(expectedRevision) > 20:
+            return error_response(422, "VALIDATION_ERROR", "Use a nonnegative integer revision.",
+                                  [{"field": "expectedRevision", "message": "Invalid revision."}])
+        return request.app.state.queries.delete(project_id, query_id, int(expectedRevision))
 
     @app.get("/", include_in_schema=False)
     def homepage():

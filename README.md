@@ -2,6 +2,9 @@
 
 A specification-driven rebuild of a deliberately smaller ResearchPilot MVP.
 Feature 001 project creation/listing/reopening/editing/deletion is implemented.
+Feature 002 manual query controls are implemented: add/edit/delete, enable/disable,
+20-query limits, and durable context-change notices. AI generation is not implemented
+yet; the reserved adapter is a scaffold, and adding a key does not enable it.
 The user accepted feature 001 with a known limitation. Detailed human-audit evidence
 and final post-audit verification remain outstanding; full compliance is not claimed.
 User review identified a [publication-year input issue](docs/known-issues.md),
@@ -31,6 +34,12 @@ Tests truncate **only the explicitly configured disposable database**. Keep loca
 credentials out of commits, browser responses, and logs. The startup script will
 serve `http://127.0.0.1:8000`: run `./scripts/start-local.sh`.
 
+Open a project's details to manage its saved queries. Manual controls require no
+API key. The approved next increment will send only saved question/keywords to
+OpenAI on explicit Generate actions using the pinned model in `.env.example`.
+`store:false` is not zero retention; provider abuse-monitoring retention may apply.
+Live smoke calls need separate permission and are never part of default tests/CI.
+
 The full suite includes the approved reference-host performance test. On other
 hardware or in CI, run `uv run --env-file .env pytest -m "not performance" -q` and
 do not claim reference-host performance acceptance. CI runs these repeatable tests,
@@ -59,8 +68,9 @@ citation numbering, authentication, exports, and PDF ingestion are excluded.
     [API contract](specs/002-search-queries/contracts/api.md), and
     [provider contract](specs/002-search-queries/contracts/provider.md).
     Plan/API/provider contracts are approved; the [task list](specs/002-search-queries/tasks.md)
-    is drafted for review. Task approval remains pending
-    before implementation. No live smoke test is authorized by those approvals.
+    is approved for implementation. Manual control is the first implemented
+    increment; generation, final verification and acceptance remain pending.
+    No live smoke test is authorized by those approvals.
 3. Review later specifications in order after their prerequisites:
    - [001 Projects](specs/001-project-management/spec.md)
    - [002 Queries](specs/002-search-queries/spec.md)

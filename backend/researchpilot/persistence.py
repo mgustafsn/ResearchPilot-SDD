@@ -39,7 +39,9 @@ class Database:
                     connection.exec_driver_sql(migration.read_text())
                     connection.execute(text("INSERT INTO schema_migrations VALUES (:version)"),
                                        {"version": migration.name})
-        self.projects = Table("projects", MetaData(), autoload_with=self.engine)
+        metadata = MetaData()
+        self.projects = Table("projects", metadata, autoload_with=self.engine)
+        self.queries = Table("search_queries", metadata, autoload_with=self.engine)
 
     def close(self):
         self.engine.dispose()

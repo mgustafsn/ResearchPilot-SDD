@@ -55,6 +55,20 @@
       </dl>
       <button id="edit-project" type="button">Edit project</button>
       <button id="delete-project" type="button">Delete project</button>
+      <section id="query-section" aria-labelledby="query-heading" hidden>
+        <h3 id="query-heading">Search queries</h3>
+        <p id="query-refresh" role="status" hidden>Research context changed. Suggestions may need refreshing.</p>
+        <p id="query-availability">Manual queries work without an AI key. Suggestion generation is not implemented yet.</p>
+        <ul id="query-list"></ul>
+        <p id="query-empty">No saved queries.</p>
+        <form id="query-form" novalidate>
+          <label for="query-text">Query text</label>
+          <textarea id="query-text" rows="2" aria-describedby="query-text-error"></textarea>
+          <span id="query-text-error" class="field-error"></span>
+          <button id="save-query" type="submit" disabled>Save query</button>
+          <button id="cancel-query" type="button">Cancel query edit</button>
+        </form>
+      </section>
     </section>
     <dialog id="delete-dialog" aria-labelledby="delete-heading" aria-describedby="delete-warning">
       <h2 id="delete-heading">Delete project?</h2>
