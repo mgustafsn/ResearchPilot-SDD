@@ -58,7 +58,8 @@ citation numbering, authentication, exports, and PDF ingestion are excluded.
     its [plan](specs/002-search-queries/plan.md),
     [API contract](specs/002-search-queries/contracts/api.md), and
     [provider contract](specs/002-search-queries/contracts/provider.md).
-    Plan/API/provider contracts are approved; task review/approval remains pending
+    Plan/API/provider contracts are approved; the [task list](specs/002-search-queries/tasks.md)
+    is drafted for review. Task approval remains pending
     before implementation. No live smoke test is authorized by those approvals.
 3. Review later specifications in order after their prerequisites:
    - [001 Projects](specs/001-project-management/spec.md)

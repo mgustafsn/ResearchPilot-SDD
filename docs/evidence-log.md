@@ -529,6 +529,43 @@ correctness. Application tests were not runnable because no implementation exist
 - BUG-PRJ-001 remains deferred and uncorrected. Feature 001's missing detailed
   audit evidence is not supplied by this approval; feature 003 remains unapproved.
 
+## Feature 002 task preparation resumed — 2026-10-13
+
+- User request (verbatim): "Ok lets continue"; after an interrupted response,
+  user requested continuation and then "resume". This authorizes task drafting/
+  review, not task approval, application implementation, or paid/live AI calls.
+- Loaded `speckit-tasks` and read its template plus approved specification, plan,
+  API/provider contracts, model, rationale, quickstart, constitution and scope.
+  The setup script completed before the interruption; interrupted patch created
+  no file. On resume, Git was clean on `main` before the new task draft was written.
+- Generated `specs/002-search-queries/tasks.md`: 36 sequential unchecked tasks,
+  comprising setup 3, foundations 5, US2 manual control 8, US1 suggestions 11, and
+  verification/audits/acceptance 9. Both stories are P1; manual control comes first
+  per the approved plan, so the initial demo needs no API key.
+- AUD-QRY-TASK-001: explicit tests-before-logic sequence, deliberate contract
+  scaffolds rather than import/setup failures as red evidence, exact model/budget/
+  prompt constraints, revision/context/ownership/slot rules and legacy compatibility
+  are included. Generic optional-test wording remains overridden by Principle VI.
+- AUD-QRY-TASK-002: include real-PostgreSQL/barrier and browser delayed-response
+  schedules, safe multi-table fixture rollout, entire batch validation, zero-add
+  context acknowledgment, no-op ownership/revisions, and ordinary manual use
+  without configuration. The deferred year-input bug is explicitly out of this
+  implementation task list; no full 001 audit evidence is invented.
+- All FR-QRY-001–010 have task mappings; task IDs are local to feature 002, and
+  original US1/US2/requirement IDs are unchanged. Independent authoring pairs are
+  T009/T010 and T017/T018 after their listed prerequisites; no delegation was used
+  and destructive test execution remains sequential by default.
+- Tasks include regular tested commit/push milestones and separate human audit/
+  acceptance. No app code, migration, runtime prompt, dependency, test, or CI file
+  was changed during drafting; no application/quality/performance result is claimed.
+- Explicit task/implementation approval is still required. No scholarly provider,
+  search route, ranking/reference work, history/lease, SDK, or live smoke is added.
+- Documentation validation PASS: 36 sequential unchecked tasks with checklist
+  format/file paths, US2=8/US1=11, four independent-authoring markers, all ten query
+  requirement mappings, and 27 Markdown local-link/heading/limited credential-pattern
+  checks. `git diff --check`: PASS. No configured after-tasks hooks found. These
+  checks are not application verification, and no application tests ran.
+
 ## Prompt iteration record template
 
 | ID/date | Feature/requirement | Exact prompt and context artifact versions | Model/tool version | Expected output | Actual output/evidence | Failure | Revised prompt | Outcome |
