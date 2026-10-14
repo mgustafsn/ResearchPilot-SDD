@@ -700,3 +700,77 @@ Personal identifiers and percentages remain unfilled until supplied and agreed b
 - User clarified that pushing requires their VPN; push is deferred to the user.
   The migration is committed locally only. The legacy
   `.github/workflows/ci.yml` is retained unchanged pending a decision to remove it.
+
+## Query generation milestone (T017–T027) — 2026-10-14
+
+- Scope: feature 002 US1 only. No live OpenAI call, no real API key used, no
+  scholarly provider/search route, no BUG-PRJ-001 change. Base commit `92804b6`.
+- Environment: Python 3.13.15 (uv venv), HTTPX 0.28.1, FastAPI 0.143.0,
+  Pydantic 2.14.1, Node v26.11.1, local loopback PostgreSQL via `docker compose`.
+- Red phase (T017–T019, before T020–T022):
+  `uv run --env-file .env pytest backend/tests/test_query_provider.py
+  backend/tests/test_query_api.py backend/tests/test_query_postgres.py -q`:
+  **88 failed, 20 passed**. Causes were missing behavior only: adapter takes no
+  arguments / no `from_environment` (54), generate route 405 (31), no
+  `QueryService.generate` (2), plus barrier waits. Browser red phase (T023):
+  **7 failed, 3 passed** (no Generate control).
+- Prompt (T020): `backend/researchpilot/prompts/query_suggestions_v1.txt`,
+  version `query_suggestions_v1`, SHA-256
+  `0cc54399eb157d45cb5a6f76b82ffad8007d1c5f02fbcc68e6efa0b526de571e`. Text is the
+  approved contract prompt verbatim (contract line breaks retained). Mock-request
+  evidence: `test_FR_QRY_001_exact_request_shape_and_prompt` asserts the exact
+  endpoint, bearer header, model `gpt-4.1-mini-2025-04-14`, `store:false`,
+  `stream:false`, `n:1`, `max_completion_tokens:512`, strict schema, two messages
+  (system prompt file, user JSON `{researchQuestion, keywords}`) and no tools.
+- Adapter limits verified by tests: 20 s total async deadline over headers and
+  body (slow-body test times out while per-chunk progress continues), 3/2/5/15 s
+  phase timeouts, 2 connections, no redirects, `trust_env=False`, TLS verify,
+  64 KiB incremental body cap (stops reading; exact-limit body accepted, +1 byte
+  rejected), single attempt for HTTP/transport errors, cancellation propagation,
+  sanitized errors with suppressed exception context, canary key/context absent
+  from all captured logs.
+- Service/API (T021/T022): snapshot transaction released before the provider
+  await; re-lock, stale check, merge, context acknowledgment and revision bump in
+  one transaction; batch re-validated in the service; provider exceptions mapped
+  to 503/504/502 fixed messages; missing parent 404 with no resurrection. Logs:
+  project UUID, status, duration, model/prompt version, token counts, merge counts.
+  Production composition reads `OPENAI_API_KEY`/`OPENAI_QUERY_MODEL`; missing key or
+  unreviewed model disables generation only. The adapter client closes at shutdown.
+  The subprocess browser fixture strips `OPENAI_API_KEY` from its environment.
+- Audit-test change: `test_NFR_PRJ_001_credentials_absent_from_assets_api_and_logs`
+  matched the substring `import openai`, which falsely flagged the composition
+  import `from researchpilot.integrations import openai_queries`. Replaced with an
+  AST check that is stricter: recursive over `backend/researchpilot`, rejects any
+  `openai`/`openalex` module import, and rejects `researchpilot.integrations`
+  imports from business modules. Verified by injecting such an import into
+  `query_service.py`: the audit failed; the probe was removed.
+- Test-harness fix: Playwright leaves an event loop on the main thread, so async
+  tests run via `conftest.run_async` (fresh thread). Before that fix the full suite
+  had 52 `asyncio.run() cannot be called from a running event loop` failures.
+- Mutation checks (temporarily applied, then reverted): disabling the stale-revision
+  check → 6 PostgreSQL failures; deleting owned rows during merge → 3 failures;
+  removing the browser view guard → navigation test failed.
+- UI (T024): explicit "Generate suggestions" button, OpenAI disclosure, disabled
+  with readable text when unconfigured, per-project pending state (duplicate
+  clicks blocked; manual work, navigation and deletion stay available), merge-count
+  status, text-only rendering, epoch/revision-bound responses, saved-state reload on
+  error without clearing unsaved input.
+- Quickstart (T027): journeys 1–10 are covered by automated tests with fake and
+  disabled providers, including restart into a manual-only profile and deleted-query
+  reappearance. No manual browser walkthrough or human review was performed.
+- Final runs: `git diff --check` PASS; `uv run ruff check backend` PASS;
+  `node --check frontend/app.js` PASS;
+  `uv run --env-file .env pytest -m 'not performance' -q`:
+  **277 passed, 1 deselected, 1 warning** (Starlette/HTTPX test-client
+  deprecation notice). Per file: provider 56, query API 29, query PostgreSQL 26,
+  query browser 10, query domain 47. `pytest -m performance`: 1 passed (existing
+  project budget; not query performance, T030 pending).
+- Requirement mapping: FR-QRY-001 (provider/API/browser generation tests),
+  FR-QRY-002 (batch/Unicode validation), FR-QRY-004 (preservation/restoration),
+  FR-QRY-005 (failure categories, unchanged state, manual still works),
+  FR-QRY-007 (stale/concurrency schedules), FR-QRY-008 (zero-slot/capacity),
+  FR-QRY-009 (atomic notice acknowledgment), FR-QRY-010 (deletion/no resurrection).
+- Not claimed: live model quality, cost, latency, or zero retention. Fake-provider
+  results are not live evidence. Committed locally only; push deferred to the user
+  (VPN required). T028–T036 (fault/security expansion, browser safety, query
+  performance, CI run, audits, human review, acceptance) remain pending.

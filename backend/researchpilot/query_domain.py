@@ -79,6 +79,18 @@ class QueryListOutput(QueryModel):
     queries: list[QueryOutput]
 
 
+class GenerationSummary(QueryModel):
+    validatedCount: int = Field(ge=0)
+    addedCount: int = Field(ge=0)
+    replacedCount: int = Field(ge=0)
+    duplicateSkippedCount: int = Field(ge=0)
+    capacitySkippedCount: int = Field(ge=0)
+
+
+class GenerationOutput(QueryListOutput):
+    generationSummary: GenerationSummary
+
+
 def refresh_required(context_revision, generated_revision):
     return context_revision > 0 and generated_revision != context_revision
 

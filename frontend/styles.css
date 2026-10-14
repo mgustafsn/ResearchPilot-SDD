@@ -27,3 +27,5 @@ dialog::backdrop { background: #182b3580; }
 #query-list li { padding: .5rem; border-bottom: 1px solid #d5e0e6; overflow-wrap: anywhere; }
 #query-list label { margin-top: 0; }
 #query-refresh { padding: .6rem; background: #fff4ce; border: 1px solid #856821; }
+#query-privacy { color: #45616f; }
+#generation-status:empty { display: none; }

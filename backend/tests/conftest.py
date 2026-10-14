@@ -7,6 +7,7 @@ import subprocess
 import sys
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -24,6 +25,12 @@ from sqlalchemy.engine import make_url
 class SecretDatabaseURL(str):
     def __repr__(self):
         return "'<redacted database URL>'"
+
+
+def run_async(coroutine):
+    """Run on a fresh thread: Playwright may leave a loop running on the main thread."""
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        return pool.submit(asyncio.run, coroutine).result()
 
 
 class FakeSuggestionProvider:
@@ -98,6 +105,8 @@ def live_server(db, db_url):
         base = f"http://127.0.0.1:{port}"
         environment = dict(os.environ, DATABASE_URL=str(db_url),
                            PYTHONPATH=str(Path("backend").resolve()))
+        # Never let a developer's real key enable live generation in tests.
+        environment.pop("OPENAI_API_KEY", None)
         process = subprocess.Popen(
             [sys.executable, "-m", "uvicorn", "researchpilot.api:create_app", "--factory",
              "--host", "127.0.0.1", "--port", str(port), "--no-access-log"],

@@ -1,5 +1,6 @@
 """Project route contract tests with isolated real PostgreSQL."""
 
+import ast
 import os
 from pathlib import Path
 from uuid import uuid4
@@ -153,10 +154,22 @@ def test_NFR_PRJ_001_credentials_absent_from_assets_api_and_logs(client, monkeyp
         for password in passwords:
             if password:
                 assert password not in response.text + caplog.text
-    # This slice must not acquire provider or LLM dependencies by accident.
-    for path in Path("backend/researchpilot").glob("*.py"):
-        source = path.read_text()
-        assert "import openai" not in source and "import openalex" not in source
+    # No vendor SDK anywhere; business logic never reaches the integration adapters.
+    business = {"domain.py", "service.py", "query_domain.py", "query_provider.py",
+                "query_service.py", "persistence.py"}
+    for path in Path("backend/researchpilot").rglob("*.py"):
+        for node in ast.walk(ast.parse(path.read_text())):
+            if isinstance(node, ast.Import):
+                modules = [alias.name for alias in node.names]
+            elif isinstance(node, ast.ImportFrom):
+                modules = [node.module or ""] + [f"{node.module}.{alias.name}"
+                                                 for alias in node.names]
+            else:
+                continue
+            for module in modules:
+                assert module.split(".")[0] not in {"openai", "openalex"}, path
+                if path.name in business:
+                    assert not module.startswith("researchpilot.integrations"), path
 
 
 def test_FR_PRJ_007_validation_explains_how_to_correct_input(client):

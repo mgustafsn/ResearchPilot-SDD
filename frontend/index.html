@@ -58,7 +58,10 @@
       <section id="query-section" aria-labelledby="query-heading" hidden>
         <h3 id="query-heading">Search queries</h3>
         <p id="query-refresh" role="status" hidden>Research context changed. Suggestions may need refreshing.</p>
-        <p id="query-availability">Manual queries work without an AI key. Suggestion generation is not implemented yet.</p>
+        <p id="query-privacy">Generate suggestions sends this project's saved research question and keywords to OpenAI. Nothing is sent unless you press the button; suggestions are search queries, not papers.</p>
+        <p id="query-availability"></p>
+        <p><button id="generate-queries" type="button" disabled>Generate suggestions</button></p>
+        <p id="generation-status" role="status"></p>
         <ul id="query-list"></ul>
         <p id="query-empty">No saved queries.</p>
         <form id="query-form" novalidate>

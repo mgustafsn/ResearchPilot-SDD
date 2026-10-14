@@ -9,6 +9,7 @@ let listEpoch = 0;
 let queryState = null;
 let queryEditingId = null;
 const queryDrafts = new Map();
+const pendingGenerations = new Set();
 
 function clearErrors() {
   byId("error").hidden = true;
@@ -93,6 +94,9 @@ function showDetail(project) {
   byId("query-text").value = draft.text;
   byId("query-section").hidden = true;
   byId("save-query").disabled = true;
+  byId("generate-queries").disabled = true;
+  byId("generation-status").textContent = pendingGenerations.has(project.id)
+    ? "Generating suggestions…" : "";
   loadQueries(project.id, epoch);
 }
 
@@ -247,6 +251,27 @@ function applyQueryState(state) {
   byId("query-refresh").hidden = !state.refreshRequired;
   byId("query-section").hidden = false;
   byId("save-query").disabled = false;
+  updateGenerateControl();
+}
+
+function updateGenerateControl() {
+  const available = Boolean(queryState?.generationAvailable);
+  byId("query-availability").textContent = available
+    ? "Manual queries always work; suggestions are optional."
+    : "Suggestion generation is not configured. Manual queries still work.";
+  byId("generate-queries").disabled = !available || !selectedProject ||
+    pendingGenerations.has(selectedProject.id);
+}
+
+function generationSummaryText(summary) {
+  const parts = [`${summary.addedCount} added`, `${summary.replacedCount} replaced`];
+  if (summary.duplicateSkippedCount) {
+    parts.push(`${summary.duplicateSkippedCount} skipped as duplicate of a kept query`);
+  }
+  if (summary.capacitySkippedCount) {
+    parts.push(`${summary.capacitySkippedCount} skipped (20-query limit)`);
+  }
+  return `Suggestions updated: ${parts.join(", ")}.`;
 }
 
 async function loadQueries(projectId, epoch) {
@@ -299,6 +324,39 @@ async function mutateQuery(suffix, method, data = {}) {
     if (queryViewCurrent(projectId, epoch)) byId("save-query").disabled = false;
   }
 }
+
+byId("generate-queries").addEventListener("click", async () => {
+  if (!queryState || !selectedProject || pendingGenerations.has(selectedProject.id)) return;
+  clearErrors();
+  const projectId = selectedProject.id;
+  const epoch = viewEpoch;
+  pendingGenerations.add(projectId);
+  updateGenerateControl();
+  byId("generation-status").textContent = "Generating suggestions…";
+  try {
+    const state = await request(`/api/projects/${projectId}/queries/generate`, {
+      method: "POST", body: JSON.stringify({expectedRevision: queryState.revision}),
+    });
+    pendingGenerations.delete(projectId);
+    if (queryViewCurrent(projectId, epoch)) {
+      applyQueryState(state);
+      byId("generation-status").textContent = generationSummaryText(state.generationSummary);
+    } else if (selectedProject?.id === projectId && !byId("detail").hidden) {
+      // Same project reopened meanwhile: show saved state through the current view.
+      byId("generation-status").textContent = "";
+      await loadQueries(projectId, viewEpoch);
+    }
+  } catch (error) {
+    pendingGenerations.delete(projectId);
+    if (!queryViewCurrent(projectId, epoch)) return;
+    byId("generation-status").textContent = "";
+    showQueryError(error);
+    // Reload saved state only; the unsaved draft and other input stay untouched.
+    await loadQueries(projectId, epoch);
+  } finally {
+    if (selectedProject?.id === projectId && !byId("detail").hidden) updateGenerateControl();
+  }
+});
 
 byId("query-text").addEventListener("input", saveQueryDraft);
 byId("cancel-query").addEventListener("click", () => {

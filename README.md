@@ -3,8 +3,9 @@
 A specification-driven rebuild of a deliberately smaller ResearchPilot MVP.
 Feature 001 project creation/listing/reopening/editing/deletion is implemented.
 Feature 002 manual query controls are implemented: add/edit/delete, enable/disable,
-20-query limits, and durable context-change notices. AI generation is not implemented
-yet; the reserved adapter is a scaffold, and adding a key does not enable it.
+20-query limits, and durable context-change notices. Explicit AI suggestion generation
+is implemented and tested only with fakes/mock HTTP; no live OpenAI call has been made,
+and audits, human review and feature acceptance remain pending.
 The user accepted feature 001 with a known limitation. Detailed human-audit evidence
 and final post-audit verification remain outstanding; full compliance is not claimed.
 User review identified a [publication-year input issue](docs/known-issues.md),
@@ -35,8 +36,9 @@ credentials out of commits, browser responses, and logs. The startup script will
 serve `http://127.0.0.1:8000`: run `./scripts/start-local.sh`.
 
 Open a project's details to manage its saved queries. Manual controls require no
-API key. The approved next increment will send only saved question/keywords to
-OpenAI on explicit Generate actions using the pinned model in `.env.example`.
+API key. With `OPENAI_API_KEY` set, "Generate suggestions" sends only the saved
+question/keywords to OpenAI on explicit action, using the pinned model in `.env.example`.
+Without a key (or with an unreviewed model), Generate is disabled and manual work continues.
 `store:false` is not zero retention; provider abuse-monitoring retention may apply.
 Live smoke calls need separate permission and are never part of default tests/CI.
 
@@ -68,8 +70,8 @@ citation numbering, authentication, exports, and PDF ingestion are excluded.
     [API contract](specs/002-search-queries/contracts/api.md), and
     [provider contract](specs/002-search-queries/contracts/provider.md).
     Plan/API/provider contracts are approved; the [task list](specs/002-search-queries/tasks.md)
-    is approved for implementation. Manual control is the first implemented
-    increment; generation, final verification and acceptance remain pending.
+    is approved for implementation. Manual control and fake-tested generation are
+    implemented; audits, final verification and acceptance remain pending.
     No live smoke test is authorized by those approvals.
 3. Review later specifications in order after their prerequisites:
    - [001 Projects](specs/001-project-management/spec.md)

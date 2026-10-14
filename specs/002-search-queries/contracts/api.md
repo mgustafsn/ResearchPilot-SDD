@@ -1,7 +1,7 @@
 # Query API/UI contract — approved
 
 **Status**: Approved by the user on 2026-10-12 (reply: "approve query plan and contracts").
-Manual query routes are implemented; generation remains pending. Approval alone
+Manual and generation routes are implemented and fake-tested. Approval alone
 does not establish full implementation or acceptance. Same-origin JSON under `/api`;
 loopback/local single-user only. Existing project input/output/PUT/DELETE contract
 is unchanged. Query state is never writable through project PUT.

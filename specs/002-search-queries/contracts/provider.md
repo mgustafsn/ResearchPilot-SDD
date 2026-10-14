@@ -2,7 +2,7 @@
 
 **Status**: Approved by the user on 2026-10-12 (reply: "approve query plan and contracts").
 No live API call or runtime prompt file has been created by this contract. Task
-review/approval was completed on 2026-10-13; the adapter remains a scaffold.
+review/approval was completed on 2026-10-13; the adapter is implemented and mock-tested only.
 Approval is not a live-smoke permission or a benchmark result.
 
 ## Common interface and composition

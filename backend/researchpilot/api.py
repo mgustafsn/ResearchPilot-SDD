@@ -14,13 +14,21 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import SQLAlchemyError
 
 from researchpilot.domain import ProjectInput, ProjectOutput
+from researchpilot.integrations import openai_queries
 from researchpilot.persistence import Database
-from researchpilot.query_domain import QueryAddInput, QueryListOutput, QueryPatchInput
+from researchpilot.query_domain import (
+    GenerateInput,
+    GenerationOutput,
+    QueryAddInput,
+    QueryListOutput,
+    QueryPatchInput,
+)
 from researchpilot.query_service import QueryError, QueryService
 from researchpilot.service import ProjectNotFound, ProjectService
 
 FRONTEND = Path(__file__).resolve().parents[2] / "frontend"
 logger = logging.getLogger("researchpilot")
+FROM_ENVIRONMENT = object()  # Production composition; tests inject a fake or None.
 
 
 def error_response(status, code, message, fields=None):
@@ -28,11 +36,11 @@ def error_response(status, code, message, fields=None):
                                    "fields": fields or []}}, status_code=status)
 
 
-def create_app(database=None, suggestion_provider=None):
+def create_app(database=None, suggestion_provider=FROM_ENVIRONMENT):
     @asynccontextmanager
     async def lifespan(app):
         owned = database is None
-        storage = None
+        storage = provider = None
         try:
             try:
                 storage = database or Database(os.environ["DATABASE_URL"])
@@ -41,9 +49,13 @@ def create_app(database=None, suggestion_provider=None):
                 raise RuntimeError("Database startup failed; check local configuration") from None
             app.state.database = storage
             app.state.projects = ProjectService(storage)
-            app.state.queries = QueryService(storage, suggestion_provider)
+            provider = (openai_queries.from_environment(os.environ)
+                        if suggestion_provider is FROM_ENVIRONMENT else suggestion_provider)
+            app.state.queries = QueryService(storage, provider)
             yield
         finally:
+            if suggestion_provider is FROM_ENVIRONMENT and provider is not None:
+                await provider.aclose()
             if owned and storage is not None:
                 storage.close()
 
@@ -140,6 +152,10 @@ def create_app(database=None, suggestion_provider=None):
             return error_response(422, "VALIDATION_ERROR", "Use a nonnegative integer revision.",
                                   [{"field": "expectedRevision", "message": "Invalid revision."}])
         return request.app.state.queries.delete(project_id, query_id, int(expectedRevision))
+
+    @app.post("/api/projects/{project_id}/queries/generate", response_model=GenerationOutput)
+    async def generate_queries(project_id: UUID, data: GenerateInput, request: Request):
+        return await request.app.state.queries.generate(project_id, data)
 
     @app.get("/", include_in_schema=False)
     def homepage():
