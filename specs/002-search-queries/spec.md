@@ -2,7 +2,7 @@
 
 **Feature Branch**: Proposed `002-search-queries` (not created)
 **Created**: 2026-10-11
-**Status**: Approved by the user on 2026-10-12 (reply: "approve query specification"); plan and API/provider contracts separately approved on the same date. Task review and implementation gates remain pending.
+**Status**: Specification/plan/contracts approved on 2026-10-12; tasks and implementation authorized on 2026-10-13. Manual-query increment implemented and verified; suggestion generation and full feature acceptance remain pending.
 **Input**: Retain description-driven query suggestions and user control; exclude categorization.
 
 ## Clarifications

@@ -630,6 +630,23 @@ correctness. Application tests were not runnable because no implementation exist
   failed before DB access because backend is not installed as a package; retried
   successfully with `PYTHONPATH=backend`, as the launcher already configures.
 
+## Query manual-control milestone publication — 2026-10-13
+
+- Implementation milestone `5fd0a3f` pushed successfully to private GitHub `main`.
+- GitHub Actions run https://github.com/mgustafsn/ResearchPilot-SDD/actions/runs/38373581252
+  completed successfully for `5fd0a3f1bcb8ff65b67a822acf8a2bc89eba48c6`.
+  Remote logs: **179 passed, 1 deselected, 1 warning in 21.68s**; Ruff and JS
+  checks passed. CI intentionally excludes reference-host performance acceptance.
+- Full local suite remains 180 passing, including the existing project performance
+  regression. Query-specific performance, real-model evaluation, generation/UI
+  integration, final audits and human acceptance are still pending (T017–036).
+- To review the manual increment, restart `./scripts/start-local.sh`, open the
+  existing project's details at `http://127.0.0.1:8000`, and use Search queries.
+  Migration retains existing project values; no key is needed. Adding a key does
+  not activate the unimplemented generator and no paid call has been made.
+- No after-implementation hooks are configured. This is a verified incremental
+  checkpoint, not completion of feature 002 or authorization for feature 003.
+
 ## Prompt iteration record template
 
 | ID/date | Feature/requirement | Exact prompt and context artifact versions | Model/tool version | Expected output | Actual output/evidence | Failure | Revised prompt | Outcome |
@@ -657,3 +674,29 @@ consistency checks are not application verification or acceptance results.
 |---|---|---|---|---|
 
 Personal identifiers and percentages remain unfilled until supplied and agreed by the team.
+
+## GitLab repository migration — 2026-10-14
+
+- User supplied the new private repository URL:
+  `https://gitlab.abo.fi/marcgust/ResearchPilot-SDD`.
+- Changed local `origin` fetch/push URL to the corresponding `.git` URL. Added
+  `.gitlab-ci.yml` with loopback PostgreSQL, repeatable non-performance tests,
+  Ruff, JavaScript syntax, and JUnit artifacts. Updated forward-looking 002
+  plan/task references (T031) and README; retained historical GitHub run evidence.
+- No application prompt or business logic changed. Requirement mapping: the
+  existing T031 CI work and constitution VI test evidence.
+- `git diff --check`: PASS. `uv run ruff check backend`: PASS.
+  `node --check frontend/app.js`: PASS.
+- Initial `uv run pytest -m 'not performance' -q` lacked the guarded test
+  database settings: 109 passed, 70 setup errors, 1 deselected. Retried with
+  `.env`; the isolated PostgreSQL container was stopped, so that run had
+  connection errors. After `docker compose up -d --wait`,
+  `uv run --env-file .env pytest -m 'not performance' -q --tb=short`:
+  **179 passed, 1 deselected, 1 warning in 13.88s**. The warning is a
+  Starlette/HTTPX test-client deprecation notice.
+- `git ls-remote origin HEAD` reached GitLab but could not authenticate to
+  the private repository (`could not read Username`). GitLab CI has not run
+  remotely, and no push or remote pipeline result is claimed.
+- User clarified that pushing requires their VPN; push is deferred to the user.
+  The migration is committed locally only. The legacy
+  `.github/workflows/ci.yml` is retained unchanged pending a decision to remove it.

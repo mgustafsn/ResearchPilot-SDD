@@ -4,7 +4,7 @@
 **Date**: 2026-10-12 | **Spec**: [spec.md](spec.md)
 **Status**: Approved by the user on 2026-10-12 (reply: "approve query plan and contracts").
 The model, budgets, design, contracts, and proposed verification protocol are
-approved; tasks require separate review before implementation. No live smoke test
+approved; tasks were separately approved for implementation on 2026-10-13. No live smoke test
 or paid call is authorized by this approval, and no verification result is implied.
 
 ## Summary
@@ -32,8 +32,8 @@ background jobs, or new frontend framework. BUG-PRJ-001 remains deferred, not fi
 | Tests | Existing pytest/HTTPX/Playwright/Ruff; fake providers, HTTPX MockTransport, real safeguarded PostgreSQL, real browser server with test-only dependency injection |
 | Performance proposal | Query CRUD p95 below 500 ms under the protocol in `../../docs/verification.md`; keep existing project budget; live AI latency/quality is not an acceptance claim |
 
-Model, endpoint, budget, performance, and contract choices are proposals, not inferred
-approval. Official source checks and alternatives are in [research.md](research.md).
+Model, endpoint, budget, performance, and contract choices were explicitly approved
+with this plan; approval is not execution evidence. Sources are in [research.md](research.md).
 HTTPX is already locked; promoting it is necessary for production installs without
 dev dependencies. No OpenAI SDK, tokenizer, task queue, cache, or new package family.
 
@@ -80,7 +80,7 @@ backend/tests/
   conftest.py                    # safe multi-table cleanup and provider injection
 frontend/index.html, app.js, styles.css
 migrations/002_search_queries.sql
-.env.example, pyproject.toml, uv.lock, README.md, .github/workflows/ci.yml
+.env.example, pyproject.toml, uv.lock, README.md, .gitlab-ci.yml
 ```
 
 Planning artifacts: this plan, `research.md`, `data-model.md`,

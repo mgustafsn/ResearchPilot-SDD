@@ -1,0 +1,34 @@
+stages:
+  - test
+
+test:
+  stage: test
+  image: python:3.12-bookworm
+  variables:
+    # Disposable CI-only credentials. The test fixture accepts loopback databases only.
+    DATABASE_URL: "postgresql+psycopg://researchpilot:disposable-ci-only@127.0.0.1:5432/researchpilot_sdd"
+    TEST_DATABASE_URL: "postgresql+psycopg://researchpilot:disposable-ci-only@127.0.0.1:5432/researchpilot_sdd_test"
+    ALLOW_TEST_DATABASE_RESET: "1"
+    UV_CACHE_DIR: "$CI_PROJECT_DIR/.uv-cache"
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y --no-install-recommends postgresql nodejs curl
+    - pg_ctlcluster 15 main start
+    - su postgres -c "psql -v ON_ERROR_STOP=1 -c \"CREATE USER researchpilot WITH PASSWORD 'disposable-ci-only'\""
+    - su postgres -c "createdb -O researchpilot researchpilot_sdd"
+    - su postgres -c "createdb -O researchpilot researchpilot_sdd_test"
+    - curl -LsSf https://astral.sh/uv/install.sh | sh
+    - export PATH="$HOME/.local/bin:$PATH"
+    - uv sync --locked --python 3.12
+    - uv run playwright install --with-deps chromium
+  script:
+    - export PATH="$HOME/.local/bin:$PATH"
+    - uv run ruff check backend
+    - node --check frontend/app.js
+    - uv run pytest -m "not performance" -q --junitxml=test-results/results.xml
+  artifacts:
+    when: always
+    reports:
+      junit: test-results/results.xml
+    paths:
+      - test-results/

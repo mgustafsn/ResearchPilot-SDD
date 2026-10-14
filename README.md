@@ -89,7 +89,9 @@ The active feature is recorded in `.specify/feature.json`. The initialized integ
 uses Claude skills such as `/speckit-clarify`, `/speckit-plan`, and `/speckit-tasks`.
 No branch, commit, dependency installation, or application implementation was created
 as part of the initial specification preparation. The artifacts are now tracked in a
-private GitHub repository; implementation remains blocked by the review gates above.
+private GitLab repository at `gitlab.abo.fi/marcgust/ResearchPilot-SDD`;
+implementation remains subject to the review gates above. GitLab CI is configured
+in `.gitlab-ci.yml`; remote execution has not yet been verified.
 
 ## Course evidence
 
