@@ -33,12 +33,13 @@ IDs each test verifies. Acceptance scenario IDs supplement, not replace, require
 
 Feature 001 has recorded automated results in `docs/evidence/` and the evidence
 log, with BUG-PRJ-001 deferred and detailed human-audit evidence outstanding.
-Feature 002 automated results and the approved-host query measurement are recorded
-in `docs/evidence-log.md`, `docs/evidence/query-traceability.md`, and
-`docs/evidence/query-performance.json`. Human review, remote CI, and explicit 002
-acceptance remain pending. Features 003–005 remain unapproved; no tests/results are
-claimed for them. Do not infer code coverage, security compliance, suggestion quality,
-or ranking accuracy from documentation checks or earlier-slice tests.
+Feature 002 automated results, approved-host query measurement and user acceptance
+are recorded in `docs/evidence-log.md`, `docs/evidence/query-traceability.md`, and
+`docs/evidence/query-performance.json`; remote GitLab CI remains unverified because
+VPN is currently down. Feature 003 specification was approved on 2026-10-19; its
+plan/contracts are drafts, and no 003 tests or runtime results are claimed. Features
+004–005 remain unapproved. Do not infer code coverage, security compliance, suggestion
+quality, or ranking accuracy from documentation checks or earlier-slice tests.
 
 ## Project-management performance reference
 
@@ -107,6 +108,28 @@ Recorded execution: nearest-rank p95 **3.746 ms** over 100 successful requests,
 below the approved 500 ms target. See `docs/evidence/query-performance.json` for raw
 durations, statuses, versions, host/load data and source hashes. This result measures
 local query CRUD only, not live suggestion generation or external-provider latency.
+
+## Retrieval-pipeline performance proposal (feature 003)
+
+**Draft for plan review; not approved or measured.** Proposed reference machine is the
+approved 001/002 host (Ryzen 7 5700X3D, 31 GiB RAM, Linux 7.2.9-2-cachyos x86_64)
+with local PostgreSQL 17 and loopback HTTP. Use the guarded disposable DB and a fake
+PaperProvider that immediately returns deterministic records; never call OpenAlex.
+
+- Seed 100 projects with 20 stored queries each. For one target, execute 20 timed
+  sequential complete search attempts, each exercising 250 normalized paper records
+  across 20 queries, deduplication and atomic association replacement. Use the same
+  stable fixture every attempt; keep search-run history as production behavior does.
+- Start app before timing; do 10 untimed warm-up search requests. Time from sending
+  each loopback request until its full response body arrives with one persistent
+  HTTP client. Include API/service/domain/PostgreSQL work and response serialization;
+  exclude process startup, fixture seeding, warm-up and fake-provider wait (zero).
+- Retain all 20 durations/statuses and fail on any non-success. Sort ascending and use
+  the 19th sample (nearest-rank p95). Proposed budget: below 2 seconds. Record commit,
+  dirty state, source hashes, OS/CPU/RAM/load, Python/dependency/PostgreSQL versions,
+  fixture counts and exact command without credentials.
+- This measures local normalization/deduplication/persistence, not network/provider
+  latency or scientific relevance. Any threshold/environment change needs plan review.
 
 ## Comparing vibe coding with SDD
 

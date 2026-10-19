@@ -2,7 +2,7 @@
 
 **Feature Branch**: Proposed `003-paper-retrieval` (not created)
 **Created**: 2026-10-11
-**Status**: Draft — human approval required
+**Status**: Approved by the user on 2026-10-19; plan, contracts, tasks, and implementation remain unapproved.
 **Input**: Retrieve real papers from OpenAlex using approved stored queries.
 
 ## Clarifications
@@ -11,8 +11,9 @@
 
 - Q: For feature 003, are you comfortable with an explicit search sending the enabled query text and project filters to OpenAlex (not OpenAI)? → A: Yes, with disclosure and only after the user clicks Search.
 - Q: If one OpenAlex request fails during a multi-query search, should previous results be kept or replaced with partial results? → A: Fail the whole attempt and preserve previous results.
-- Q: Should each OpenAlex search use the enabled saved query as-is or combine it with the project question and keywords? → A: Search each enabled query as-is; apply years and paper limit as filters.
+- Q: Should each OpenAlex search use the enabled saved query as-is or combine it with the project question and keywords? → A: Search each enabled query as-is; apply inclusive year filters and enforce the paper limit through per-query allocations.
 - Q: If all OpenAlex requests succeed but return no usable papers, should old results be replaced with an empty result set? → A: Yes; replace current results with the successful empty result, keeping saved references separate.
+- Q: Should the selected publication-year range include papers published in both the start year and the end year? → A: Yes; provided year bounds are inclusive.
 
 ## User Scenarios & Testing
 
@@ -44,7 +45,7 @@ enabled query count greater than paper budget.
 
 ### Functional Requirements
 
-- **FR-RET-001**: Search OpenAlex only, through PaperProvider, using an attempt snapshot of enabled queries, project question/keywords, years, and paper limit. Send provider requests only after explicit user Search action; disclose that enabled query text and applied publication-year filters go to OpenAlex, not OpenAI. Search each enabled query exactly as stored; do not send or append the project question/keywords to provider search text. Enforce the paper limit through the per-query raw-record allocation and retain the full project context in the snapshot for reproducibility.
+- **FR-RET-001**: Search OpenAlex only, through PaperProvider, using an attempt snapshot of enabled queries, project question/keywords, years, and paper limit. Send provider requests only after explicit user Search action; disclose that enabled query text and applied publication-year filters go to OpenAlex, not OpenAI. Search each enabled query exactly as stored; do not send or append the project question/keywords to provider search text. Apply provided publication-year bounds inclusively. Enforce the paper limit through the per-query raw-record allocation and retain the full project context in the snapshot for reproducibility.
 - **FR-RET-002**: Divide the raw-record budget across enabled queries in stored order: floor(limit/count) each, with one extra for the first remainder queries. Queries with zero allocation are recorded as unused, not called. Show actual queries used.
 - **FR-RET-003**: Normalize provider metadata: source identity/URL, title, abstract, authors, DOI, publication year/date, venue, citation count, publication/full-text links, and open-access status. Missing optional values stay absent; no LLM completion.
 - **FR-RET-004**: DOI normalization trims/case-folds and removes doi:/resolver prefixes. Deduplicate by valid DOI, then provider identity, then normalized title. Distinct nonempty DOIs MUST NOT merge on title alone. Title normalization uses Unicode NFKD, ASCII folding, lowercase alphanumeric tokens, and collapsed whitespace, retaining baseline behavior pending collision review.

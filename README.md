@@ -64,7 +64,9 @@ citation numbering, authentication, exports, and PDF ingestion are excluded.
 
 1. The [constitution amendment](docs/constitution-amendment.md) is ratified as 2.0.0;
    [scope boundaries](docs/scope.md) and feature 001's specification are approved.
-    Feature 002's query specification is also approved; features 003–005 remain drafts.
+     Feature 002's query specification and feature 003's clarified retrieval
+     specification are approved; feature 003's plan/contracts remain drafts, and
+     features 004–005 remain drafts.
 2. Feature 001's [plan](specs/001-project-management/plan.md) and
    [API contract](specs/001-project-management/contracts/api.md) are approved.
    Its tasks are approved and feature 001 implementation is authorized; the
@@ -74,9 +76,10 @@ citation numbering, authentication, exports, and PDF ingestion are excluded.
     [API contract](specs/002-search-queries/contracts/api.md), and
     [provider contract](specs/002-search-queries/contracts/provider.md).
     Plan/API/provider contracts are approved; the [task list](specs/002-search-queries/tasks.md)
-    is approved for implementation. Manual control and fake-tested generation are
-    implemented; audits, final verification and acceptance remain pending.
-    No live smoke test is authorized by those approvals.
+     is approved for implementation. Manual control and fake-tested generation are
+     implemented and feature 002 is accepted. No live OpenAI call was made; user
+     prefers no OpenAI connection. Remote GitLab CI remains unverified. No live
+     OpenAlex smoke call is authorized by feature 003's specification approval.
 3. Review later specifications in order after their prerequisites:
    - [001 Projects](specs/001-project-management/spec.md)
    - [002 Queries](specs/002-search-queries/spec.md)

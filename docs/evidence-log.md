@@ -752,26 +752,67 @@ correctness. Application tests were not runnable because no implementation exist
   `could not read Username for 'https://gitlab.abo.fi': No such device or address`.
   No credentials were requested or disclosed. The commits remain local and remote
   GitLab CI remains unverified.
+- User subsequently clarified VPN is currently down; no further push attempt is made
+  until the user says it is available.
 
 ## Feature 003 clarification — 2026-10-19
 
 - User accepted feature 002 (“All works. Lets proceed.”); the active local Spec Kit
   feature was switched to `specs/003-paper-retrieval/spec.md`. The prerequisite
   script resolved feature 003 paths. No implementation plan or tasks were created.
-- Clarification workflow asked four questions, one at a time; the user selected the
+- Clarification workflow asked five questions, one at a time; the user selected the
   recommended A option each time. Recorded in the draft spec and `docs/scope.md`:
   (1) explicit Search may send enabled query text/applied filters to OpenAlex (not
   OpenAI), with disclosure; (2) any failed enabled-query request fails the whole
   attempt and preserves previous results; (3) search each saved query as-is, without
-  appending question/keywords; years and paper limit are filters, with question and
+  appending question/keywords; apply inclusive year filters and enforce the paper limit
+  through allocations, with question and
   keywords retained in the attempt snapshot; (4) a fully successful empty search
-  replaces current search results, while saved references remain unchanged.
+  replaces current search results, while saved references remain unchanged; (5)
+  supplied publication-year bounds are inclusive.
 - These clarify product behavior but do not approve the whole specification, plan,
   contracts, tasks, implementation, external live smoke, or any future features.
   Remaining timeout/lease/provider budgets and performance protocol belong in plan
   review. No OpenAlex/OpenAI calls or application changes occurred.
 - `.specify/feature.json` now points locally to feature 003; actual Git branch is
   still `main`. The file remains machine-local/ignored.
+
+## Feature 003 specification approval — 2026-10-19
+
+- User approval (verbatim): “Yes its approved.” Recorded approval of the clarified
+  `specs/003-paper-retrieval/spec.md`, including the five clarification decisions.
+- Plan/design, contracts, tasks, and implementation were not approved by the spec
+  approval. Planning may begin; implementation remains gated on its own reviewed
+  plan/contracts/tasks and explicit authorization. No OpenAlex or OpenAI call was
+  made. User clarified VPN is currently down; no GitLab push is attempted.
+
+## Feature 003 plan and design preparation — 2026-10-19
+
+- User approved the clarified 003 specification and requested continuation. Ran
+  `.specify/scripts/bash/setup-plan.sh --json`; it copied the plan template to
+  `specs/003-paper-retrieval/plan.md`, resolving feature 003 while the actual Git
+  branch remains `main`. No feature branch was created. No extension hooks file is
+  present. No tasks or implementation were generated.
+- Re-read constitution 2.0.0, approved 003 spec, approved 001/002 implementation
+  patterns, PostgreSQL migration model, local dependencies, scope and verification
+  requirements. No code or dependency changes were made.
+- Directly reviewed OpenAlex official documentation on 2026-10-19 (no research
+  delegation and no API requests): Works Search, Works Filters, Work Object, API
+  Rate Limits/Authentication and API response envelope. Findings include `search`
+  fields/default provider relevance ordering, inclusive publication-date filters,
+  maximum `per_page` 100, no-key basic access/rate limits, current key/usage changes,
+  `meta.cost_usd`, and abstract inverted-index/authorship/location/OA field shapes.
+  Source links and design decisions are in `specs/003-paper-retrieval/research.md`.
+- Drafted plan, research, provider/API contracts, data model and quickstart under
+  `specs/003-paper-retrieval/`. All are proposals pending review; plan proposes no
+  OpenAlex key/paid account, at most 20 requests per search, no automatic retries,
+  2 concurrent requests, 10/120-second request/attempt deadlines, 150-second lease,
+  2 MiB response cap, and local mock-provider p95 <2 seconds over the proposed
+  reference-host protocol. These budgets have not been approved or measured.
+- The plan Constitution Check finds no proposed deviation from Principles I–VII at
+  design level. No live OpenAlex/OpenAI calls, benchmark, migration, task list, CI
+  change, or implementation occurred. Plan/contracts/tasks/implementation approval
+  remain separate gates.
 
 Attach full significant prompts or link committed prompt files. Do not reconstruct
 missing original prompts as quotations. Save representative responses/diffs.

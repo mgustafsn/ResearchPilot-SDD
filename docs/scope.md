@@ -2,10 +2,11 @@
 
 The user approved the five included delivery slices and listed exclusions on
 2026-10-12 (option A: keep all five features, build and approve one at a time).
-This scope-boundary approval does not approve individual specifications, plans,
-tasks, or implementation. Feature 001's specification and the paper-count decision
-were separately approved on 2026-10-12. Feature 002's query specification and
-failure-preservation behavior are also approved; other product proposals remain draft.
+This scope-boundary approval does not approve individual plans, tasks, or
+implementation. Feature 001's specification and paper-count decision, feature 002's
+query specification/failure behavior, and feature 003's clarified retrieval
+specification are approved. Plans, contracts, tasks, and implementation remain
+separate review gates.
 
 ## Objective and stakeholders
 
@@ -41,6 +42,7 @@ exports/Zotero; institutional access; PDF ingestion; embedding caches.
 | Deployment | Local, single user, same-origin web application | Retain |
 | Stack | Python 3.12+, FastAPI, SQLAlchemy, PostgreSQL; vanilla JS | Retain to limit stack confounding |
 | Paper limit (approved 2026-10-12) | Required integer 1–250; UI default 100 | Narrow baseline API limit 1–1000 |
+| Publication-year bounds (approved 2026-10-19) | Inclusive start and end years when supplied | Conventional bounded range |
 | Query generation failure (approved in 002 spec, 2026-10-12) | Keep current list unchanged, show error; permit manual queries | Simplify baseline keyword/name fallback |
 | Retrieval failure (approved 2026-10-19) | Any enabled-query failure fails the attempt; retain old results. A successful empty result replaces current results; saved references remain unchanged. | Simplify partial-success behavior |
 | OpenAlex data flow (approved 2026-10-19) | Search is explicit; disclose that enabled query text and applied filters are sent to OpenAlex, not OpenAI. Search each enabled query as stored; do not append project question/keywords. | User-controlled, reproducible search |
