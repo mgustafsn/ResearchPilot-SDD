@@ -342,6 +342,12 @@ function renderPapers(state) {
   });
   byId("paper-list").replaceChildren(...items);
   const attempt = state.latestAttempt || state;
+  const used = attempt.queriesUsed || [];
+  const unused = attempt.queriesUnused || [];
+  byId("search-queries-used").textContent = used.length
+    ? `Queries used: ${used.map((query) => query.text).join(", ")}` : "";
+  byId("search-queries-unused").textContent = unused.length
+    ? `Queries unused (no budget): ${unused.map((query) => query.text).join(", ")}` : "";
   byId("papers-empty").hidden =
     papers.length !== 0 || attempt.status !== "succeeded";
   if (attempt.status === "pending") {

@@ -22,7 +22,7 @@ OpenAlex or OpenAI request was made.
 - Final local verification on 2026-10-19: **358 passed**, one known Starlette/HTTPX
   deprecation warning. The additive migration 003 was applied at local app startup;
   app root responds HTTP 200. Full output and commands are in `docs/evidence-log.md`.
-- The approved-host fake-provider benchmark measured **204.55 ms p95** under the
+- The approved-host fake-provider benchmark measured **207.47 ms p95** under the
   2-second target; see `retrieval-performance.json`.
 - `docs/evidence/retrieval-performance.json` contains the approved-host mock-provider
   benchmark's raw timings, statuses, source hashes, software versions and host/load.

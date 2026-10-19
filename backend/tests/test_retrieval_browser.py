@@ -73,6 +73,7 @@ def test_FR_RET_001_006_search_is_explicit_and_displays_provider_results(page, q
         page.get_by_role("button", name="Search OpenAlex", exact=True).click()
         expect(page.locator("#paper-list")).to_contain_text("OpenAlex work")
         expect(page.locator("#paper-list")).to_contain_text("Open-access status unknown")
+        expect(page.locator("#search-queries-used")).to_contain_text("AI tutors")
         expect(page.get_by_role("link", name="OpenAlex record", exact=True)).to_have_attribute(
             "href", "https://openalex.org/W1"
         )

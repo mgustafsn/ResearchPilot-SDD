@@ -136,7 +136,7 @@ PaperProvider that immediately returns deterministic records; never call OpenAle
 - This measures local normalization/deduplication/persistence, not network/provider
   latency or scientific relevance. Any threshold/environment change needs plan review.
 
-Recorded execution: **p95 204.55 ms**, 20/20 attempts succeeded, 250 records per
+Recorded execution: **p95 207.47 ms**, 20/20 attempts succeeded, 250 records per
 attempt, 100 projects/2,000 stored queries, 10 warm-ups. Evidence in
 `docs/evidence/retrieval-performance.json` includes raw samples and source/host hashes.
 

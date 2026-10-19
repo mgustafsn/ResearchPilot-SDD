@@ -1148,14 +1148,14 @@ Personal identifiers and percentages remain unfilled until supplied and agreed b
 
 - Full suite after implementation/audit:
   `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache uv run --env-file .env pytest -q --tb=short`:
-  **358 passed, 1 existing Starlette/HTTPX deprecation warning in 44.61s**. This
+  **358 passed, 1 existing Starlette/HTTPX deprecation warning in 44.72s**. This
   includes existing 001/002 regressions and all feature-003 fake-provider/PostgreSQL/
   Chromium tests; no OpenAlex or OpenAI call occurred.
 - Final retrieval benchmark after code freeze:
   `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache PERFORMANCE_OUTPUT=docs/evidence/retrieval-performance.json
   uv run --env-file .env pytest backend/tests/test_retrieval_performance.py -m performance
   -q --tb=short`: **1 passed, 1 warning in 6.09s**, 20/20 complete searches and 250
-  fixture papers/attempt. Nearest-rank p95 **204.55 ms** (<2,000 ms). Raw samples,
+  fixture papers/attempt. Nearest-rank p95 **207.47 ms** (<2,000 ms). Raw samples,
   statuses, versions, host/load, commit/dirty state and source hashes are retained in
   `docs/evidence/retrieval-performance.json`.
 - Final quality checks: `uv run ruff check backend`, `uv run ruff format --check` on

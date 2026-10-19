@@ -7,7 +7,7 @@ Feature 002 manual query controls are implemented: add/edit/delete, enable/disab
 is implemented and tested only with fakes/mock HTTP; no live OpenAI call has been made.
 Feature 002 is accepted; the user does not want OpenAI connected now. Latest local verification:
 358 tests passed with one existing deprecation warning. Feature 002 query CRUD measured
-3.75 ms p95; feature 003's fake-provider retrieval pipeline measured 204.55 ms p95
+3.75 ms p95; feature 003's fake-provider retrieval pipeline measured 207.47 ms p95
 against the approved 2-second budget. See [query traceability](docs/evidence/query-traceability.md),
 [retrieval traceability](docs/evidence/retrieval-traceability.md), and the performance
 artifacts under `docs/evidence/`. No live OpenAlex/OpenAI call was made. Remote GitLab
