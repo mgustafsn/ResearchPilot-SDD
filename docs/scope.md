@@ -42,7 +42,8 @@ exports/Zotero; institutional access; PDF ingestion; embedding caches.
 | Stack | Python 3.12+, FastAPI, SQLAlchemy, PostgreSQL; vanilla JS | Retain to limit stack confounding |
 | Paper limit (approved 2026-10-12) | Required integer 1–250; UI default 100 | Narrow baseline API limit 1–1000 |
 | Query generation failure (approved in 002 spec, 2026-10-12) | Keep current list unchanged, show error; permit manual queries | Simplify baseline keyword/name fallback |
-| Retrieval failure | Any enabled-query failure fails the attempt; retain old results | Simplify partial-success behavior |
+| Retrieval failure (approved 2026-10-19) | Any enabled-query failure fails the attempt; retain old results. A successful empty result replaces current results; saved references remain unchanged. | Simplify partial-success behavior |
+| OpenAlex data flow (approved 2026-10-19) | Search is explicit; disclose that enabled query text and applied filters are sent to OpenAlex, not OpenAI. Search each enabled query as stored; do not append project question/keywords. | User-controlled, reproducible search |
 | Ranking | Retain calibrated embedding score; show all retrieved papers | Drop baseline automatic 40% filtering |
 | References | Provider-derived snapshots saved from search results only | Exclude baseline manual citations and editable metadata |
 | Search progress | Visible pending/success/failure; no staged history polling initially | Simplify baseline UI |

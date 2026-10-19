@@ -5,6 +5,15 @@
 **Status**: Draft — human approval required
 **Input**: Retrieve real papers from OpenAlex using approved stored queries.
 
+## Clarifications
+
+### Session 2026-10-19
+
+- Q: For feature 003, are you comfortable with an explicit search sending the enabled query text and project filters to OpenAlex (not OpenAI)? → A: Yes, with disclosure and only after the user clicks Search.
+- Q: If one OpenAlex request fails during a multi-query search, should previous results be kept or replaced with partial results? → A: Fail the whole attempt and preserve previous results.
+- Q: Should each OpenAlex search use the enabled saved query as-is or combine it with the project question and keywords? → A: Search each enabled query as-is; apply years and paper limit as filters.
+- Q: If all OpenAlex requests succeed but return no usable papers, should old results be replaced with an empty result set? → A: Yes; replace current results with the successful empty result, keeping saved references separate.
+
 ## User Scenarios & Testing
 
 ### User Story 1 — Retrieve real papers (Priority: P1)
@@ -35,13 +44,13 @@ enabled query count greater than paper budget.
 
 ### Functional Requirements
 
-- **FR-RET-001**: Search OpenAlex only, through PaperProvider, using a snapshot of enabled queries, question/keywords, years, and paper limit.
+- **FR-RET-001**: Search OpenAlex only, through PaperProvider, using an attempt snapshot of enabled queries, project question/keywords, years, and paper limit. Send provider requests only after explicit user Search action; disclose that enabled query text and applied publication-year filters go to OpenAlex, not OpenAI. Search each enabled query exactly as stored; do not send or append the project question/keywords to provider search text. Enforce the paper limit through the per-query raw-record allocation and retain the full project context in the snapshot for reproducibility.
 - **FR-RET-002**: Divide the raw-record budget across enabled queries in stored order: floor(limit/count) each, with one extra for the first remainder queries. Queries with zero allocation are recorded as unused, not called. Show actual queries used.
 - **FR-RET-003**: Normalize provider metadata: source identity/URL, title, abstract, authors, DOI, publication year/date, venue, citation count, publication/full-text links, and open-access status. Missing optional values stay absent; no LLM completion.
 - **FR-RET-004**: DOI normalization trims/case-folds and removes doi:/resolver prefixes. Deduplicate by valid DOI, then provider identity, then normalized title. Distinct nonempty DOIs MUST NOT merge on title alone. Title normalization uses Unicode NFKD, ASCII folding, lowercase alphanumeric tokens, and collapsed whitespace, retaining baseline behavior pending collision review.
 - **FR-RET-005**: Merge richer provider records and fill gaps without generating facts. Define richness and tie handling in the plan and test transitive identity bridging.
 - **FR-RET-006**: Persist attempt ID, input snapshot, timestamps, status, ownership token/expiry, fetched/skipped/duplicate counts, and sanitized error. Show pending/success/failure; missing-title records are skipped and counted.
-- **FR-RET-007**: Replace project result associations atomically only after the full enabled-query attempt succeeds and ownership remains current. Failure preserves all prior results and references.
+- **FR-RET-007**: Replace project result associations atomically only after every enabled-query request succeeds and ownership remains current. Failure of any request fails the whole attempt and preserves all prior results and references; partial results are not committed. A fully successful attempt with zero usable papers replaces the current result associations with an empty set; saved references remain unchanged.
 - **FR-RET-008**: Permit one active attempt per project. Reject project/query edits, deletion, and a second search while active. Expired ownership releases the lock; late workers cannot commit.
 - **FR-RET-009**: Display available source/publication/open-access links and metadata without asserting that missing access metadata means closed access.
 - **FR-RET-010**: Treat source text as untrusted: render as text, permit only http/https links, never interpolate provider text into executable HTML.

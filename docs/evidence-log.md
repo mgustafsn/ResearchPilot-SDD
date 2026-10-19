@@ -744,6 +744,35 @@ correctness. Application tests were not runnable because no implementation exist
   required. BUG-PRJ-001 remains deferred and unfixed. Features 003–005 remain separate
   approval gates; this acceptance does not approve their specs/plans/tasks or code.
 
+## Feature 002 publication attempt — 2026-10-19
+
+- Created local commits `9ded61b` (verification/performance) and `4443779`
+  (acceptance record) on `main`. User indicated VPN access should be available.
+- `git push origin main` still failed before authentication with
+  `could not read Username for 'https://gitlab.abo.fi': No such device or address`.
+  No credentials were requested or disclosed. The commits remain local and remote
+  GitLab CI remains unverified.
+
+## Feature 003 clarification — 2026-10-19
+
+- User accepted feature 002 (“All works. Lets proceed.”); the active local Spec Kit
+  feature was switched to `specs/003-paper-retrieval/spec.md`. The prerequisite
+  script resolved feature 003 paths. No implementation plan or tasks were created.
+- Clarification workflow asked four questions, one at a time; the user selected the
+  recommended A option each time. Recorded in the draft spec and `docs/scope.md`:
+  (1) explicit Search may send enabled query text/applied filters to OpenAlex (not
+  OpenAI), with disclosure; (2) any failed enabled-query request fails the whole
+  attempt and preserves previous results; (3) search each saved query as-is, without
+  appending question/keywords; years and paper limit are filters, with question and
+  keywords retained in the attempt snapshot; (4) a fully successful empty search
+  replaces current search results, while saved references remain unchanged.
+- These clarify product behavior but do not approve the whole specification, plan,
+  contracts, tasks, implementation, external live smoke, or any future features.
+  Remaining timeout/lease/provider budgets and performance protocol belong in plan
+  review. No OpenAlex/OpenAI calls or application changes occurred.
+- `.specify/feature.json` now points locally to feature 003; actual Git branch is
+  still `main`. The file remains machine-local/ignored.
+
 Attach full significant prompts or link committed prompt files. Do not reconstruct
 missing original prompts as quotations. Save representative responses/diffs.
 
