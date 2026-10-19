@@ -1174,3 +1174,11 @@ Personal identifiers and percentages remain unfilled until supplied and agreed b
   The first version-check command omitted `PYTHONPATH=backend` and failed before DB
   access; rerun with the launcher-equivalent `PYTHONPATH` succeeded. `.env` still has
   no OpenAI key/model or OpenAlex key; no external call was made.
+
+## GitLab push retry — 2026-10-19
+
+- User indicated VPN should be up; retried `git push origin main` once. It still failed
+  before authentication with `could not read Username for 'https://gitlab.abo.fi': No
+  such device or address`. No credentials were requested or disclosed. All verified
+  feature-003 commits remain local; remote GitLab CI remains unverified. No retry or
+  alternate authentication method was attempted.
