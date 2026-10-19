@@ -6,10 +6,12 @@ Feature 002 manual query controls are implemented: add/edit/delete, enable/disab
 20-query limits, and durable context-change notices. Explicit AI suggestion generation
 is implemented and tested only with fakes/mock HTTP; no live OpenAI call has been made.
 Feature 002 is accepted; the user does not want OpenAI connected now. Latest local verification:
-281 tests passed; query CRUD measured 3.75 ms p95 against the approved 500 ms
-reference-host budget. See [query traceability](docs/evidence/query-traceability.md)
-and [query performance evidence](docs/evidence/query-performance.json). Remote
-GitLab CI has not yet run because VPN access is required.
+358 tests passed with one existing deprecation warning. Feature 002 query CRUD measured
+3.75 ms p95; feature 003's fake-provider retrieval pipeline measured 204.55 ms p95
+against the approved 2-second budget. See [query traceability](docs/evidence/query-traceability.md),
+[retrieval traceability](docs/evidence/retrieval-traceability.md), and the performance
+artifacts under `docs/evidence/`. No live OpenAlex/OpenAI call was made. Remote GitLab
+CI has not run because VPN is down.
 The user accepted feature 001 with a known limitation. Detailed human-audit evidence
 and final post-audit verification remain outstanding; full compliance is not claimed.
 User review identified a [publication-year input issue](docs/known-issues.md),
@@ -60,34 +62,21 @@ papers → deduplicate and rank by embedding similarity → save project referen
 Clustering, Scopus, explanations, manual categories, reference notes, reading status,
 citation numbering, authentication, exports, and PDF ingestion are excluded.
 
-## Review before implementation
+## Review gates and current status
 
-1. The [constitution amendment](docs/constitution-amendment.md) is ratified as 2.0.0;
-   [scope boundaries](docs/scope.md) and feature 001's specification are approved.
-     Feature 002's query specification and feature 003's clarified retrieval
-     specification are approved; feature 003's plan/contracts remain drafts, and
-     features 004–005 remain drafts.
-2. Feature 001's [plan](specs/001-project-management/plan.md) and
-   [API contract](specs/001-project-management/contracts/api.md) are approved.
-   Its tasks are approved and feature 001 implementation is authorized; the
-    user confirmed proceeding with unchecked checklist items and subsequently
-    accepted it with BUG-PRJ-001 deferred. Feature 002's specification is approved;
-    its [plan](specs/002-search-queries/plan.md),
-    [API contract](specs/002-search-queries/contracts/api.md), and
-    [provider contract](specs/002-search-queries/contracts/provider.md).
-    Plan/API/provider contracts are approved; the [task list](specs/002-search-queries/tasks.md)
-     is approved for implementation. Manual control and fake-tested generation are
-     implemented and feature 002 is accepted. No live OpenAI call was made; user
-     prefers no OpenAI connection. Remote GitLab CI remains unverified. No live
-     OpenAlex smoke call is authorized by feature 003's specification approval.
-3. Review later specifications in order after their prerequisites:
-   - [001 Projects](specs/001-project-management/spec.md)
-   - [002 Queries](specs/002-search-queries/spec.md)
-   - [003 Retrieval](specs/003-paper-retrieval/spec.md)
-   - [004 Ranking](specs/004-relevance-ranking/spec.md)
-   - [005 References](specs/005-saved-references/spec.md)
-4. Implement and verify one approved feature at a time. Generate plans for later features
-   only after their prerequisites and decisions are reviewed.
+- The [constitution amendment](docs/constitution-amendment.md) and reduced
+  [scope](docs/scope.md) are approved. Features 001 and 002 are implemented; 002 is
+  accepted. The publication-year issue BUG-PRJ-001 remains deferred.
+- Feature 003's [specification](specs/003-paper-retrieval/spec.md),
+  [plan](specs/003-paper-retrieval/plan.md), [API contract](specs/003-paper-retrieval/contracts/api.md),
+  [provider contract](specs/003-paper-retrieval/contracts/provider.md), and
+  [task list](specs/003-paper-retrieval/tasks.md) are approved; implementation is
+  complete locally and awaits user keyboard/usability review and acceptance. All
+  automated tests use fakes; no live OpenAlex call was made. The user does not want
+  OpenAI connected. In the app, only clicking Search sends enabled query text and
+  selected year filters to OpenAlex; project question/keywords are not sent.
+- Features 004–005 remain drafts and are not included in the current implementation.
+  Remote GitLab CI remains unverified because VPN access is currently unavailable.
 
 Initial artifacts were derived by an AI coding agent from the original repository
 without invoking Spec Kit commands. Feature 001 subsequently underwent the installed

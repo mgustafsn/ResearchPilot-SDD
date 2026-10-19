@@ -12,6 +12,25 @@ class ProjectNotFound(Exception):
     pass
 
 
+class SearchInProgress(Exception):
+    pass
+
+
+def ensure_search_inactive(connection, database, project_id):
+    """Caller holds the project row lock; expire stale owners or reject a writer."""
+    table = database.search_runs
+    pending = connection.execute(select(table).where(
+        table.c.project_id == project_id, table.c.status == "pending"
+    ).order_by(table.c.started_at.desc()).with_for_update()).mappings().first()
+    if pending is None:
+        return
+    now = datetime.now(UTC)
+    if pending["lease_expires_at"] > now:
+        raise SearchInProgress
+    connection.execute(update(table).where(table.c.id == pending["id"]).values(
+        status="failed", finished_at=now, error_code="SEARCH_EXPIRED"))
+
+
 def project_output(row):
     return ProjectOutput(
         id=row["id"], title=row["title"], researchQuestion=row["research_question"],
@@ -66,6 +85,7 @@ class ProjectService:
             ).mappings().first()
             if previous is None:
                 raise ProjectNotFound
+            ensure_search_inactive(connection, self.database, project_id)
             values = input_values(data)
             changed = any(previous[name] != value for name, value in values.items())
             context_changed = any(previous[name] != values[name]
@@ -88,6 +108,7 @@ class ProjectService:
             ).first()
             if parent is None:
                 raise ProjectNotFound
+            ensure_search_inactive(connection, self.database, project_id)
             result = connection.execute(delete(table).where(table.c.id == project_id))
             if result.rowcount == 0:
                 raise ProjectNotFound

@@ -47,7 +47,8 @@ def test_FR_PRJ_006_migrations_are_versioned_and_repeatable(db_url):
         database.migrate()
         with database.engine.connect() as connection:
             versions = connection.execute(text("SELECT version FROM schema_migrations")).scalars()
-            assert sorted(versions) == ["001_projects.sql", "002_search_queries.sql"]
+            assert sorted(versions) == ["001_projects.sql", "002_search_queries.sql",
+                                        "003_paper_retrieval.sql"]
     finally:
         database.close()
 

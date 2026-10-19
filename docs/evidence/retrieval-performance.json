@@ -1,0 +1,194 @@
+{
+  "run_timestamp": "2026-10-19T18:17:10.543020+00:00",
+  "requirement": "FR-RET-002/006 local mock-provider pipeline proposal",
+  "threshold_ms": 2000,
+  "p95_ms": 204.54851199610857,
+  "request_count": 20,
+  "seeded_projects": 100,
+  "seeded_queries": 2000,
+  "records_per_attempt": 250,
+  "provider_queries_per_attempt": 20,
+  "warmup_requests": 10,
+  "provider_call_count": 600,
+  "percentile_method": "nearest-rank, 19th of 20 samples",
+  "transport": "real loopback HTTP and PostgreSQL; deterministic fake PaperProvider",
+  "python": "3.13.15",
+  "os": "Linux-7.2.9-2-cachyos-x86_64-with-glibc2.44",
+  "cpu": "AMD Ryzen 7 5700X3D 8-Core Processor",
+  "load_average": [
+    2.43798828125,
+    2.171875,
+    2.0517578125
+  ],
+  "postgresql": "PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+  "versions": {
+    "fastapi": "0.143.0",
+    "sqlalchemy": "2.1.4",
+    "psycopg": "3.3.6",
+    "httpx": "0.28.1"
+  },
+  "baseline_commit": "c5f2274e63314633974771b689eea030b0b8c878",
+  "dirty_working_tree": true,
+  "source_hashes": {
+    "backend/researchpilot/__init__.py": "41f98f6411c93ef5da189140ee3ffda93b439c9c0c372e12770436f57f3027e2",
+    "backend/researchpilot/api.py": "82f78553468ec87f2f7b1c4eb90cfba78ec15d04598c1926168080143124081f",
+    "backend/researchpilot/domain.py": "343218186fadc272d2dc7eded53e6c518f77d9c8a8a0612bb375306c31d3dae7",
+    "backend/researchpilot/integrations/__init__.py": "491b1805aee42ef2b2f85d5a8518c4bf35ae0e147f8a8c192fe47dda1ff2902f",
+    "backend/researchpilot/integrations/openai_queries.py": "26e48a810a1ed5fcabfacc98a1b188670b93db551e3ff1d472af2bd3fff2e756",
+    "backend/researchpilot/integrations/openalex_papers.py": "df24d43557eff0cd2e83e92bedc477f23c458ebec6ca1762ce7b58c68b3865c3",
+    "backend/researchpilot/paper_domain.py": "286bd76706786935a835a8e801f0e0f49729610588b6e19fee555f0d8fac8b9a",
+    "backend/researchpilot/paper_provider.py": "1024ef6e6a7488f1b7fa510962ca095348f824c7c2940c3c9b8e383a25bf97d3",
+    "backend/researchpilot/persistence.py": "f68d8279e9cfe3ea10d3350cc99851d68c4b302ee37abd19356a7b42f66a71ef",
+    "backend/researchpilot/query_domain.py": "5afdeb9fc04c2ab071f572e5b09b53b07450ffd6c6b2eb29c4712c98efeeadb4",
+    "backend/researchpilot/query_provider.py": "356df2b5c2b90feb9698905a0f9c4e2b13232108e2dcd3b68ab77168a8c7fda5",
+    "backend/researchpilot/query_service.py": "3739aaf22b8e7e1d9bdd961181822681b19321853eb459c09ecf730a8faa7225",
+    "backend/researchpilot/retrieval_service.py": "9de97fb83b94d3ff212e84942dc48e91f84fa078dee04597b239685c155a5335",
+    "backend/researchpilot/service.py": "1756569de50e5ca5304445c0cc5d6bea6a15e36ce6cba18c2337bdfa29674ce6",
+    "backend/tests/conftest.py": "d596d5cfb3ea54d917d1ac4f799fbc4a0527108e7b53c1afe76726a3829c54a9",
+    "backend/tests/test_openalex_provider.py": "dad08ab4b5145e250e1f776cbbdbac954e90b60feeb21b3779621b0ef5f34958",
+    "backend/tests/test_papers.py": "b2d1b3d2903645d1d846d6a76da41e9d1c4a7e7f53a2f509bc8d2067a0bbe1d4",
+    "backend/tests/test_project_api.py": "911fb54af327e7fa455c923ca019e9ba99875f8b4969a5ace1da36a837982180",
+    "backend/tests/test_project_browser.py": "08e0c8dd78f6307352b68fe2cfb2cd2205e3bf57468e59bd9069c741d041edb2",
+    "backend/tests/test_project_performance.py": "31994d24979a6ce6de52a2563840f43829666738756af85dc579ca0bbeeaef32",
+    "backend/tests/test_project_postgres.py": "ad7c15f2b218f3c4a990ada2b64255ad487d3bc1c25162a8f1c4c25958186278",
+    "backend/tests/test_projects.py": "fcc8d97a89f1cffa6bf9af6d89111512539d55fd5f1eb71533e95aae1574d502",
+    "backend/tests/test_queries.py": "89f3b52ca22af208c54aae6e2d89319742121d3ed1bdc9cc126371bf508bcc55",
+    "backend/tests/test_query_api.py": "336696ad6e9f087c5f082a8d63b84bb3ee3e45c42f83874b8f91d45f73f11399",
+    "backend/tests/test_query_browser.py": "431ce1e4a29852fe5764649b3c5871b9ea97fbeb2d255115006fe926b586bc8f",
+    "backend/tests/test_query_performance.py": "35b37aaf0add56a48bca8db7fb2e4faf5bd1dad2baf514231f0727456a237d18",
+    "backend/tests/test_query_postgres.py": "b2c1a37c1fc7d12fd9df6f7ec3a645d66fc07bf7d7f2194b61c6305c3882c852",
+    "backend/tests/test_query_provider.py": "9ef0df3e97ce5d4d4ecca706a458054c668c3a0b310587a2314f46a2a3542cb1",
+    "backend/tests/test_retrieval_api.py": "20e68bdbabd4db8a0181a61ac46ba4220319ee83aeff093d9cc3e39f840c36c4",
+    "backend/tests/test_retrieval_browser.py": "8f7c3e127d3f0197ade4b39268ee9868a19b0f4ef239f401db4682bb720b3a88",
+    "backend/tests/test_retrieval_performance.py": "750ab14ae9a5ec66c50dbb3c1343490cc320354950c0b9cff8dacd3d57f9ef42",
+    "backend/tests/test_retrieval_postgres.py": "8ed4b59efa1066ebeb2ceb8759df4326b982fb4a68f9e98d785bfc5f758a89da",
+    "frontend/app.js": "038233fd7fda621c581ebebeffda4a465109f15c580ca3e854a0f901a7f30345",
+    "frontend/index.html": "4a558155f6bae6b8d7be29b2ca2b76a5f8b09e5f3a4aab404a4d8c12ccf61ed7",
+    "frontend/styles.css": "22303dbf6de5e2807224825233dbc3d4488166696631b221158268284a415e65",
+    "migrations/001_projects.sql": "b29880c495f6eeb9b2aca0d10045d9f4bb8e0b9407e8ccdb69532d7e46dfb2f6",
+    "migrations/002_search_queries.sql": "312652aadd933b90377030ba8d67194b406ea760c138c4ecb9ea06e9863aaaa2",
+    "migrations/003_paper_retrieval.sql": "f914ec0a86070eb3ce1fe4195bd70b3f8a239933961e74395c8623d7e2b662f0"
+  },
+  "samples": [
+    {
+      "iteration": 1,
+      "duration_ms": 183.35617200500565,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 2,
+      "duration_ms": 207.06337800220354,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 3,
+      "duration_ms": 188.67322999722091,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 4,
+      "duration_ms": 185.2799420012161,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 5,
+      "duration_ms": 180.6271379973623,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 6,
+      "duration_ms": 185.2738009984023,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 7,
+      "duration_ms": 185.95707100030268,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 8,
+      "duration_ms": 187.05740500445245,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 9,
+      "duration_ms": 182.96303300303407,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 10,
+      "duration_ms": 183.9596400022856,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 11,
+      "duration_ms": 183.41619599959813,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 12,
+      "duration_ms": 204.54851199610857,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 13,
+      "duration_ms": 178.4595930002979,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 14,
+      "duration_ms": 180.31251900538336,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 15,
+      "duration_ms": 177.2265760009759,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 16,
+      "duration_ms": 176.285886002006,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 17,
+      "duration_ms": 178.15050399804022,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 18,
+      "duration_ms": 182.55437599873403,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 19,
+      "duration_ms": 182.24140999518568,
+      "status": 200,
+      "raw_fetched_count": 250
+    },
+    {
+      "iteration": 20,
+      "duration_ms": 180.80056799954036,
+      "status": 200,
+      "raw_fetched_count": 250
+    }
+  ]
+}

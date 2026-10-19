@@ -10,6 +10,7 @@ let queryState = null;
 let queryEditingId = null;
 const queryDrafts = new Map();
 const pendingGenerations = new Set();
+const pendingSearches = new Set();
 
 function clearErrors() {
   byId("error").hidden = true;
@@ -93,11 +94,14 @@ function showDetail(project) {
   queryEditingId = draft.id;
   byId("query-text").value = draft.text;
   byId("query-section").hidden = true;
+  byId("retrieval-section").hidden = true;
   byId("save-query").disabled = true;
   byId("generate-queries").disabled = true;
+  byId("search-openalex").disabled = true;
   byId("generation-status").textContent = pendingGenerations.has(project.id)
     ? "Generating suggestions…" : "";
   loadQueries(project.id, epoch);
+  loadPapers(project.id, epoch);
 }
 
 async function openProject(id) {
@@ -252,6 +256,8 @@ function applyQueryState(state) {
   byId("query-section").hidden = false;
   byId("save-query").disabled = false;
   updateGenerateControl();
+  byId("retrieval-section").hidden = false;
+  updateSearchControl();
 }
 
 function updateGenerateControl() {
@@ -261,6 +267,94 @@ function updateGenerateControl() {
     : "Suggestion generation is not configured. Manual queries still work.";
   byId("generate-queries").disabled = !available || !selectedProject ||
     pendingGenerations.has(selectedProject.id);
+}
+
+function updateSearchControl() {
+  const hasEnabled = Boolean(queryState?.queries?.some((query) => query.enabled));
+  byId("search-openalex").disabled = !hasEnabled || !selectedProject ||
+    pendingSearches.has(selectedProject.id);
+}
+
+function safeExternalUrl(value) {
+  if (typeof value !== "string") return null;
+  try {
+    const url = new URL(value);
+    if (!["http:", "https:"].includes(url.protocol) || url.username || url.password) return null;
+    return url.href;
+  } catch {
+    return null;
+  }
+}
+
+function makePaperLink(value, label) {
+  const href = safeExternalUrl(value);
+  if (!href) return null;
+  const link = document.createElement("a");
+  link.href = href;
+  link.textContent = label;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  return link;
+}
+
+function renderPapers(state) {
+  const papers = state.papers || [];
+  const items = papers.map((paper) => {
+    const item = document.createElement("li");
+    const heading = document.createElement("h4");
+    heading.textContent = paper.title;
+    item.append(heading);
+
+    const details = document.createElement("p");
+    const metadata = [];
+    if (paper.authors?.length) metadata.push(paper.authors.join(", "));
+    if (paper.publicationYear) metadata.push(String(paper.publicationYear));
+    if (paper.venue) metadata.push(paper.venue);
+    if (paper.citationCount !== null && paper.citationCount !== undefined) {
+      metadata.push(`${paper.citationCount} citations`);
+    }
+    metadata.push(paper.isOpenAccess === true ? "Open access" :
+      paper.isOpenAccess === false ? "Not marked open access" : "Open-access status unknown");
+    details.textContent = metadata.join(" · ");
+    item.append(details);
+
+    if (paper.abstract) {
+      const abstract = document.createElement("p");
+      abstract.textContent = paper.abstract;
+      item.append(abstract);
+    }
+    if (paper.doi) {
+      const doi = document.createElement("p");
+      doi.textContent = `DOI: ${paper.doi}`;
+      item.append(doi);
+    }
+
+    const links = document.createElement("p");
+    const source = makePaperLink(paper.sourceUrl, "OpenAlex record");
+    const publication = makePaperLink(paper.publicationUrl, "Publication page");
+    const fullText = makePaperLink(paper.fullTextUrl, "Open-access copy");
+    for (const [index, link] of [source, publication, fullText].filter(Boolean).entries()) {
+      if (index > 0) links.append(document.createTextNode(" · "));
+      links.append(link);
+    }
+    if (links.childNodes.length) item.append(links);
+    return item;
+  });
+  byId("paper-list").replaceChildren(...items);
+  const attempt = state.latestAttempt || state;
+  byId("papers-empty").hidden =
+    papers.length !== 0 || attempt.status !== "succeeded";
+  if (attempt.status === "pending") {
+    byId("search-status").textContent = "A search is in progress for this project.";
+  } else if (attempt.status === "failed") {
+    byId("search-status").textContent = "The latest search failed; previous results were kept.";
+  } else if (attempt.status === "succeeded") {
+    byId("search-status").textContent =
+      `Latest search: ${papers.length} unique papers; ${attempt.rawFetchedCount} fetched, ` +
+      `${attempt.skippedCount} skipped, ${attempt.duplicateCount} duplicates removed.`;
+  } else {
+    byId("search-status").textContent = "No search has been run for this project.";
+  }
 }
 
 function generationSummaryText(summary) {
@@ -280,6 +374,15 @@ async function loadQueries(projectId, epoch) {
     if (queryViewCurrent(projectId, epoch)) applyQueryState(state);
   } catch (error) {
     if (queryViewCurrent(projectId, epoch)) showQueryError(error);
+  }
+}
+
+async function loadPapers(projectId, epoch) {
+  try {
+    const state = await request(`/api/projects/${projectId}/papers`);
+    if (queryViewCurrent(projectId, epoch)) renderPapers(state);
+  } catch (error) {
+    if (queryViewCurrent(projectId, epoch)) showError(error);
   }
 }
 
@@ -371,6 +474,32 @@ byId("query-form").addEventListener("submit", (event) => {
   byId("save-query").disabled = true;
   const data = {text: byId("query-text").value};
   mutateQuery(queryEditingId ? `/${queryEditingId}` : "", queryEditingId ? "PATCH" : "POST", data);
+});
+
+byId("search-openalex").addEventListener("click", async () => {
+  if (!selectedProject || !queryState || pendingSearches.has(selectedProject.id)) return;
+  const projectId = selectedProject.id;
+  const epoch = viewEpoch;
+  pendingSearches.add(projectId);
+  updateSearchControl();
+  byId("search-status").textContent = "Searching OpenAlex…";
+  try {
+    const state = await request(`/api/projects/${projectId}/search`, {method: "POST"});
+    pendingSearches.delete(projectId);
+    if (queryViewCurrent(projectId, epoch)) renderPapers(state);
+    else if (selectedProject?.id === projectId && !byId("detail").hidden) {
+      await loadPapers(projectId, viewEpoch);
+    }
+  } catch (error) {
+    pendingSearches.delete(projectId);
+    if (queryViewCurrent(projectId, epoch)) {
+      byId("search-status").textContent = "Search failed; previous results were kept.";
+      showError(error);
+      await loadPapers(projectId, epoch);
+    }
+  } finally {
+    if (selectedProject?.id === projectId && !byId("detail").hidden) updateSearchControl();
+  }
 });
 
 loadProjects();

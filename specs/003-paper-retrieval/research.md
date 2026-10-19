@@ -1,6 +1,6 @@
 # Feature 003 research — OpenAlex retrieval
 
-**Status**: Draft research supporting the unapproved implementation plan.
+**Status**: Research supporting the approved implementation plan.
 **Research date**: 2026-10-19. Official documentation was read; no OpenAlex API
 request, provider smoke test, or other live data access was performed.
 
@@ -27,7 +27,7 @@ request, provider smoke test, or other live data access was performed.
 - **Decision**: Follow FR-RET-002 allocation in stored query order; page only until
   each query's allocation is met, use `per_page` no greater than 100, and cap total
   requests at 20 per search attempt. No automatic retries. At most two concurrent
-  HTTP requests; timeouts/lease values are proposals for plan review.
+  HTTP requests; approved timeout/lease values are specified in the plan.
 - **Rationale**: OpenAlex currently documents `per_page` max 100, basic pagination up
   to the first 10,000 results, and no-key request rate of 10/second. The MVP limit is
   250 records with at most 20 saved queries, so bounded basic paging can satisfy this
@@ -92,9 +92,9 @@ request, provider smoke test, or other live data access was performed.
 
 ## Open questions intentionally left for plan approval
 
-- Proposed request/body/deadline limits, two-request concurrency, 150-second lease,
-  and the local pipeline p95 budget require explicit approval with the plan.
-- The precise richness field weights, equal-richness tie handling and identity-bridge
-  algorithm are fully stated as proposed design in `plan.md`; approval is pending.
+- The approved request/body/deadline limits, two-request concurrency, 150-second
+  lease, and local pipeline p95 budget require implementation evidence, not reapproval.
+- Richness scoring/tie handling and the identity-bridge algorithm are stated in the
+  approved plan and require regression tests.
 - No live OpenAlex smoke test, API key creation, usage-account setup, or paid call is
   included. Search calls in the running app remain an explicit user action.

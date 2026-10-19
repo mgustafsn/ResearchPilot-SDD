@@ -4,7 +4,7 @@
 
 **Input**: User-approved feature specification in `specs/003-paper-retrieval/spec.md`.
 
-**Status**: Plan approved by the user on 2026-10-19. API/provider contracts and tasks remain separate approval gates; no implementation is authorized.
+**Status**: Plan, API/provider contracts and tasks approved by the user on 2026-10-19; implementation of feature 003 is authorized.
 
 ## Summary
 
@@ -34,16 +34,16 @@ PostgreSQL, and real local Chromium/loopback HTTP; no live provider in automated
 
 **Project Type**: Existing Python web service with static vanilla-JS frontend.
 
-**Performance Goals**: Proposal for approval: local mock-provider normalization,
+**Performance Goals**: Approved target (2026-10-19): local mock-provider normalization,
 deduplication and PostgreSQL replacement of 250 papers p95 <2 seconds over 20
 sequential searches on the approved 001 reference host. Excludes startup and external
-OpenAlex latency. This is not an approved acceptance target yet.
+OpenAlex latency. Approved by the user with the plan on 2026-10-19.
 
 **Constraints**: 1–250 raw-record budget; 1–20 saved queries; at most 20 OpenAlex
 HTTP requests per attempt; at most two concurrent requests; proposed 10-second
 per-request and 120-second whole-attempt deadlines; proposed 150-second ownership
-lease; proposed 2 MiB response cap per request; no automatic retries. These request/
-deadline/performance values are proposals for plan approval. No API key is needed for
+lease; 2 MiB response cap per request; no automatic retries. These request/deadline/
+performance values were approved with the plan on 2026-10-19. No API key is needed for
 the bounded basic-use path; never set up a paid key/account as part of implementation.
 
 **Scale/Scope**: Single user; one active retrieval per project; at most 250 fetched
@@ -69,11 +69,11 @@ request made only by explicit action; no OpenAI key/request; no API key or paid 
 plan introduced; if an optional key is considered later, it must come from the server
 environment and require separate reviewed approval. No licensed full text is fetched
 or stored. Parameter, request-count, concurrency, timeout, lease, payload-size, and
-performance values above are proposals until this plan is approved.
+performance values above were approved with the plan.
 
 Pre-design and post-design Constitution Checks both pass at design level for
-Principles I–VII. They do not establish implementation verification or approve the
-proposal; all new operational/performance budgets remain review items.
+Principles I–VII. They do not establish implementation verification; the approved
+operational/performance budgets must be verified during implementation.
 
 ## Project Structure
 
@@ -114,7 +114,7 @@ provider adapter and common domain model. Reuse current persistence, API, fronte
 and test fixture patterns. No separate service, repository abstraction, SDK, or
 frontend framework is proposed.
 
-## Design decisions proposed for review
+## Approved design decisions
 
 ### Provider request and bounds
 
@@ -126,7 +126,7 @@ frontend framework is proposed.
 - Divide the raw-record budget by enabled-query count in stored slot order as required
   by FR-RET-002. Never fetch beyond each allocation. Enforce at most 20 provider
   requests per attempt. No retry after 429, timeout, transport, or invalid response.
-- Proposed two in-flight requests, 10-second request deadline and 120-second total
+- Two in-flight requests, 10-second request deadline and 120-second total
   attempt deadline; no API key by default. OpenAlex documents no-key basic use and
   10 requests/second, with keys raising daily budget and paid usage beyond included
   quotas. Keep under that rate; do not create a key or paid plan. Log request count
@@ -168,7 +168,7 @@ frontend framework is proposed.
 - Lock the project row before checking/creating an active run. A partial unique index
   permits one pending run per project. Capture query/context/filter/budget/provider
   snapshot; commit before network calls. No database transaction is held during HTTP.
-- Proposed 150-second lease exceeds the proposed 120-second attempt deadline.
+- The 150-second lease exceeds the 120-second attempt deadline.
   Project/query edits, deletion and another search conflict while a nonexpired attempt
   is active. Expired attempts are marked failed/interrupted before ownership is
   replaced. Final transaction verifies attempt token and live lease, upserts normalized
@@ -184,7 +184,7 @@ frontend framework is proposed.
   association remains; future references use independent snapshots and are not FK-bound
   to this table.
 
-### UI, observability, verification proposals
+### UI, observability, and verification
 
 - Add explicit Search control and visible pending/success/failure state, actual queries
   used/unused, fetched/skipped/duplicate counts, and safe metadata/source links. Render
@@ -192,10 +192,10 @@ frontend framework is proposed.
 - Test API, provider mapping, DOI/title identity cases, malformed records, year bounds,
   budget allocation, 429/timeout/cancellation, rollback, active-owner expiry and stale
   worker races with fakes plus real disposable PostgreSQL and browser tests.
-- Proposed reference-host pipeline benchmark is documented in Technical Context;
+- Approved reference-host pipeline benchmark is documented in Technical Context;
   actual OpenAlex network latency is recorded separately and is not a hard latency
-  acceptance criterion. Plan approval must approve or revise the budget, request count/
-  rate, timeout/lease values, normalization/merge rules and host protocol.
+  acceptance criterion. These budgets and normalization/merge rules were approved
+  with the plan; implementation must verify them as specified.
 
 ## Requirement-to-Test Mapping
 

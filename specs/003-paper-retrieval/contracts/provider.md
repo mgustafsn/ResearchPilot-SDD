@@ -35,7 +35,7 @@ SDK is proposed.
 - No API key by default, no paid plan/account setup, TLS verification enabled,
   redirects disabled, `trust_env=False`, at most two concurrent calls, at most 20
   actual requests per attempt, proposed 10-second request / 120-second attempt
-  deadline, and no retry. All numeric values are proposals requiring approval.
+  deadline, and no retry. These values were approved with the plan on 2026-10-19.
 
 ## Mapping/validation
 

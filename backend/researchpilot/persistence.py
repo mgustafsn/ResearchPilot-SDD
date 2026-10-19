@@ -42,6 +42,9 @@ class Database:
         metadata = MetaData()
         self.projects = Table("projects", metadata, autoload_with=self.engine)
         self.queries = Table("search_queries", metadata, autoload_with=self.engine)
+        self.papers = Table("papers", metadata, autoload_with=self.engine)
+        self.project_papers = Table("project_papers", metadata, autoload_with=self.engine)
+        self.search_runs = Table("search_runs", metadata, autoload_with=self.engine)
 
     def close(self):
         self.engine.dispose()

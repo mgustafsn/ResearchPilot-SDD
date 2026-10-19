@@ -88,7 +88,9 @@ def db(db_url):
     database = Database(db_url)
     database.migrate()
     with database.engine.begin() as connection:
-        connection.execute(text("TRUNCATE search_queries, projects"))
+        connection.execute(text(
+            "TRUNCATE project_papers, search_runs, papers, search_queries, projects"
+        ))
     try:
         yield database
     finally:
@@ -107,6 +109,7 @@ def live_server(db, db_url):
                            PYTHONPATH=str(Path("backend").resolve()))
         # Never let a developer's real key enable live generation in tests.
         environment.pop("OPENAI_API_KEY", None)
+        environment.pop("OPENALEX_API_KEY", None)
         process = subprocess.Popen(
             [sys.executable, "-m", "uvicorn", "researchpilot.api:create_app", "--factory",
              "--host", "127.0.0.1", "--port", str(port), "--no-access-log"],
@@ -149,13 +152,14 @@ def query_server(db):
     from researchpilot.api import create_app
 
     @contextmanager
-    def start(provider=None):
+    def start(provider=None, paper_provider=None):
         with socket.socket() as sock:
             sock.bind(("127.0.0.1", 0))
             port = sock.getsockname()[1]
         base = f"http://127.0.0.1:{port}"
         server = uvicorn.Server(uvicorn.Config(
-            create_app(db, suggestion_provider=provider), host="127.0.0.1", port=port,
+            create_app(db, suggestion_provider=provider, paper_provider=paper_provider),
+            host="127.0.0.1", port=port,
             log_level="warning", access_log=False,
         ))
         thread = threading.Thread(target=server.run, daemon=True)

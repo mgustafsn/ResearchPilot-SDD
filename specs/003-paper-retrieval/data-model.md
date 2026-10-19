@@ -2,8 +2,8 @@
 
 All scholarly facts are mapped from OpenAlex by `PaperProvider`. None of these
 models may accept LLM-generated metadata. PostgreSQL migration 003 is additive;
-migration 001/002 remain immutable. Field sizes/index details are proposals pending
-plan approval.
+migrations 001/002 remain immutable. Proposed fields and relationships are from the
+approved plan; implementation and database tests remain pending.
 
 ## Entities
 

@@ -1,7 +1,9 @@
 # Feature 003 validation guide — draft
 
-**Status**: Plan/contract and task review pending. This guide is not authorization for
-live provider calls. Automated tests must use fake `PaperProvider` and HTTPX `MockTransport`.
+**Status**: Plan, contracts and tasks approved; implementation and automated verification
+are complete locally. Human review/acceptance and remote CI remain pending. This guide
+is not authorization for an agent-run live smoke test. Automated tests use fake
+`PaperProvider` and HTTPX `MockTransport`.
 
 ## Prerequisites
 
@@ -38,7 +40,7 @@ live provider calls. Automated tests must use fake `PaperProvider` and HTTPX `Mo
 8. Confirm no OpenAI API request, model output, LLM metadata, full-text download,
    ranking score, reference editing or out-of-scope schema appears in the slice.
 
-## Repeatable commands after implementation
+## Repeatable local validation commands
 
 ```bash
 docker compose up -d --wait db
@@ -48,10 +50,9 @@ node --check frontend/app.js
 ```
 
 The guarded disposable test DB must be configured as documented in the repository
-README. On the approved reference host, run the separately approved mock-provider
-PostgreSQL pipeline benchmark. Do not include live OpenAlex or paid-service latency in
-that measurement. Exact provider limits/performance budgets remain proposals until the
-plan is approved.
+README. On the approved reference host, run the mock-provider PostgreSQL pipeline
+benchmark under the approved 2-second p95 budget. Do not include live OpenAlex or
+paid-service latency in that measurement.
 
 ## Separate live-service use
 

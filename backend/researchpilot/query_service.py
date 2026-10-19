@@ -19,7 +19,7 @@ from researchpilot.query_domain import (
     refresh_required,
 )
 from researchpilot.query_provider import SuggestionContext, SuggestionProviderError
-from researchpilot.service import ProjectNotFound
+from researchpilot.service import ProjectNotFound, ensure_search_inactive
 
 logger = logging.getLogger("researchpilot.suggestions")
 PROVIDER_ERRORS = {"timeout": "SUGGESTIONS_TIMEOUT", "invalid_output": "SUGGESTIONS_INVALID_OUTPUT"}
@@ -60,7 +60,7 @@ class QueryService:
             self._parent(connection, project_id)
             return enabled_texts(self._rows(connection, project_id))
 
-    def _parent(self, connection, project_id, revision=None):
+    def _parent(self, connection, project_id, revision=None, mutation=False):
         table = self.database.projects
         parent = connection.execute(
             select(table).where(table.c.id == project_id).with_for_update()
@@ -69,6 +69,8 @@ class QueryService:
             raise ProjectNotFound
         if revision is not None and parent["mutation_revision"] != revision:
             raise QueryError("QUERY_REVISION_CHANGED")
+        if mutation:
+            ensure_search_inactive(connection, self.database, project_id)
         return dict(parent)
 
     def _rows(self, connection, project_id):
@@ -95,7 +97,7 @@ class QueryService:
 
     def add(self, project_id, data):
         with self.database.engine.begin() as connection:
-            parent = self._parent(connection, project_id, data.expectedRevision)
+            parent = self._parent(connection, project_id, data.expectedRevision, mutation=True)
             rows = self._rows(connection, project_id)
             if any(row["normalized_key"] == data.text.casefold() for row in rows):
                 raise QueryError("QUERY_DUPLICATE")
@@ -112,7 +114,7 @@ class QueryService:
 
     def patch(self, project_id, query_id, data):
         with self.database.engine.begin() as connection:
-            parent = self._parent(connection, project_id, data.expectedRevision)
+            parent = self._parent(connection, project_id, data.expectedRevision, mutation=True)
             rows = self._rows(connection, project_id)
             previous = next((row for row in rows if row["id"] == query_id), None)
             if previous is None:
@@ -132,7 +134,7 @@ class QueryService:
 
     def delete(self, project_id, query_id, revision):
         with self.database.engine.begin() as connection:
-            parent = self._parent(connection, project_id, revision)
+            parent = self._parent(connection, project_id, revision, mutation=True)
             table = self.database.queries
             result = connection.execute(delete(table).where(
                 table.c.id == query_id, table.c.project_id == project_id))

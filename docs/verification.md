@@ -36,10 +36,15 @@ log, with BUG-PRJ-001 deferred and detailed human-audit evidence outstanding.
 Feature 002 automated results, approved-host query measurement and user acceptance
 are recorded in `docs/evidence-log.md`, `docs/evidence/query-traceability.md`, and
 `docs/evidence/query-performance.json`; remote GitLab CI remains unverified because
-VPN is currently down. Feature 003 specification was approved on 2026-10-19; its
-plan/contracts are drafts, and no 003 tests or runtime results are claimed. Features
-004–005 remain unapproved. Do not infer code coverage, security compliance, suggestion
-quality, or ranking accuracy from documentation checks or earlier-slice tests.
+VPN is currently down. Feature 003 specification, plan/contracts and tasks were
+approved on 2026-10-19; implementation is underway with fake-provider tests and a
+local mock-provider benchmark recorded in `docs/evidence/retrieval-traceability.md`
+and `docs/evidence/retrieval-performance.json`. Implementation/automated verification
+are complete locally (358 tests passed); human review/acceptance remain pending. No
+live OpenAlex call was made.
+Features 004–005 remain unapproved. Do not infer code
+coverage, security compliance, suggestion quality, or ranking accuracy from
+documentation checks or earlier-slice tests.
 
 ## Project-management performance reference
 
@@ -109,9 +114,9 @@ below the approved 500 ms target. See `docs/evidence/query-performance.json` for
 durations, statuses, versions, host/load data and source hashes. This result measures
 local query CRUD only, not live suggestion generation or external-provider latency.
 
-## Retrieval-pipeline performance proposal (feature 003)
+## Retrieval-pipeline performance (feature 003)
 
-**Draft for plan review; not approved or measured.** Proposed reference machine is the
+**Approved with the feature-003 plan; measured 2026-10-19.** Reference machine is the
 approved 001/002 host (Ryzen 7 5700X3D, 31 GiB RAM, Linux 7.2.9-2-cachyos x86_64)
 with local PostgreSQL 17 and loopback HTTP. Use the guarded disposable DB and a fake
 PaperProvider that immediately returns deterministic records; never call OpenAlex.
@@ -125,11 +130,15 @@ PaperProvider that immediately returns deterministic records; never call OpenAle
   HTTP client. Include API/service/domain/PostgreSQL work and response serialization;
   exclude process startup, fixture seeding, warm-up and fake-provider wait (zero).
 - Retain all 20 durations/statuses and fail on any non-success. Sort ascending and use
-  the 19th sample (nearest-rank p95). Proposed budget: below 2 seconds. Record commit,
+  the 19th sample (nearest-rank p95). Approved budget: below 2 seconds. Record commit,
   dirty state, source hashes, OS/CPU/RAM/load, Python/dependency/PostgreSQL versions,
   fixture counts and exact command without credentials.
 - This measures local normalization/deduplication/persistence, not network/provider
   latency or scientific relevance. Any threshold/environment change needs plan review.
+
+Recorded execution: **p95 204.55 ms**, 20/20 attempts succeeded, 250 records per
+attempt, 100 projects/2,000 stored queries, 10 warm-ups. Evidence in
+`docs/evidence/retrieval-performance.json` includes raw samples and source/host hashes.
 
 ## Comparing vibe coding with SDD
 

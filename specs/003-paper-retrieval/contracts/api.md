@@ -43,8 +43,8 @@ Use `{error:{code,message,fields:[]}}` with fixed safe messages. Proposed outcom
 | 504 `PROVIDER_TIMEOUT` | Per-request or whole-attempt deadline elapsed |
 | 503 `STORAGE_UNAVAILABLE` | Database operation/commit failed; old associations remain |
 
-Exact codes/status mapping, retry behavior (proposed none), and precedence are pending
-plan/contract approval. Do not leak upstream body, URL/query, exception, SQL, or key.
+These codes/status mappings and no-retry behavior are approved with the plan/contracts.
+Do not leak upstream body, URL/query, exception, SQL, or key.
 
 ## UI behavior
 

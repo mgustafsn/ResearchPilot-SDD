@@ -15,6 +15,8 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from researchpilot.domain import ProjectInput, ProjectOutput
 from researchpilot.integrations import openai_queries
+from researchpilot.integrations.openalex_papers import OpenAlexPaperProvider
+from researchpilot.paper_domain import CurrentPapersOutput, SearchOutput
 from researchpilot.persistence import Database
 from researchpilot.query_domain import (
     GenerateInput,
@@ -24,11 +26,13 @@ from researchpilot.query_domain import (
     QueryPatchInput,
 )
 from researchpilot.query_service import QueryError, QueryService
-from researchpilot.service import ProjectNotFound, ProjectService
+from researchpilot.retrieval_service import RetrievalError, RetrievalService
+from researchpilot.service import ProjectNotFound, ProjectService, SearchInProgress
 
 FRONTEND = Path(__file__).resolve().parents[2] / "frontend"
 logger = logging.getLogger("researchpilot")
 FROM_ENVIRONMENT = object()  # Production composition; tests inject a fake or None.
+OPENALEX_PROVIDER = object()  # Production composition; tests inject a fake or None.
 
 
 def error_response(status, code, message, fields=None):
@@ -36,11 +40,12 @@ def error_response(status, code, message, fields=None):
                                    "fields": fields or []}}, status_code=status)
 
 
-def create_app(database=None, suggestion_provider=FROM_ENVIRONMENT):
+def create_app(database=None, suggestion_provider=FROM_ENVIRONMENT,
+               paper_provider=OPENALEX_PROVIDER):
     @asynccontextmanager
     async def lifespan(app):
         owned = database is None
-        storage = provider = None
+        storage = provider = retrieval_provider = None
         try:
             try:
                 storage = database or Database(os.environ["DATABASE_URL"])
@@ -52,10 +57,17 @@ def create_app(database=None, suggestion_provider=FROM_ENVIRONMENT):
             provider = (openai_queries.from_environment(os.environ)
                         if suggestion_provider is FROM_ENVIRONMENT else suggestion_provider)
             app.state.queries = QueryService(storage, provider)
+            if paper_provider is OPENALEX_PROVIDER:
+                retrieval_provider = OpenAlexPaperProvider()
+            else:
+                retrieval_provider = paper_provider
+            app.state.retrieval = RetrievalService(storage, retrieval_provider)
             yield
         finally:
             if suggestion_provider is FROM_ENVIRONMENT and provider is not None:
                 await provider.aclose()
+            if paper_provider is OPENALEX_PROVIDER and retrieval_provider is not None:
+                await retrieval_provider.aclose()
             if owned and storage is not None:
                 storage.close()
 
@@ -113,6 +125,15 @@ def create_app(database=None, suggestion_provider=FROM_ENVIRONMENT):
     async def query_error(request, exception):
         return error_response(exception.status, exception.code, exception.message)
 
+    @app.exception_handler(RetrievalError)
+    async def retrieval_error(request, exception):
+        return error_response(exception.status, exception.code, exception.message)
+
+    @app.exception_handler(SearchInProgress)
+    async def search_in_progress(request, exception):
+        return error_response(409, "SEARCH_ACTIVE",
+                              "A search is active for this project. Please wait before editing.")
+
     @app.get("/api/projects", response_model=list[ProjectOutput])
     def list_projects(request: Request):
         return request.app.state.projects.list()
@@ -156,6 +177,14 @@ def create_app(database=None, suggestion_provider=FROM_ENVIRONMENT):
     @app.post("/api/projects/{project_id}/queries/generate", response_model=GenerationOutput)
     async def generate_queries(project_id: UUID, data: GenerateInput, request: Request):
         return await request.app.state.queries.generate(project_id, data)
+
+    @app.post("/api/projects/{project_id}/search", response_model=SearchOutput)
+    async def search_project(project_id: UUID, request: Request):
+        return await request.app.state.retrieval.search(project_id)
+
+    @app.get("/api/projects/{project_id}/papers", response_model=CurrentPapersOutput)
+    def current_papers(project_id: UUID, request: Request):
+        return request.app.state.retrieval.current(project_id)
 
     @app.get("/", include_in_schema=False)
     def homepage():

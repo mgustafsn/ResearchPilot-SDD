@@ -850,6 +850,76 @@ correctness. Application tests were not runnable because no implementation exist
   labels, description and file path. `git diff --check`: PASS. No application code,
   tests, migrations, CI, API requests or dependencies changed.
 
+## Feature 003 implementation authorization — 2026-10-19
+
+- User approval (verbatim): “yes i reviewed go ahead”. Recorded approval of all
+  33 tasks in `specs/003-paper-retrieval/tasks.md` and authorization to implement
+  feature 003 only. No future ranking/references work or live provider smoke call is
+  authorized. OpenAI remains unconfigured; automated tests must not call OpenAlex.
+- `.specify/scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks`
+  resolved feature 003 and its approved task list. No feature-003 checklist directory
+  exists. Extension hook file is absent. Actual Git branch remains `main`.
+
+## Feature 003 setup baseline — 2026-10-19
+
+- Baseline commit `c5f2274`, actual branch `main`; active ignored Spec Kit feature is
+  `specs/003-paper-retrieval`. PostgreSQL 17 Compose service is healthy on the
+  rebuild's loopback test port. Environment: uv 0.13.1, project Python 3.13.15,
+  HTTPX 0.28.1. `pyproject.toml` and `uv.lock` already include HTTPX at runtime; no
+  new dependency or credential was added. In the project environment, no
+  `OPENAI_API_KEY`, `OPENAI_QUERY_MODEL`, or `OPENALEX_API_KEY` is configured.
+- Baseline command `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache uv run --env-file
+  .env pytest -m 'not performance' -q --tb=short`: **279 passed, 2 deselected, 1
+  existing Starlette/HTTPX deprecation warning in 24.16s**. Performance tests were
+  deliberately deselected for baseline.
+- A preliminary system-Python 3.14 metadata probe could not find project HTTPX; reran
+  in the locked uv project environment successfully (0.28.1). No application test
+  failure or source change resulted.
+- T001–T003 complete. No provider calls, code, schema, or dependencies changed.
+
+## Feature 003 foundational implementation — 2026-10-19
+
+- T004/T005 red tests were authored before behavior/schema: domain suite
+  `backend/tests/test_papers.py` **18 failed** on unimplemented domain behavior;
+  PostgreSQL/schema suite `backend/tests/test_retrieval_postgres.py` **4 failed** on
+  absent migration/reflection/schema. Failures were test assertions/setup at the
+  feature behavior boundary, not live-service errors. A system-Python diagnostic
+  earlier lacked the project HTTPX install; test runs use the locked uv environment.
+- Implemented normalized `Paper`, strict provider model validation, inclusive year
+  filters, exact query-budget allocation, DOI/title normalization, abstract-index
+  reconstruction, safe URL checks and deterministic DOI/provider/title dedup in
+  `backend/researchpilot/paper_domain.py`; added vendor-free `PaperProvider` protocol
+  and result/error contracts in `paper_provider.py`.
+- Added additive migration `003_paper_retrieval.sql` for `papers`, `project_papers`
+  and `search_runs`, status/count/identity/ownership constraints, one-pending-run
+  partial unique index and project-scoped result/run keys. Extended reflection in
+  `persistence.py`; migrations 001/002 were not edited. Updated only the explicitly
+  configured disposable-test cleanup and injection scaffolding; subprocess tests
+  strip OpenAI/OpenAlex keys.
+- Green results: `backend/tests/test_papers.py`: **25 passed**; focused migration and
+  existing project PostgreSQL tests:
+  `uv run --env-file .env pytest backend/tests/test_retrieval_postgres.py
+  backend/tests/test_project_postgres.py -q --tb=short`: **30 passed**, 1 existing
+  Starlette/HTTPX deprecation warning. All DB work used the guarded disposable DB.
+- T001–T008 complete. No live OpenAlex/OpenAI calls, dependencies, ranking/reference
+  schema, or application-database migration were introduced.
+
+## Feature 003 US1 red-phase tests — 2026-10-19
+
+- Added the OpenAlex `MockTransport` suite before adapter logic:
+  `uv run --env-file .env pytest backend/tests/test_openalex_provider.py -q --tb=no`:
+  **15 failed** against importable `NotImplementedError` scaffolds. Tests cover exact
+  request/data flow, mapping, bounds, malformed responses, status failures and logs.
+- Added fake-provider route tests before service/API logic:
+  `uv run --env-file .env pytest backend/tests/test_retrieval_api.py
+  backend/tests/test_retrieval_postgres.py -q --tb=no`: **6 failed, 4 passed**. All
+  failures were missing success-path routes/persistence; foundational schema tests
+  passed.
+- Added Chromium workflow tests before UI logic:
+  `uv run --env-file .env pytest backend/tests/test_retrieval_browser.py -q --tb=no`:
+  **2 failed** because Search/results controls are absent. No test called a live
+  provider. Failures are recorded red-phase evidence, not regressions in earlier slices.
+
 Attach full significant prompts or link committed prompt files. Do not reconstruct
 missing original prompts as quotations. Save representative responses/diffs.
 
@@ -1051,3 +1121,56 @@ Personal identifiers and percentages remain unfilled until supplied and agreed b
 - T030 is now complete. `ruff check backend`, `node --check frontend/app.js`, and
   `git diff --check`: PASS. This does not complete remaining audits, remote CI,
   human review, final acceptance or feature 002 as a whole. No live model calls ran.
+
+## Feature 003 security and data-flow audit — 2026-10-19
+
+- Reviewer: OpenCode/GPT-6 Luna, static source/config/test audit after implementation
+  increments; not an independent human security certification. AST scan found no
+  OpenAI/OpenAlex vendor imports outside `integrations`; API imports adapters only
+  at the composition root. Frontend `innerHTML` occurrence count is zero; result
+  metadata is built with text nodes and links pass `http`/`https`+credential checks.
+- AUD-RET-001: the initial mocked HTTP test captured HTTPX's INFO access log, which
+  included the full search URL and therefore the user query. Changed the adapter to
+  suppress HTTPX/HTTPCore access-level logs and emit only typed request/status/count/
+  duration/cost metadata. `test_FR_RET_007_only_safe_typed_metadata_is_logged` now
+  passes; application code never logs the raw query or body.
+- Only additive `migrations/003_paper_retrieval.sql` was added; migrations 001/002
+  remain unchanged. Test cleanup explicitly truncates only feature tables plus the
+  existing project/query tables in the guarded disposable database. No ranking,
+  reference schema, full-text download, OpenAI call/key, live OpenAlex call, or new
+  dependency was introduced. CI explicitly unsets all provider key/model variables.
+- Project and query writes lock the project first and reject active search leases;
+  provider calls occur outside DB transactions; stale workers cannot commit; failures
+  leave current associations unchanged. No blocking finding remains from this static
+  review. Human usability review and user acceptance remain pending.
+
+## Feature 003 final local verification — 2026-10-19
+
+- Full suite after implementation/audit:
+  `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache uv run --env-file .env pytest -q --tb=short`:
+  **358 passed, 1 existing Starlette/HTTPX deprecation warning in 44.61s**. This
+  includes existing 001/002 regressions and all feature-003 fake-provider/PostgreSQL/
+  Chromium tests; no OpenAlex or OpenAI call occurred.
+- Final retrieval benchmark after code freeze:
+  `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache PERFORMANCE_OUTPUT=docs/evidence/retrieval-performance.json
+  uv run --env-file .env pytest backend/tests/test_retrieval_performance.py -m performance
+  -q --tb=short`: **1 passed, 1 warning in 6.09s**, 20/20 complete searches and 250
+  fixture papers/attempt. Nearest-rank p95 **204.55 ms** (<2,000 ms). Raw samples,
+  statuses, versions, host/load, commit/dirty state and source hashes are retained in
+  `docs/evidence/retrieval-performance.json`.
+- Final quality checks: `uv run ruff check backend`, `uv run ruff format --check` on
+  the ten new feature-003 Python/test files, `node --check frontend/app.js`, and
+  `git diff --check`: PASS. Existing shared legacy files were not mass-reformatted.
+- Browser test authoring initially used an exact label not present in the project form
+  and an incorrect link locator; corrected test selectors to the actual accessible
+  labels. Application behavior was unchanged; final browser/full suites pass.
+- Feature 003 T001–T032 complete. T033 requires the user's hands-on keyboard/usability
+  review and explicit acceptance. Remote GitLab CI remains unverified while VPN is
+  down. No live OpenAlex smoke or OpenAI call was made.
+- Restarted the user's local app with `./scripts/start-local.sh` detached after
+  implementation. It applied migrations 001–003 and Uvicorn reported startup complete;
+  `curl http://127.0.0.1:8000/` returned HTTP 200. A read-only local DB check reported
+  schema versions 001/002/003 and one project row (no project contents were read).
+  The first version-check command omitted `PYTHONPATH=backend` and failed before DB
+  access; rerun with the launcher-equivalent `PYTHONPATH` succeeded. `.env` still has
+  no OpenAI key/model or OpenAlex key; no external call was made.

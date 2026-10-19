@@ -3,10 +3,11 @@
 The user approved the five included delivery slices and listed exclusions on
 2026-10-12 (option A: keep all five features, build and approve one at a time).
 This scope-boundary approval does not approve individual plans, tasks, or
-implementation. Feature 001's specification and paper-count decision, feature 002's
+implementation. Feature 001's specification/paper-count decision, feature 002's
 query specification/failure behavior, and feature 003's clarified retrieval
-specification are approved. Plans, contracts, tasks, and implementation remain
-separate review gates.
+specification are approved. Feature 003's plan/API/provider contracts/tasks were
+separately approved on 2026-10-19; implementation is authorized. Features 004–005
+remain separate review gates.
 
 ## Objective and stakeholders
 
