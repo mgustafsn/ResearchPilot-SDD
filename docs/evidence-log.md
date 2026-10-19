@@ -652,6 +652,80 @@ correctness. Application tests were not runnable because no implementation exist
 | ID/date | Feature/requirement | Exact prompt and context artifact versions | Model/tool version | Expected output | Actual output/evidence | Failure | Revised prompt | Outcome |
 |---|---|---|---|---|---|---|---|---|
 
+## Feature 002 static audit — 2026-10-19
+
+- Reviewer: OpenCode, model `openai/gpt-6-luna`; static repository review, not an
+  independent human/security certification. Scope: Principles I–VII and T032.
+- Scholarly metadata: 002 exposes query text only. No paper/citation fields or
+  scholarly provider were added. Source scan of `backend/researchpilot` found no
+  OpenAI/OpenAlex imports outside `integrations`; a Python AST scan reported
+  `vendor imports outside integrations: []`. The API module imports the adapter only
+  at the composition boundary; query service/domain depend on the provider protocol.
+- Structured output/provider boundary: inspected `openai_queries.py`; fixed endpoint,
+  pinned allowed model, strict JSON schema, whole-batch validation, 512-token cap,
+  one request, no redirects/proxy environment, TLS verification, 20-second deadline,
+  64 KiB incremental response cap. Provider tests cover malformed/refused/truncated
+  output, timeouts, cancellation, no retries and canary redaction.
+- Secrets/logging/privacy: API key is read from environment and held by the adapter;
+  it is not returned to browser responses or emitted in adapter/service logs. Logged
+  suggestion metadata is typed model/prompt/status/duration/token/count data only.
+  Explicit generation sends stored question/keywords; no call is made on load/edit.
+  `store:false` is not described as zero retention; disclosure remains in UI/docs.
+- Rendering and concurrency: query data is assigned through DOM `textContent`,
+  `createTextNode`, and `replaceChildren`; no `innerHTML` use was found in
+  `frontend/app.js`. Parent-first locks, expected revisions, unlocked provider await,
+  stale merge rejection and transaction rollback have PostgreSQL/API/browser tests.
+- Test safety/schema/scope: fixture reset is guarded to the loopback, named, explicitly
+  disposable `researchpilot_sdd_test` database, distinct from application DB; it
+  truncates only the known `search_queries` and `projects` tables. Only migration 002
+  was added for query schema; migration 001 is unchanged. Browser-server fixtures
+  strip `OPENAI_API_KEY`. No production fake switch, hidden retry, unauthorized search/
+  paper/ranking/reference schema or BUG-PRJ-001 fix found.
+- Findings: no blocking implementation finding from this bounded static review.
+  Existing Starlette/HTTPX test-client deprecation warning remains. Remote GitLab
+  pipeline is unverified due VPN requirement. Manual keyboard/usability review,
+  independent human audit, and explicit user acceptance remain outstanding. This
+  review does not claim zero retention, live model quality, or complete feature 001
+  compliance. No prompt changes or live provider calls were made.
+
+## Feature 002 post-audit verification — 2026-10-19
+
+- AUD-QRY-FINAL-001: added a browser schedule for editing a saved query while fake
+  generation is pending. The first full run exposed a test-scheduling race: the fake
+  provider was released before the asynchronous edit had committed, allowing a valid
+  generation completion to win. The test now waits until the edited state is visible
+  before releasing the provider, then asserts the late suggestion result is rejected.
+  This matches the approved ordering; no product logic change was needed.
+- A first assertion assumed one exact stale-error wording; the browser/server can
+  legitimately surface either sanitized revision-conflict wording depending on which
+  guard responds first. Assertion now checks the shared `changed` meaning. After adding
+  a wait for the edit commit, final browser test passed and final full suite passed.
+- Final full local suite after audit/test changes:
+  `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache uv run --env-file .env pytest -q --tb=short`:
+  **281 passed, 1 warning in 25.42s**. Warning: existing Starlette/HTTPX test-client
+  deprecation. Failed intermediate run after audit: **280 passed, 1 failed** due to the
+  above test scheduling race; corrected and rerun successfully.
+- Project performance separately:
+  `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache uv run --env-file .env pytest
+  backend/tests/test_project_performance.py -m performance -q --tb=short`:
+  **1 passed, 1 warning in 1.13s**.
+- Query performance separately:
+  `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache PERFORMANCE_OUTPUT=docs/evidence/query-performance.json
+  uv run --env-file .env pytest backend/tests/test_query_performance.py -m performance
+  -q --tb=short`: **1 passed, 1 warning in 1.24s**; 100/100 requests succeeded,
+  p95 **3.746 ms** (<500 ms). Updated raw evidence includes final source hashes and
+  dirty-tree disclosure.
+- Final checks: `uv run ruff check backend`, `uv run ruff format --check
+  backend/tests/test_query_browser.py backend/tests/test_query_performance.py`,
+  `node --check frontend/app.js`, and `git diff --check`: PASS. Automated quickstart
+  journeys are covered by the complete test suite; no manual human walkthrough or
+  remote GitLab pipeline was performed.
+- T034 complete. T033 human usability review and T036 explicit user acceptance remain
+  pending; feature 003 remains unauthorized. No live OpenAI request was made.
+- FR-QRY-001–010 automated mapping and remaining limitations are in
+  `docs/evidence/query-traceability.md`; README and `docs/verification.md` link the
+  current verified status and query performance artifact.
+
 Attach full significant prompts or link committed prompt files. Do not reconstruct
 missing original prompts as quotations. Save representative responses/diffs.
 
@@ -774,3 +848,82 @@ Personal identifiers and percentages remain unfilled until supplied and agreed b
   results are not live evidence. Committed locally only; push deferred to the user
   (VPN required). T028–T036 (fault/security expansion, browser safety, query
   performance, CI run, audits, human review, acceptance) remain pending.
+
+## Local verification continuation — 2026-10-19
+
+- Current base checkout is the existing `5dd81a4` query-generation milestone.
+  Added `backend/tests/test_query_performance.py` to implement the approved
+  PostgreSQL/loopback protocol, but could not execute it because Docker is
+  unavailable here; this test is unverified and remains a draft. Environment:
+  Python 3.13.15, pytest from the project `.venv`, Linux
+  `7.2.9-2-cachyos x86_64`, AMD Ryzen 7 5700X3D, 31 GiB RAM. No live provider
+  credentials were used.
+- `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache uv run --env-file .env pytest
+  backend/tests/test_query_provider.py backend/tests/test_queries.py -q --tb=short`:
+  **103 passed, 1 warning in 0.41s**. The warning is the existing
+  Starlette/httpx test-client deprecation notice.
+- `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache uv run --env-file .env pytest -m
+  'not performance' -q --tb=short`: **165 passed, 1 failed, 111 errors, 1
+  deselected in 20.18s**. The environment denied access to Docker's Unix socket;
+  PostgreSQL could not be started or reached. Database-backed project, query,
+  browser, and migration fixtures consequently errored at setup. The lone failure
+  was the PostgreSQL migration test failing on the same unavailable connection.
+  This is an infrastructure failure, not evidence of an application regression;
+  PostgreSQL and browser acceptance remain unverified in this run.
+- `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache uv run ruff check backend`:
+  PASS. `node --check frontend/app.js`: PASS.
+- `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache uv run ruff format --check backend`:
+  FAIL because 17 existing backend files do not match the current formatter; the
+  new performance test itself passes `ruff format --check`. Existing files were
+  not reformatted as part of this task.
+- Docker access check `docker compose ps` was denied by the sandbox. The full
+  repeatable suite, query performance protocol, PostgreSQL migration/concurrency
+  checks, and CI result still require an environment with the configured disposable
+  PostgreSQL service. No task is marked complete on the basis of this partial run.
+
+### Continuation check — 2026-10-19
+
+- Re-ran the provider/domain subset:
+  `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache uv run --env-file .env pytest
+  backend/tests/test_query_provider.py backend/tests/test_queries.py -q --tb=short`:
+  **103 passed, 1 warning in 0.41s** (existing Starlette/HTTPX test-client warning).
+- Attempted API/provider/domain checks including `backend/tests/test_query_api.py`.
+  Provider/domain tests passed; all 29 API tests errored during fixture setup because
+  PostgreSQL at `127.0.0.1:55432` refused the connection. This does not verify API
+  behavior. No application tests were changed and no task status was advanced.
+- `uv run ruff check backend`, `node --check frontend/app.js`, and `git diff --check`:
+  PASS. The working tree still contains the pre-existing uncommitted query benchmark
+  test and evidence draft; neither was rewritten or marked verified.
+
+### PostgreSQL-backed verification and query performance — 2026-10-19
+
+- Started only this rebuild's dedicated Compose `db` service with
+  `docker compose up -d --wait db`: PASS; service reported healthy. No application
+  or original-repository database was targeted.
+- `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache uv run --env-file .env pytest -m
+  'not performance' -q --tb=short`: **277 passed, 2 deselected, 1 warning in
+  22.23s**. The warning is the existing Starlette/HTTPX test-client deprecation.
+- Existing project performance regression, separately:
+  `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache uv run --env-file .env pytest
+  backend/tests/test_project_performance.py -m performance -q --tb=short`:
+  **1 passed, 1 warning in 1.19s**.
+- Query CRUD performance protocol:
+  `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache PERFORMANCE_OUTPUT=docs/evidence/query-performance.json
+  uv run --env-file .env pytest backend/tests/test_query_performance.py -m performance
+  -q --tb=short`: **1 passed, 1 warning in 1.23s**. On the approved Ryzen 7 5700X3D /
+  Linux 7.2.9-2-cachyos reference host with PostgreSQL 17.11, all 100 loopback HTTP
+  requests succeeded across 100 projects/1,999 queries. Nearest-rank p95 was **3.78 ms**,
+  below the approved 500 ms budget. Raw samples, statuses, versions, load, commit,
+  dirty-tree state and source hashes are retained in `docs/evidence/query-performance.json`.
+- Full suite, including both performance tests:
+  `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache uv run --env-file .env pytest -q --tb=short`:
+  **281 passed, 1 warning in 25.33s** (existing Starlette/HTTPX test-client warning).
+- Added browser regressions for inert hostile query text/keyboard focus and editing
+  a saved query during an in-flight generation. The latter exposed two valid stale
+  error messages depending on whether the browser revision guard or server conflict
+  arrived first; the assertion now checks their common sanitized meaning. A full
+  run before this assertion correction had **280 passed, 1 failed**; after correction
+  the full suite passed. Browser suite: **12 passed**.
+- T030 is now complete. `ruff check backend`, `node --check frontend/app.js`, and
+  `git diff --check`: PASS. This does not complete remaining audits, remote CI,
+  human review, final acceptance or feature 002 as a whole. No live model calls ran.

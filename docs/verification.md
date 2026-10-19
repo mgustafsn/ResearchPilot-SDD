@@ -33,9 +33,12 @@ IDs each test verifies. Acceptance scenario IDs supplement, not replace, require
 
 Feature 001 has recorded automated results in `docs/evidence/` and the evidence
 log, with BUG-PRJ-001 deferred and detailed human-audit evidence outstanding.
-Feature 002–005 tests/results remain planned until actually executed. Do not infer
-code coverage, security compliance, suggestion quality, or ranking accuracy from
-documentation checks or earlier-slice tests.
+Feature 002 automated results and the approved-host query measurement are recorded
+in `docs/evidence-log.md`, `docs/evidence/query-traceability.md`, and
+`docs/evidence/query-performance.json`. Human review, remote CI, and explicit 002
+acceptance remain pending. Features 003–005 remain unapproved; no tests/results are
+claimed for them. Do not infer code coverage, security compliance, suggestion quality,
+or ranking accuracy from documentation checks or earlier-slice tests.
 
 ## Project-management performance reference
 
@@ -72,7 +75,7 @@ or approved merely because the 001 budget was approved.
 
 ## Query-management performance proposal
 
-**Approved with the 002 plan on 2026-10-12; no 002 benchmark has run.** Use the same approved
+**Approved with the 002 plan on 2026-10-12; executed 2026-10-19.** Use the same approved
 reference machine as 001 (Ryzen 7 5700X3D, 31 GiB reported RAM, Linux
 7.2.9-2-cachyos x86_64) and actual PostgreSQL 17/loopback HTTP. Proposed query CRUD
 p95 budget: below 500 ms over 100 requests, not a live-provider latency promise.
@@ -99,6 +102,11 @@ p95 budget: below 500 ms over 100 requests, not a live-provider latency promise.
 - CI executes repeatable tests, not approved-reference-host latency acceptance.
   Any live smoke/evaluation needs separate authorization, privacy/cost disclosure,
   and actual evidence, not inclusion in default tests.
+
+Recorded execution: nearest-rank p95 **3.746 ms** over 100 successful requests,
+below the approved 500 ms target. See `docs/evidence/query-performance.json` for raw
+durations, statuses, versions, host/load data and source hashes. This result measures
+local query CRUD only, not live suggestion generation or external-provider latency.
 
 ## Comparing vibe coding with SDD
 

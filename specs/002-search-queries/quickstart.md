@@ -1,9 +1,10 @@
-# Feature 002 validation guide — approved plan, not implemented
+# Feature 002 validation guide — implementation and evidence
 
-The specification, plan, contracts, and this guide are approved. Task review remains
-pending; commands/test paths for feature 002 are not successful-run evidence.
-Feature 001 is implemented and accepted with BUG-PRJ-001 deferred. Its incomplete
-human-audit evidence and publication-year defect are not resolved by this slice.
+The specification, plan, contracts, and tasks are approved. Manual query management
+and fake-tested suggestion generation are implemented. Repeatable tests and query
+performance evidence are recorded in `docs/evidence-log.md` and
+`docs/evidence/query-performance.json`; audits, human review, remote CI, and feature
+acceptance remain pending. Feature 001's BUG-PRJ-001 remains deferred.
 
 ## Prerequisites
 
@@ -18,7 +19,7 @@ human-audit evidence and publication-year defect are not resolved by this slice.
   configured external AI provider. It requires server-side environment credentials
   and explicit user action; opening/editing a project must not cause an AI call.
 
-## Local acceptance journeys after implementation
+## Automated acceptance journeys
 
 1. Create/reopen a project and inspect its query list. Manually add a query, edit
    it, disable/re-enable it, and reopen/restart. Stored text/state remains unchanged
@@ -54,9 +55,10 @@ human-audit evidence and publication-year defect are not resolved by this slice.
     queries while generation is pending. A delayed response must not repaint a
     different project or overwrite newer displayed state.
 
-## Planned automated commands
+## Repeatable automated commands
 
-After implementation and reviewed dependency updates, from the repository root:
+From the repository root with the dedicated local PostgreSQL and disposable test
+database configured:
 
 ```bash
 uv sync --locked
@@ -65,6 +67,10 @@ uv run --env-file .env pytest -m "not performance" -q
 uv run ruff check backend
 node --check frontend/app.js
 ```
+
+On the approved reference host, run performance regressions separately with
+`uv run --env-file .env pytest -m performance -q`; retain query results using
+`PERFORMANCE_OUTPUT=docs/evidence/query-performance.json`.
 
 The suite must cover `test_queries.py`, `test_query_api.py`,
 `test_query_provider.py`, `test_query_postgres.py`, and `test_query_browser.py`

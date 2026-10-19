@@ -5,7 +5,11 @@ Feature 001 project creation/listing/reopening/editing/deletion is implemented.
 Feature 002 manual query controls are implemented: add/edit/delete, enable/disable,
 20-query limits, and durable context-change notices. Explicit AI suggestion generation
 is implemented and tested only with fakes/mock HTTP; no live OpenAI call has been made,
-and audits, human review and feature acceptance remain pending.
+and human review and feature acceptance remain pending. Latest local verification:
+281 tests passed; query CRUD measured 3.75 ms p95 against the approved 500 ms
+reference-host budget. See [query traceability](docs/evidence/query-traceability.md)
+and [query performance evidence](docs/evidence/query-performance.json). Remote
+GitLab CI has not yet run because VPN access is required.
 The user accepted feature 001 with a known limitation. Detailed human-audit evidence
 and final post-audit verification remain outstanding; full compliance is not claimed.
 User review identified a [publication-year input issue](docs/known-issues.md),
