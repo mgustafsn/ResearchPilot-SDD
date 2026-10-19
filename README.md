@@ -10,8 +10,8 @@ Feature 002 is accepted; the user does not want OpenAI connected now. Latest loc
 3.75 ms p95; feature 003's fake-provider retrieval pipeline measured 207.47 ms p95
 against the approved 2-second budget. See [query traceability](docs/evidence/query-traceability.md),
 [retrieval traceability](docs/evidence/retrieval-traceability.md), and the performance
-artifacts under `docs/evidence/`. No live OpenAlex/OpenAI call was made. Remote GitLab
-CI has not run because VPN is down.
+artifacts under `docs/evidence/`. No live OpenAlex/OpenAI call was made. GitLab
+pipeline 6874 is pending because no runner is assigned; its result is unverified.
 The user accepted feature 001 with a known limitation. Detailed human-audit evidence
 and final post-audit verification remain outstanding; full compliance is not claimed.
 User review identified a [publication-year input issue](docs/known-issues.md),

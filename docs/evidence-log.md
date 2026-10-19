@@ -1182,3 +1182,17 @@ Personal identifiers and percentages remain unfilled until supplied and agreed b
   such device or address`. No credentials were requested or disclosed. All verified
   feature-003 commits remain local; remote GitLab CI remains unverified. No retry or
   alternate authentication method was attempted.
+
+## GitLab publication and CI status — 2026-10-19
+
+- The user reported `glab` should be configured. `glab auth status --hostname
+  gitlab.abo.fi` confirmed authenticated without displaying credential contents; Git's
+  repository-local credential helper was absent. Configured only this repository's
+  helper as `!glab auth git-credential` (not global), then `git push origin main`
+  succeeded: remote advanced from `5fd0a3f` through `9f8e5cb` (including accepted 002,
+  003 spec/plan/contracts/tasks and implementation checkpoints). No token was printed.
+- GitLab pipeline **6874** for `9f8e5cb05fb0ad37cfa2c047a81fb115f1e40a62` was created.
+  `glab ci status --wait` ran for 120s but pipeline remained pending. `glab ci get
+  --pipeline-id 6874 --output json` reports status `pending`, job `test` not started,
+  runner id `0`, inactive, with no runner assigned. CI result is therefore unverified;
+  no retry or runner setup was attempted.

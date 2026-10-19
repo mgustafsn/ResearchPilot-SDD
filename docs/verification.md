@@ -35,8 +35,8 @@ Feature 001 has recorded automated results in `docs/evidence/` and the evidence
 log, with BUG-PRJ-001 deferred and detailed human-audit evidence outstanding.
 Feature 002 automated results, approved-host query measurement and user acceptance
 are recorded in `docs/evidence-log.md`, `docs/evidence/query-traceability.md`, and
-`docs/evidence/query-performance.json`; remote GitLab CI remains unverified because
-VPN is currently down. Feature 003 specification, plan/contracts and tasks were
+`docs/evidence/query-performance.json`; GitLab pipeline 6874 is pending without an
+assigned runner, so remote CI remains unverified. Feature 003 specification, plan/contracts and tasks were
 approved on 2026-10-19; implementation is underway with fake-provider tests and a
 local mock-provider benchmark recorded in `docs/evidence/retrieval-traceability.md`
 and `docs/evidence/retrieval-performance.json`. Implementation/automated verification
