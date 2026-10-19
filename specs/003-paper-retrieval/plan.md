@@ -4,7 +4,7 @@
 
 **Input**: User-approved feature specification in `specs/003-paper-retrieval/spec.md`.
 
-**Status**: Draft pending human plan/contract approval. No implementation is authorized.
+**Status**: Plan approved by the user on 2026-10-19. API/provider contracts and tasks remain separate approval gates; no implementation is authorized.
 
 ## Summary
 

@@ -1,6 +1,6 @@
 # Retrieval API/UI contract — proposal
 
-**Status**: Draft; requires plan/contract approval. Same-origin, local, single-user
+**Status**: Approved by the user on 2026-10-19. Same-origin, local, single-user
 JSON API. Existing project and query routes remain compatible except that project/query
 mutations return a conflict while that project's retrieval attempt is active.
 

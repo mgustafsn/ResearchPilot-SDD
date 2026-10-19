@@ -1,6 +1,6 @@
 # PaperProvider / OpenAlex adapter contract — proposal
 
-**Status**: Draft; requires plan/contract approval. No live request is authorized or
+**Status**: Approved by the user on 2026-10-19. No live request is authorized or
 performed by this contract.
 
 ## Domain interface

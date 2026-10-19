@@ -814,6 +814,42 @@ correctness. Application tests were not runnable because no implementation exist
   change, or implementation occurred. Plan/contracts/tasks/implementation approval
   remain separate gates.
 
+## Feature 003 implementation plan approval — 2026-10-19
+
+- User approval (verbatim): “I approve the plan. Lets go”. Recorded approval of
+  `specs/003-paper-retrieval/plan.md`, including the proposed budgets/verification
+  approach as written. At this point the API/provider contracts still awaited separate
+  review; they were approved in the following entry. Task generation and implementation
+  had not begun. No live OpenAlex/OpenAI call was made. VPN is down; no push attempted.
+
+## Feature 003 API/provider contract approval — 2026-10-19
+
+- User approved both draft contracts (reply: “Approve both (Recommended)”) for
+  `specs/003-paper-retrieval/contracts/api.md` and
+  `specs/003-paper-retrieval/contracts/provider.md`. Task generation is authorized;
+  generated tasks and implementation still require separate review/approval.
+- No live provider call was made. OpenAI remains unconfigured per user preference;
+  OpenAlex usage is restricted to explicit user-triggered searches in the future.
+
+## Feature 003 task draft — 2026-10-19
+
+- User separately approved the implementation plan and API/provider contracts.
+  `.specify/scripts/bash/setup-tasks.sh --json` resolved `specs/003-paper-retrieval/`
+  and the available research/data-model/contracts/quickstart artifacts. No extension
+  hooks file is present. Task generation did not authorize implementation.
+- Created `specs/003-paper-retrieval/tasks.md` with 33 sequential unchecked tasks:
+  setup 3, foundation 5, US1 retrieval 8, US2 safe recovery 8, cross-cutting/polish 9.
+  MVP candidate is US1 successful retrieval using fakes; full acceptance requires US2
+  failure/ownership behavior as well. Independent test authorship opportunities are
+  marked [P]; no agents or delegated work were used.
+- Requirement-to-task mapping covers FR-RET-001–010. Tasks sequence tests before
+  logic and preserve disposable-DB safeguards, no-live-provider testing, no OpenAI
+  requests, no API key/paid plan, and excluded ranking/references/PDF work. All task
+  IDs are unchecked pending user task review/approval.
+- Format validation: **33/33** lines have checkbox, sequential ID, valid optional
+  labels, description and file path. `git diff --check`: PASS. No application code,
+  tests, migrations, CI, API requests or dependencies changed.
+
 Attach full significant prompts or link committed prompt files. Do not reconstruct
 missing original prompts as quotations. Save representative responses/diffs.
 
