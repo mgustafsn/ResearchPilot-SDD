@@ -726,6 +726,24 @@ correctness. Application tests were not runnable because no implementation exist
   `docs/evidence/query-traceability.md`; README and `docs/verification.md` link the
   current verified status and query performance artifact.
 
+## Feature 002 human review and acceptance — 2026-10-19
+
+- Reviewer: user; browser/version not provided. After being asked to review query
+  add/edit/enable/disable/delete, keyboard/focus behavior, validation retention,
+  context refresh notice, ownership labels, and suggestion privacy disclosure, the
+  user reported (verbatim): **“All works. Lets proceed.”** This is recorded as the
+  requested human usability review and explicit acceptance of feature 002. No
+  individual accessibility claim beyond the user's reported review is inferred.
+- The user affirmed the privacy disclosure and stated they do not want the app
+  connected to OpenAI now. No live calls were made. A non-secret configuration check
+  found `OPENAI_API_KEY` absent and `OPENAI_QUERY_MODEL` absent from local `.env`;
+  suggestion generation is therefore unavailable in this local run while manual
+  query management remains usable. The integration remains explicit-action/optional
+  per the approved feature; no permanent removal was requested.
+- Feature 002 accepted. Remote GitLab CI remains unverified because VPN access is
+  required. BUG-PRJ-001 remains deferred and unfixed. Features 003–005 remain separate
+  approval gates; this acceptance does not approve their specs/plans/tasks or code.
+
 Attach full significant prompts or link committed prompt files. Do not reconstruct
 missing original prompts as quotations. Save representative responses/diffs.
 

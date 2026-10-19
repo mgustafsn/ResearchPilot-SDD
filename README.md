@@ -4,8 +4,8 @@ A specification-driven rebuild of a deliberately smaller ResearchPilot MVP.
 Feature 001 project creation/listing/reopening/editing/deletion is implemented.
 Feature 002 manual query controls are implemented: add/edit/delete, enable/disable,
 20-query limits, and durable context-change notices. Explicit AI suggestion generation
-is implemented and tested only with fakes/mock HTTP; no live OpenAI call has been made,
-and human review and feature acceptance remain pending. Latest local verification:
+is implemented and tested only with fakes/mock HTTP; no live OpenAI call has been made.
+Feature 002 is accepted; the user does not want OpenAI connected now. Latest local verification:
 281 tests passed; query CRUD measured 3.75 ms p95 against the approved 500 ms
 reference-host budget. See [query traceability](docs/evidence/query-traceability.md)
 and [query performance evidence](docs/evidence/query-performance.json). Remote
