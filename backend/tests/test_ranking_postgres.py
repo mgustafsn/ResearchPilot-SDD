@@ -45,7 +45,7 @@ def test_FR_RNK_006_upgrade_preserves_legacy_without_backfill(db):
         assert row["ranking_provenance"] is None
         assert row["ordinal"] == 0
         assert c.execute(text("SELECT title FROM papers")).scalar_one() == "A paper"
-        assert c.execute(text("SELECT count(*) FROM schema_migrations")).scalar_one() == 4
+        assert c.execute(text("SELECT count(*) FROM schema_migrations")).scalar_one() == 5
     reopened = Database(str(db.engine.url.render_as_string(hide_password=False)))
     try:
         reopened.migrate()

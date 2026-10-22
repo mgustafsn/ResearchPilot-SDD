@@ -101,8 +101,11 @@ citation numbering, authentication, exports, and PDF ingestion are excluded.
   Human ranking-usefulness evaluation and acceptance remain pending. Model setup
   has been run locally; startup/Search never download or repair it automatically.
   See [ranking traceability](docs/evidence/ranking-traceability.md).
-- Feature 005 remains a draft and is not implemented. Remote GitLab CI remains
-  unverified; last observed pipeline had no assigned runner.
+- Feature 005's specification and plan/supporting design are approved. The task
+  list is prepared for review; implementation remains unauthorized until that
+  gate is approved. Remote GitLab CI remains unverified; last observed pipeline had no assigned runner. GitHub Actions run
+  [39827940845](https://github.com/mgustafsn/ResearchPilot-SDD/actions/runs/39827940845)
+  passed for the current feature-004 commit (423 passed, 4 performance tests excluded).
 
 Initial artifacts were derived by an AI coding agent from the original repository
 without invoking Spec Kit commands. Feature 001 subsequently underwent the installed

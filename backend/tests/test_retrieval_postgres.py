@@ -127,14 +127,20 @@ def test_FR_RET_006_007_migration_003_is_versioned_repeatable_and_reflected(db_u
             )
             tables = {
                 connection.execute(text("SELECT to_regclass(:name)"), {"name": name}).scalar_one()
-                for name in ("papers", "project_papers", "search_runs")
+                for name in ("papers", "project_papers", "search_runs", "saved_references")
             }
-        assert versions == {"001_projects.sql", "002_search_queries.sql",
-                            "003_paper_retrieval.sql", "004_local_ranking.sql"}
-        assert tables == {"papers", "project_papers", "search_runs"}
+        assert versions == {
+            "001_projects.sql",
+            "002_search_queries.sql",
+            "003_paper_retrieval.sql",
+            "004_local_ranking.sql",
+            "005_saved_references.sql",
+        }
+        assert tables == {"papers", "project_papers", "search_runs", "saved_references"}
         assert database.papers.name == "papers"
         assert database.project_papers.name == "project_papers"
         assert database.search_runs.name == "search_runs"
+        assert database.saved_references.name == "saved_references"
     finally:
         database.close()
 
@@ -213,8 +219,14 @@ def test_FR_RET_006_007_success_persists_run_snapshot_and_replaces_results(db):
         "yearTo": 2024,
         "maxPaperCount": 2,
     }
-    with TestClient(create_app(db, suggestion_provider=None, paper_provider=provider,
-                              embedding_provider=FakeEmbeddingProvider())) as client:
+    with TestClient(
+        create_app(
+            db,
+            suggestion_provider=None,
+            paper_provider=provider,
+            embedding_provider=FakeEmbeddingProvider(),
+        )
+    ) as client:
         project = client.post("/api/projects", json=values).json()
         query_path = f"/api/projects/{project['id']}/queries"
         client.post(query_path, json={"text": "Search phrase", "expectedRevision": 0})
@@ -259,8 +271,14 @@ def test_FR_RET_006_007_success_persists_run_snapshot_and_replaces_results(db):
 def test_FR_RET_007_successful_empty_search_removes_associations(db):
     provider = FakePaperProvider([[paper("W1", "Old")], []])
     values = {"title": "Empty", "researchQuestion": "Question", "maxPaperCount": 1}
-    with TestClient(create_app(db, suggestion_provider=None, paper_provider=provider,
-                              embedding_provider=FakeEmbeddingProvider())) as client:
+    with TestClient(
+        create_app(
+            db,
+            suggestion_provider=None,
+            paper_provider=provider,
+            embedding_provider=FakeEmbeddingProvider(),
+        )
+    ) as client:
         project = client.post("/api/projects", json=values).json()
         path = f"/api/projects/{project['id']}"
         query_path = f"{path}/queries"
@@ -291,8 +309,14 @@ def test_FR_RET_007_successful_empty_search_removes_associations(db):
 def test_FR_RET_008_project_and_query_mutations_conflict_during_active_search(db, mutation):
     provider = BarrierPaperProvider(block_first=True)
     values = {"title": "Locked", "researchQuestion": "Question", "maxPaperCount": 10}
-    with TestClient(create_app(db, suggestion_provider=None, paper_provider=provider,
-                              embedding_provider=FakeEmbeddingProvider())) as client:
+    with TestClient(
+        create_app(
+            db,
+            suggestion_provider=None,
+            paper_provider=provider,
+            embedding_provider=FakeEmbeddingProvider(),
+        )
+    ) as client:
         project = client.post("/api/projects", json=values).json()
         path = f"/api/projects/{project['id']}"
         query_path = f"{path}/queries"
@@ -329,8 +353,14 @@ def test_FR_RET_008_expired_owner_cannot_replace_newer_attempt(db):
         block_first=True,
     )
     values = {"title": "Lease", "researchQuestion": "Question", "maxPaperCount": 1}
-    with TestClient(create_app(db, suggestion_provider=None, paper_provider=provider,
-                              embedding_provider=FakeEmbeddingProvider())) as client:
+    with TestClient(
+        create_app(
+            db,
+            suggestion_provider=None,
+            paper_provider=provider,
+            embedding_provider=FakeEmbeddingProvider(),
+        )
+    ) as client:
         project = client.post("/api/projects", json=values).json()
         path = f"/api/projects/{project['id']}"
         client.post(f"{path}/queries", json={"text": "Query", "expectedRevision": 0})
@@ -384,8 +414,14 @@ def test_FR_RET_007_failed_result_commit_preserves_previous_associations(db):
         ]
     )
     values = {"title": "Rollback", "researchQuestion": "Question", "maxPaperCount": 1}
-    with TestClient(create_app(db, suggestion_provider=None, paper_provider=provider,
-                              embedding_provider=FakeEmbeddingProvider())) as client:
+    with TestClient(
+        create_app(
+            db,
+            suggestion_provider=None,
+            paper_provider=provider,
+            embedding_provider=FakeEmbeddingProvider(),
+        )
+    ) as client:
         project = client.post("/api/projects", json=values).json()
         path = f"/api/projects/{project['id']}"
         client.post(f"{path}/queries", json={"text": "Query", "expectedRevision": 0})

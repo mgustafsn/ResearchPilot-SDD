@@ -69,6 +69,7 @@ class FakeEmbeddingProvider:
             EmbeddingItem,
         )
         from researchpilot.ranking_domain import token_hash
+
         self.calls.append(inputs)
         if self.failure:
             raise EmbeddingError(self.failure)
@@ -76,11 +77,22 @@ class FakeEmbeddingProvider:
         for i in range(len(inputs) - 1):
             cosine = 0.59 - i * 0.001
             vectors.append([cosine, math.sqrt(1 - cosine**2)])
-        return EmbeddingBatch(model_id=MODEL_ID, model_revision=MODEL_REVISION, dimension=384,
-            package_versions={"fake": "test-only"}, items=[
-                EmbeddingItem(id=item.id, vector=vector + [0.0] * 382,
-                    token_hash=token_hash([101, 102]), token_count=2, truncated=False)
-                for item, vector in zip(inputs, vectors, strict=True)])
+        return EmbeddingBatch(
+            model_id=MODEL_ID,
+            model_revision=MODEL_REVISION,
+            dimension=384,
+            package_versions={"fake": "test-only"},
+            items=[
+                EmbeddingItem(
+                    id=item.id,
+                    vector=vector + [0.0] * 382,
+                    token_hash=token_hash([101, 102]),
+                    token_count=2,
+                    truncated=False,
+                )
+                for item, vector in zip(inputs, vectors, strict=True)
+            ],
+        )
 
 
 def require_safe_test_database(test_url=None, app_url=None, opt_in=None):
@@ -89,9 +101,13 @@ def require_safe_test_database(test_url=None, app_url=None, opt_in=None):
     opt_in = opt_in if opt_in is not None else os.environ.get("ALLOW_TEST_DATABASE_RESET", "")
     try:
         target = make_url(test_url)
-        if (opt_in != "1" or not app_url or target.database != "researchpilot_sdd_test"
-                or target.get_backend_name() != "postgresql"
-                or target.host not in {"127.0.0.1", "localhost", "::1"}):
+        if (
+            opt_in != "1"
+            or not app_url
+            or target.database != "researchpilot_sdd_test"
+            or target.get_backend_name() != "postgresql"
+            or target.host not in {"127.0.0.1", "localhost", "::1"}
+        ):
             raise ValueError
         if app_url:
             application = make_url(app_url)
@@ -119,9 +135,12 @@ def db(db_url):
     database = Database(db_url)
     database.migrate()
     with database.engine.begin() as connection:
-        connection.execute(text(
-            "TRUNCATE project_papers, search_runs, papers, search_queries, projects"
-        ))
+        connection.execute(
+            text(
+                "TRUNCATE saved_references, project_papers, search_runs, papers, "
+                "search_queries, projects"
+            )
+        )
     try:
         yield database
     finally:
@@ -136,15 +155,28 @@ def live_server(db, db_url):
             sock.bind(("127.0.0.1", 0))
             port = sock.getsockname()[1]
         base = f"http://127.0.0.1:{port}"
-        environment = dict(os.environ, DATABASE_URL=str(db_url),
-                           PYTHONPATH=str(Path("backend").resolve()))
+        environment = dict(
+            os.environ, DATABASE_URL=str(db_url), PYTHONPATH=str(Path("backend").resolve())
+        )
         # Never let a developer's real key enable live generation in tests.
         environment.pop("OPENAI_API_KEY", None)
         environment.pop("OPENALEX_API_KEY", None)
         process = subprocess.Popen(
-            [sys.executable, "-m", "uvicorn", "researchpilot.api:create_app", "--factory",
-             "--host", "127.0.0.1", "--port", str(port), "--no-access-log"],
-            env=environment, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            [
+                sys.executable,
+                "-m",
+                "uvicorn",
+                "researchpilot.api:create_app",
+                "--factory",
+                "--host",
+                "127.0.0.1",
+                "--port",
+                str(port),
+                "--no-access-log",
+            ],
+            env=environment,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
         try:
             with httpx.Client(base_url=base) as client:
@@ -167,6 +199,7 @@ def live_server(db, db_url):
             except subprocess.TimeoutExpired:
                 process.kill()
                 process.wait()
+
     return start
 
 
@@ -188,12 +221,20 @@ def query_server(db):
             sock.bind(("127.0.0.1", 0))
             port = sock.getsockname()[1]
         base = f"http://127.0.0.1:{port}"
-        server = uvicorn.Server(uvicorn.Config(
-            create_app(db, suggestion_provider=provider, paper_provider=paper_provider,
-                       embedding_provider=embedding_provider or FakeEmbeddingProvider()),
-            host="127.0.0.1", port=port,
-            log_level="warning", access_log=False,
-        ))
+        server = uvicorn.Server(
+            uvicorn.Config(
+                create_app(
+                    db,
+                    suggestion_provider=provider,
+                    paper_provider=paper_provider,
+                    embedding_provider=embedding_provider or FakeEmbeddingProvider(),
+                ),
+                host="127.0.0.1",
+                port=port,
+                log_level="warning",
+                access_log=False,
+            )
+        )
         thread = threading.Thread(target=server.run, daemon=True)
         thread.start()
         try:
@@ -213,4 +254,5 @@ def query_server(db):
             thread.join(timeout=5)
             if thread.is_alive():
                 raise RuntimeError("Injected-provider test server failed to shut down")
+
     return start

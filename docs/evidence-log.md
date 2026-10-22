@@ -1,5 +1,66 @@
 # Evidence log
 
+## Feature 004 GitHub Actions verification — 2026-10-22
+
+- Commit `64fe96a35b8eb8d58f7e1075a03ad4c68765f0d9` was pushed to the existing
+  private GitHub repository. GitHub Actions run [39827940845](https://github.com/mgustafsn/ResearchPilot-SDD/actions/runs/39827940845)
+  completed successfully on Ubuntu 24.04 with PostgreSQL 17 and Python 3.12.
+- CI passed locked dependency setup, browser installation, `ruff check backend`,
+  `node --check frontend/app.js`, and `uv run pytest -m "not performance" -q`:
+  **423 passed, 4 deselected in 51.40s**. Performance-marked tests were
+  intentionally excluded; real-model/reference-host benchmarking remains separate.
+- This verifies the GitHub workflow for this commit. GitLab pipeline status is a
+  separate, still-unverified check. No prompt, runtime, or requirement changes were
+  made to record this result.
+
+## Feature 005 specification and plan preparation — 2026-10-22
+
+- The user approved the Feature 005 specification for planning (reply: “Approve
+  spec for planning”). This approves the specification only. Recorded that gate in
+  `specs/005-saved-references/spec.md` and `docs/scope.md`.
+- Read constitution 2.0.0, the approved Feature 005 spec, current normalized Paper
+  model, project/search locking, migration conventions, and prior feature plans.
+  Prepared `plan.md`, `research.md`, `data-model.md`, `contracts/api.md`, and
+  `quickstart.md` for review. No task list, migration, runtime code, or new
+  dependency was created; implementation remains unauthorized.
+- Proposed design uses one additive JSONB snapshot table with provider identity
+  uniqueness, no FK to mutable search/paper rows, current-result-only saves,
+  project-row locking, active-search save rejection, project-scoped listing/removal,
+  and explicit project-delete cascade. No performance budget was invented.
+- No application tests, OpenAlex calls, or ranking labels were run/collected.
+  Ranking review retrieval awaits the user's research question. Local app was
+  started with the existing model and PostgreSQL; `GET /` returned HTTP 200. This
+  is setup evidence only, not human usability/acceptance evidence.
+
+## Feature 005 plan approval and task preparation — 2026-10-22
+
+- User reviewed the plan/supporting design and said: “I reviewed, every thing
+  looks good. I think we can start feature 005”. Recorded plan/design approval in
+  `specs/005-saved-references/`; this is not inferred as approval of unseen tasks.
+- Prepared a 19-task test-first implementation sequence in
+  `specs/005-saved-references/tasks.md`, mapping FR-REF-001–008,
+  AC-REF-001–004, and SC-REF-001–003. Tasks cover strict snapshots, migration,
+  idempotent concurrent writes, current-result ownership, active search behavior,
+  project isolation, safe UI, audits, and actual evidence.
+- Task list is a draft for separate human review. No Feature 005 source code,
+  migration, or tests were added or run; no runtime implementation is claimed.
+  `git diff --check` was run for documentation whitespace only.
+- Ranking usefulness review remains blocked on the user's exact research question;
+  the user authorized an OpenAlex retrieval for that review but has not supplied the
+  question. No OpenAlex request or human label was made.
+
+## Feature 005 task approval and implementation start — 2026-10-22
+
+- User reviewed and approved the 19-task Feature 005 checklist (reply: “I reviewed
+  and I approve”). Implementation authorization is limited to approved Feature 005.
+- Starting with T001 baseline verification against the guarded disposable test
+  database. Preserve all existing uncommitted documentation/evidence changes.
+- T001 completed: `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache uv run --env-file
+  .env pytest -q --tb=short` on Python 3.13.15: **426 passed, 1 skipped in
+  52.52s**. The first sandboxed run failed to connect to local PostgreSQL; the
+  identical guarded run with authorized local-network access passed. No code was
+  changed before the baseline; application database was not reset.
+
 ## Feature 004 initial user observation — 2026-10-21
 
 - User reported: “Yep it ranks now”. Recorded as user-observed ranking behavior
@@ -1486,3 +1547,59 @@ Personal identifiers and percentages remain unfilled until supplied and agreed b
   --pipeline-id 6874 --output json` reports status `pending`, job `test` not started,
   runner id `0`, inactive, with no runner assigned. CI result is therefore unverified;
   no retry or runner setup was attempted.
+
+## Feature 005 implementation and automated verification — 2026-10-22
+
+- Feature 005 spec, plan/supporting design and tasks were reviewed and approved by
+  the user before runtime implementation. The implementation added only the saved
+  reference slice: migration 005, normalized snapshot domain/service, scoped API,
+  and save/list/remove browser controls. It adds no dependency or provider/LLM
+  metadata path and does not edit earlier migrations.
+- `migrations/005_saved_references.sql` stores provider-owned Paper fields as a JSONB
+  snapshot, checks provider/source identity and required title/source fields, and
+  cascades only from its owning project. It has no FK to replaceable search results.
+  Save locks the project row first, resolves a paper from current project results,
+  checks/expires leases through existing search ownership code, and uses a unique
+  provider identity plus `ON CONFLICT DO NOTHING` for idempotency. List and delete
+  are project-scoped and do not require an inactive search.
+- API accepts only `paperId` on save, returns sanitized reference errors, and strips
+  ranking state by constructing responses from the strict normalized `Paper` model.
+  First save returns 201; an idempotent repeat returns 200 with the stored snapshot.
+  Browser content uses `textContent` and links pass the existing HTTP(S),
+  credential-free URL validator. No `innerHTML`, manual citation fields, or LLM call
+  was added to this flow.
+- Test-first evidence: initial new reference suite had 16 expected implementation
+  failures; after implementation, focused domain/PostgreSQL/API tests passed **20/20**.
+  Browser regression passed **1/1** with Chromium. The full command
+  `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache uv run --env-file .env pytest -x -q --tb=short`
+  completed with **447 passed, 1 skipped in 58.31s** on Python 3.13.15 using the
+  guarded disposable PostgreSQL database and Chromium. One earlier full-suite run
+  caught the existing project test's expected migration list missing version 005;
+  the assertion was corrected, then the full suite passed. A separate full run had
+  a transient PostgreSQL DDL lock conflict; it did not recur after isolation.
+- `UV_CACHE_DIR=/tmp/researchpilot-sdd-uv-cache uv run ruff check .`: PASS.
+  `uv run ruff format --check` over the 12 changed Python files: PASS.
+  `node --check frontend/app.js`: PASS. `git diff --check`: PASS. Secret-pattern
+  scan of backend/frontend/migrations found no token-shaped credential literals.
+  No live OpenAlex/OpenAI calls were used.
+- Coverage includes concurrent duplicate saves, migration repeat/reopen, project
+  deletion cascade, result deletion/provider refresh independence, active-search save
+  rejection with list/remove available, stale lease expiry, cross-project isolation,
+  and inert hostile text/safe links. Gaps: no separately injected migration rollback
+  failure; failed-search preservation is supported by independent snapshot storage
+  rather than an explicit failure-after-save test; no multi-item browser sort journey.
+  Sorting itself has a Unicode case-fold domain test. These are documented limits.
+- Static audit found project-first row locks in saved-reference reads/writes, no
+  scholarly metadata source besides normalized provider Papers, no ranking metadata
+  in saved output, project-scoped reference IDs, and project cascade. No automated
+  implementation blocker remains. Human keyboard/usability review and explicit
+  feature acceptance are pending; automated results do not claim user acceptance.
+- Local review startup: `./scripts/start-local.sh` applied repository migrations but
+  could not bind port 8000 because another app already held it. Left that app
+  untouched and started this checkout on `http://127.0.0.1:8001/`; homepage and
+  OpenAPI returned HTTP 200 and OpenAPI includes the three reference routes. The
+  local review server remains running for the user's keyboard/usability review.
+- Human review and acceptance: on 2026-10-22 the user confirmed satisfaction,
+  approved Feature 005, and authorized pushing it to GitHub. No requested UI fixes
+  or limitations were reported. This completes the Feature 005 human acceptance
+  gate; implementation/test coverage limitations above remain part of the evidence.

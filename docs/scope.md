@@ -10,8 +10,9 @@ separately approved on 2026-10-19; the implemented feature was accepted by the u
 on 2026-10-21. Feature 004's local-ranking specification, including provisional
 score mapping and showing all retrieved papers, was approved on 2026-10-21;
 its plan/supporting design/contracts were separately approved on 2026-10-21;
-tasks/implementation were authorized on 2026-10-21 (reply: “Start”). Feature 005
-remains a separate review gate.
+tasks/implementation were authorized on 2026-10-21 (reply: “Start”). Feature 005's
+specification, plan/supporting design, and tasks were approved on 2026-10-22;
+implementation is authorized for Feature 005 only.
 
 ## Objective and stakeholders
 

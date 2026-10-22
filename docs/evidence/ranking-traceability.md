@@ -34,5 +34,7 @@ automated evidence; **SC-RNK-003 human-labeled usefulness evaluation is pending*
 - Static/AI audit is not independent human security certification. Offline controls
   cover this app's known ML libraries and Python socket/DNS access, not a hostile
   native binary controlling the user's machine. No model pickle/remote Python used.
-- Remote CI was not rerun/verified. BUG-PRJ-001 remains deferred. Feature 005 not
+- GitHub Actions run 39827940845 for commit `64fe96a` passed (423 passed, 4
+  performance tests deselected); GitLab pipeline 6874 remains unverified.
+  BUG-PRJ-001 remains deferred. Feature 005 not
   implemented. Human keyboard/usability review and explicit 004 acceptance pending.

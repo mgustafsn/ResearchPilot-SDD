@@ -2,7 +2,7 @@
 
 **Feature Branch**: Proposed `005-saved-references` (not created)
 **Created**: 2026-10-11
-**Status**: Draft — human approval required
+**Status**: Specification approved by the user on 2026-10-22 (reply: “Approve spec for planning”). Plan/supporting design approved by the user on 2026-10-22 (reply: “I reviewed, every thing looks good. I think we can start feature 005”). Task review remains before implementation.
 **Input**: Retain a minimal project reading list from retrieved papers.
 
 ## User Scenarios & Testing
@@ -49,4 +49,6 @@ It is not dependent on a currently present ProjectPaper association.
 ## Assumptions
 
 Depends on 003; ranked final demonstration also needs 004. Snapshot semantics and
-provider-identity-only duplicate detection are deliberate simplifications needing approval.
+provider-identity-only duplicate detection are deliberate simplifications approved
+for planning on 2026-10-22. The plan/supporting design were reviewed and approved
+on 2026-10-22. Tasks require their own review before implementation.

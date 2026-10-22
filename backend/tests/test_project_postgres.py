@@ -10,17 +10,26 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
 
-@pytest.mark.parametrize("url,app,opt_in", [
-    ("postgresql+psycopg://localhost/researchpilot_sdd_test", "", "0"),
-    ("postgresql+psycopg://localhost/researchpilot_sdd", "", "1"),
-    ("sqlite:///researchpilot_sdd_test", "", "1"),
-    ("bad-secret-url", "", "1"),
-    ("postgresql+psycopg://localhost/researchpilot_sdd_test", "", "1"),
-    ("postgresql+psycopg://remote.invalid/researchpilot_sdd_test",
-     "postgresql://localhost/researchpilot_sdd", "1"),
-    ("postgresql+psycopg://one:secret@localhost/researchpilot_sdd_test",
-     "postgresql://two:other@127.0.0.1:5432/researchpilot_sdd_test", "1"),
-])
+@pytest.mark.parametrize(
+    "url,app,opt_in",
+    [
+        ("postgresql+psycopg://localhost/researchpilot_sdd_test", "", "0"),
+        ("postgresql+psycopg://localhost/researchpilot_sdd", "", "1"),
+        ("sqlite:///researchpilot_sdd_test", "", "1"),
+        ("bad-secret-url", "", "1"),
+        ("postgresql+psycopg://localhost/researchpilot_sdd_test", "", "1"),
+        (
+            "postgresql+psycopg://remote.invalid/researchpilot_sdd_test",
+            "postgresql://localhost/researchpilot_sdd",
+            "1",
+        ),
+        (
+            "postgresql+psycopg://one:secret@localhost/researchpilot_sdd_test",
+            "postgresql://two:other@127.0.0.1:5432/researchpilot_sdd_test",
+            "1",
+        ),
+    ],
+)
 def test_NFR_PRJ_001_safety_refuses_unsafe_targets(url, app, opt_in):
     with pytest.raises(RuntimeError, match="^Refusing unsafe test database configuration$"):
         require_safe_test_database(url, app, opt_in)
@@ -31,10 +40,14 @@ def test_NFR_PRJ_001_safety_allows_separate_database():
     assert require_safe_test_database(url, "postgresql://localhost/researchpilot_sdd", "1") == url
 
 
-@pytest.mark.parametrize("url", [
-    "sqlite:///projects.sqlite", "postgresql+psycopg://localhost/original_project",
-    "postgresql+psycopg://remote.invalid/researchpilot_sdd",
-])
+@pytest.mark.parametrize(
+    "url",
+    [
+        "sqlite:///projects.sqlite",
+        "postgresql+psycopg://localhost/original_project",
+        "postgresql+psycopg://remote.invalid/researchpilot_sdd",
+    ],
+)
 def test_NFR_PRJ_001_runtime_refuses_nonlocal_or_unrelated_database(url):
     with pytest.raises(RuntimeError, match="^Use the dedicated local ResearchPilot database$"):
         Database(url)
@@ -47,8 +60,13 @@ def test_FR_PRJ_006_migrations_are_versioned_and_repeatable(db_url):
         database.migrate()
         with database.engine.connect() as connection:
             versions = connection.execute(text("SELECT version FROM schema_migrations")).scalars()
-            assert sorted(versions) == ["001_projects.sql", "002_search_queries.sql",
-                                        "003_paper_retrieval.sql", "004_local_ranking.sql"]
+            assert sorted(versions) == [
+                "001_projects.sql",
+                "002_search_queries.sql",
+                "003_paper_retrieval.sql",
+                "004_local_ranking.sql",
+                "005_saved_references.sql",
+            ]
     finally:
         database.close()
 
@@ -56,13 +74,16 @@ def test_FR_PRJ_006_migrations_are_versioned_and_repeatable(db_url):
 def insert_project(connection, **overrides):
     values = dict(title="Persisted", question="A question", count=100, start=None, end=None)
     values.update(overrides)
-    return connection.execute(text("""
+    return connection.execute(
+        text("""
         INSERT INTO projects
             (id, title, research_question, keywords, year_from, year_to,
              max_paper_count, created_at, updated_at)
         VALUES ('11111111-1111-4111-8111-111111111111', :title, :question, '[]',
                 :start, :end, :count, now(), now()) RETURNING id
-    """), values).scalar_one()
+    """),
+        values,
+    ).scalar_one()
 
 
 def test_FR_PRJ_006_reconnect_and_migrate_preserve_data(db, db_url):
@@ -78,10 +99,20 @@ def test_FR_PRJ_006_reconnect_and_migrate_preserve_data(db, db_url):
         restarted.close()
 
 
-@pytest.mark.parametrize("overrides", [
-    {"title": ""}, {"title": "x" * 201}, {"question": ""}, {"question": "x" * 5001},
-    {"count": 0}, {"count": 251}, {"start": 0}, {"end": 10000}, {"start": 2026, "end": 2020},
-])
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"title": ""},
+        {"title": "x" * 201},
+        {"question": ""},
+        {"question": "x" * 5001},
+        {"count": 0},
+        {"count": 251},
+        {"start": 0},
+        {"end": 10000},
+        {"start": 2026, "end": 2020},
+    ],
+)
 def test_FR_PRJ_002_004_005_database_constraints(db, overrides):
     with pytest.raises(IntegrityError):
         with db.engine.begin() as connection:
@@ -101,8 +132,13 @@ def test_FR_PRJ_007_transaction_rolls_back(db):
 
 def test_FR_PRJ_006_SC_PRJ_003_api_app_restart_retains_project(db, db_url, monkeypatch):
     monkeypatch.setenv("DATABASE_URL", str(db_url))
-    values = {"title": "Restart project", "researchQuestion": "Restart question",
-              "maxPaperCount": 100, "keywords": [" LLM ", "llm"], "yearFrom": 2020}
+    values = {
+        "title": "Restart project",
+        "researchQuestion": "Restart question",
+        "maxPaperCount": 100,
+        "keywords": [" LLM ", "llm"],
+        "yearFrom": 2020,
+    }
     with TestClient(create_app()) as first:
         response = first.post("/api/projects", json=values)
         assert response.status_code == 201

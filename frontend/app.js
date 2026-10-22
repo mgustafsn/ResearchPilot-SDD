@@ -11,6 +11,8 @@ let queryEditingId = null;
 const queryDrafts = new Map();
 const pendingGenerations = new Set();
 const pendingSearches = new Set();
+let referenceState = null;
+let latestPaperState = null;
 
 function clearErrors() {
   byId("error").hidden = true;
@@ -90,11 +92,14 @@ function showDetail(project) {
   byId("form-section").hidden = true;
   byId("detail-title").focus();
   queryState = null;
+  referenceState = null;
+  latestPaperState = null;
   const draft = queryDrafts.get(project.id) || {text: "", id: null};
   queryEditingId = draft.id;
   byId("query-text").value = draft.text;
   byId("query-section").hidden = true;
   byId("retrieval-section").hidden = true;
+  byId("saved-reference-section").hidden = false;
   byId("save-query").disabled = true;
   byId("generate-queries").disabled = true;
   byId("search-openalex").disabled = true;
@@ -102,6 +107,7 @@ function showDetail(project) {
     ? "Generating suggestions…" : "";
   loadQueries(project.id, epoch);
   loadPapers(project.id, epoch);
+  loadReferences(project.id, epoch);
 }
 
 async function openProject(id) {
@@ -298,12 +304,23 @@ function makePaperLink(value, label) {
 }
 
 function renderPapers(state) {
+  latestPaperState = state;
   const papers = state.papers || [];
+  const savedKeys = new Set((referenceState?.references || []).map(
+    (reference) => `${reference.provider}:${reference.providerId}`));
   const items = papers.map((paper) => {
     const item = document.createElement("li");
     const heading = document.createElement("h4");
     heading.textContent = paper.title;
     item.append(heading);
+
+    const save = document.createElement("button");
+    save.type = "button";
+    const alreadySaved = savedKeys.has(`${paper.provider}:${paper.providerId}`);
+    save.textContent = alreadySaved ? "Saved" : "Save reference";
+    save.disabled = alreadySaved;
+    save.addEventListener("click", () => saveReference(paper.id, save));
+    item.append(save);
 
     const similarity = document.createElement("p");
     similarity.className = "embedding-similarity";
@@ -377,6 +394,73 @@ function renderPapers(state) {
       `${attempt.skippedCount} skipped, ${attempt.duplicateCount} duplicates removed.`;
   } else {
     byId("search-status").textContent = "No search has been run for this project.";
+  }
+}
+
+function renderReferences(state) {
+  referenceState = state;
+  const items = state.references.map((reference) => {
+    const item = document.createElement("li");
+    const heading = document.createElement("h4");
+    heading.textContent = reference.title;
+    item.append(heading);
+    const metadata = document.createElement("p");
+    metadata.textContent = [
+      ...(reference.authors || []),
+      reference.publicationYear ? String(reference.publicationYear) : null,
+      reference.venue,
+    ].filter(Boolean).join(" · ");
+    item.append(metadata);
+    const link = makePaperLink(reference.sourceUrl, "OpenAlex record");
+    if (link) item.append(link);
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "Remove reference";
+    remove.addEventListener("click", () => removeReference(reference.id, remove));
+    item.append(document.createTextNode(" "), remove);
+    return item;
+  });
+  byId("saved-reference-list").replaceChildren(...items);
+  byId("saved-reference-empty").hidden = items.length !== 0;
+  if (latestPaperState) renderPapers(latestPaperState);
+}
+
+async function loadReferences(projectId, epoch) {
+  try {
+    const state = await request(`/api/projects/${projectId}/references`);
+    if (queryViewCurrent(projectId, epoch)) renderReferences(state);
+  } catch (error) {
+    if (queryViewCurrent(projectId, epoch)) showError(error);
+  }
+}
+
+async function saveReference(paperId, button) {
+  if (!selectedProject) return;
+  const projectId = selectedProject.id;
+  const epoch = viewEpoch;
+  button.disabled = true;
+  try {
+    await request(`/api/projects/${projectId}/references`, {
+      method: "POST", body: JSON.stringify({paperId}),
+    });
+    if (queryViewCurrent(projectId, epoch)) await loadReferences(projectId, epoch);
+  } catch (error) {
+    button.disabled = false;
+    if (queryViewCurrent(projectId, epoch)) showError(error);
+  }
+}
+
+async function removeReference(referenceId, button) {
+  if (!selectedProject) return;
+  const projectId = selectedProject.id;
+  const epoch = viewEpoch;
+  button.disabled = true;
+  try {
+    await request(`/api/projects/${projectId}/references/${referenceId}`, {method: "DELETE"});
+    if (queryViewCurrent(projectId, epoch)) await loadReferences(projectId, epoch);
+  } catch (error) {
+    button.disabled = false;
+    if (queryViewCurrent(projectId, epoch)) showError(error);
   }
 }
 

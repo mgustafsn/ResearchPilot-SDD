@@ -27,6 +27,13 @@ from researchpilot.query_domain import (
     QueryPatchInput,
 )
 from researchpilot.query_service import QueryError, QueryService
+from researchpilot.references_domain import (
+    ReferenceError,
+    ReferenceListOutput,
+    ReferenceOutput,
+    ReferenceSaveInput,
+)
+from researchpilot.references_service import ReferenceService
 from researchpilot.retrieval_service import RetrievalError, RetrievalService
 from researchpilot.service import ProjectNotFound, ProjectService, SearchInProgress
 
@@ -38,12 +45,17 @@ LOCAL_EMBEDDINGS = object()
 
 
 def error_response(status, code, message, fields=None):
-    return JSONResponse({"error": {"code": code, "message": message,
-                                   "fields": fields or []}}, status_code=status)
+    return JSONResponse(
+        {"error": {"code": code, "message": message, "fields": fields or []}}, status_code=status
+    )
 
 
-def create_app(database=None, suggestion_provider=FROM_ENVIRONMENT,
-                paper_provider=OPENALEX_PROVIDER, embedding_provider=LOCAL_EMBEDDINGS):
+def create_app(
+    database=None,
+    suggestion_provider=FROM_ENVIRONMENT,
+    paper_provider=OPENALEX_PROVIDER,
+    embedding_provider=LOCAL_EMBEDDINGS,
+):
     @asynccontextmanager
     async def lifespan(app):
         owned = database is None
@@ -57,15 +69,22 @@ def create_app(database=None, suggestion_provider=FROM_ENVIRONMENT,
                 raise RuntimeError("Database startup failed; check local configuration") from None
             app.state.database = storage
             app.state.projects = ProjectService(storage)
-            provider = (openai_queries.from_environment(os.environ)
-                        if suggestion_provider is FROM_ENVIRONMENT else suggestion_provider)
+            provider = (
+                openai_queries.from_environment(os.environ)
+                if suggestion_provider is FROM_ENVIRONMENT
+                else suggestion_provider
+            )
             app.state.queries = QueryService(storage, provider)
+            app.state.references = ReferenceService(storage)
             if paper_provider is OPENALEX_PROVIDER:
                 retrieval_provider = OpenAlexPaperProvider()
             else:
                 retrieval_provider = paper_provider
-            embeddings = (LocalEmbeddingProvider() if embedding_provider is LOCAL_EMBEDDINGS
-                          else embedding_provider)
+            embeddings = (
+                LocalEmbeddingProvider()
+                if embedding_provider is LOCAL_EMBEDDINGS
+                else embedding_provider
+            )
             app.state.retrieval = RetrievalService(storage, retrieval_provider, embeddings)
             yield
         finally:
@@ -83,14 +102,19 @@ def create_app(database=None, suggestion_provider=FROM_ENVIRONMENT,
     @app.exception_handler(RequestValidationError)
     async def validation_error(request, exception):
         fields = []
-        allowed = set(ProjectInput.model_fields) | set(QueryAddInput.model_fields) | {
-            "project_id", "query_id"}
+        allowed = (
+            set(ProjectInput.model_fields)
+            | set(QueryAddInput.model_fields)
+            | {"project_id", "query_id", "paperId", "reference_id"}
+        )
         for error in exception.errors():
             name = next((part for part in error["loc"] if part in allowed), "request")
             kind, context = error["type"], error.get("ctx", {})
             messages = {
-                "missing": "This field is required.", "int_type": "Use a whole number.",
-                "string_type": "Use text.", "list_type": "Use a list of keywords.",
+                "missing": "This field is required.",
+                "int_type": "Use a whole number.",
+                "string_type": "Use text.",
+                "list_type": "Use a list of keywords.",
                 "extra_forbidden": "Unknown fields are not allowed.",
                 "json_invalid": "The request must contain valid JSON.",
                 "uuid_parsing": "Use a valid project ID.",
@@ -125,8 +149,9 @@ def create_app(database=None, suggestion_provider=FROM_ENVIRONMENT,
     async def storage_error(request, exception):
         # Never log exception text, SQL, parameters, credentials, or database URLs.
         logger.warning("Project storage operation failed")
-        return error_response(503, "STORAGE_UNAVAILABLE",
-                              "Storage is temporarily unavailable. Please try again.")
+        return error_response(
+            503, "STORAGE_UNAVAILABLE", "Storage is temporarily unavailable. Please try again."
+        )
 
     @app.exception_handler(QueryError)
     async def query_error(request, exception):
@@ -136,10 +161,22 @@ def create_app(database=None, suggestion_provider=FROM_ENVIRONMENT,
     async def retrieval_error(request, exception):
         return error_response(exception.status, exception.code, exception.message)
 
+    @app.exception_handler(ReferenceError)
+    async def reference_error(request, exception):
+        errors = {
+            "PROJECT_NOT_FOUND": (404, "Project not found."),
+            "PAPER_NOT_FOUND": (404, "Paper not found in this project's current results."),
+            "REFERENCE_NOT_FOUND": (404, "Saved reference not found."),
+            "STORAGE_ERROR": (500, "Saved reference data could not be read safely."),
+        }
+        status, message = errors.get(exception.code, (500, "Saved reference operation failed."))
+        return error_response(status, exception.code, message)
+
     @app.exception_handler(SearchInProgress)
     async def search_in_progress(request, exception):
-        return error_response(409, "SEARCH_ACTIVE",
-                              "A search is active for this project. Please wait before editing.")
+        return error_response(
+            409, "SEARCH_ACTIVE", "A search is active for this project. Please wait before editing."
+        )
 
     @app.get("/api/projects", response_model=list[ProjectOutput])
     def list_projects(request: Request):
@@ -177,8 +214,12 @@ def create_app(database=None, suggestion_provider=FROM_ENVIRONMENT,
     @app.delete("/api/projects/{project_id}/queries/{query_id}", response_model=QueryListOutput)
     def delete_query(project_id: UUID, query_id: UUID, expectedRevision: str, request: Request):
         if not re.fullmatch(r"[0-9]+", expectedRevision) or len(expectedRevision) > 20:
-            return error_response(422, "VALIDATION_ERROR", "Use a nonnegative integer revision.",
-                                  [{"field": "expectedRevision", "message": "Invalid revision."}])
+            return error_response(
+                422,
+                "VALIDATION_ERROR",
+                "Use a nonnegative integer revision.",
+                [{"field": "expectedRevision", "message": "Invalid revision."}],
+            )
         return request.app.state.queries.delete(project_id, query_id, int(expectedRevision))
 
     @app.post("/api/projects/{project_id}/queries/generate", response_model=GenerationOutput)
@@ -192,6 +233,28 @@ def create_app(database=None, suggestion_provider=FROM_ENVIRONMENT,
     @app.get("/api/projects/{project_id}/papers", response_model=CurrentPapersOutput)
     def current_papers(project_id: UUID, request: Request):
         return request.app.state.retrieval.current(project_id)
+
+    @app.get("/api/projects/{project_id}/references", response_model=ReferenceListOutput)
+    def list_references(project_id: UUID, request: Request):
+        return request.app.state.references.list(project_id)
+
+    @app.post("/api/projects/{project_id}/references", response_model=ReferenceOutput)
+    def save_reference(
+        project_id: UUID, data: ReferenceSaveInput, request: Request, response: Response
+    ):
+        try:
+            result, created = request.app.state.references.save(project_id, data.paperId)
+        except SearchInProgress:
+            return error_response(
+                409, "SEARCH_ACTIVE", "Wait for the active search before saving a reference."
+            )
+        response.status_code = 201 if created else 200
+        return result
+
+    @app.delete("/api/projects/{project_id}/references/{reference_id}", status_code=204)
+    def remove_reference(project_id: UUID, reference_id: UUID, request: Request):
+        request.app.state.references.remove(project_id, reference_id)
+        return Response(status_code=204)
 
     @app.get("/", include_in_schema=False)
     def homepage():

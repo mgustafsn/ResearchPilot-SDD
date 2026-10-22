@@ -35,16 +35,19 @@ Feature 001 has recorded automated results in `docs/evidence/` and the evidence
 log, with BUG-PRJ-001 deferred and detailed human-audit evidence outstanding.
 Feature 002 automated results, approved-host query measurement and user acceptance
 are recorded in `docs/evidence-log.md`, `docs/evidence/query-traceability.md`, and
-`docs/evidence/query-performance.json`; GitLab pipeline 6874 is pending without an
-assigned runner, so remote CI remains unverified. Feature 003 specification, plan/contracts and tasks were
-approved on 2026-10-19; implementation is underway with fake-provider tests and a
-local mock-provider benchmark recorded in `docs/evidence/retrieval-traceability.md`
+`docs/evidence/query-performance.json`; GitLab pipeline 6874 remains pending without an
+assigned runner. GitHub Actions run 39827940845 for feature-004 commit `64fe96a`
+completed successfully with 423 passed and 4 performance tests deselected. Feature 003 specification, plan/contracts and tasks were
+approved on 2026-10-19; implementation and automated verification are complete,
+with a local mock-provider benchmark recorded in `docs/evidence/retrieval-traceability.md`
 and `docs/evidence/retrieval-performance.json`. Implementation/automated verification
 are complete locally; feature 003 was accepted on 2026-10-21. No
 agent-run live OpenAlex call was made.
 Feature 004 spec/plan/contracts/tasks are approved and implemented, with current
 full-suite results and real offline inference recorded in the evidence log. Human
-quality evaluation and acceptance remain pending. Feature 005 remains unapproved. Do not infer code
+quality evaluation and acceptance remain pending. Feature 005's specification is
+approved, as are the plan/supporting design; the Feature 005 task list is prepared
+for review, with implementation still unauthorized. Do not infer code
 coverage, security compliance, suggestion quality, or ranking accuracy from
 documentation checks or earlier-slice tests.
 
