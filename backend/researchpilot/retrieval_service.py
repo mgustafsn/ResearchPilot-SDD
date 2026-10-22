@@ -7,10 +7,11 @@ from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from pydantic import ValidationError
-from sqlalchemy import delete, insert, select, update
+from sqlalchemy import delete, insert, null, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import SQLAlchemyError
 
+from researchpilot.embedding_provider import EmbeddingError, EmbeddingInput
 from researchpilot.paper_domain import (
     CurrentPapersOutput,
     DeduplicationResult,
@@ -22,13 +23,23 @@ from researchpilot.paper_domain import (
     deduplicate_papers,
 )
 from researchpilot.paper_provider import PaperProviderError, PaperSearchResult
+from researchpilot.ranking_domain import (
+    RunRankingProvenance,
+    context_text,
+    make_provenance,
+    paper_text,
+    rank_papers,
+    similarity_score,
+    validate_batch,
+)
 from researchpilot.service import ProjectNotFound
 
 logger = logging.getLogger("researchpilot.retrieval")
 MAX_REQUESTS_PER_ATTEMPT = 20
 MAX_CONCURRENT_REQUESTS = 2
 ATTEMPT_TIMEOUT_SECONDS = 120
-LEASE_SECONDS = 150
+LEASE_SECONDS = 240
+PIPELINE_TIMEOUT_SECONDS = 210
 PROVIDER_ERRORS = {
     "rate_limited": "PROVIDER_UNAVAILABLE",
     "timeout": "PROVIDER_TIMEOUT",
@@ -48,6 +59,28 @@ class RetrievalError(Exception):
             "PROVIDER_UNAVAILABLE": (503, "OpenAlex is unavailable; previous results were kept."),
             "PROVIDER_TIMEOUT": (504, "OpenAlex timed out; previous results were kept."),
             "STORAGE_UNAVAILABLE": (503, "Storage is unavailable; previous results were kept."),
+            "EMBEDDING_MODEL_MISSING": (
+                503,
+                "Local embedding model is missing. Run explicit setup; previous results were kept.",
+            ),
+            "EMBEDDING_MODEL_INVALID": (
+                503,
+                "Local embedding model files are invalid; previous results were kept.",
+            ),
+            "EMBEDDING_BUSY": (
+                503,
+                "Local ranking is busy. Try again later; previous results were kept.",
+            ),
+            "EMBEDDING_TIMEOUT": (504, "Local ranking timed out; previous results were kept."),
+            "EMBEDDING_INVALID_RESPONSE": (
+                502,
+                "Local ranking returned invalid vectors; previous results were kept.",
+            ),
+            "EMBEDDING_UNAVAILABLE": (
+                503,
+                "Local ranking is unavailable; previous results were kept.",
+            ),
+            "SEARCH_TIMEOUT": (504, "Search timed out; previous results were kept."),
         }[code]
         super().__init__(self.message)
 
@@ -76,6 +109,8 @@ def _paper_output(paper_id, row):
         publicationUrl=row["publication_url"],
         fullTextUrl=row["full_text_url"],
         isOpenAccess=row["is_open_access"],
+        embeddingScore=row.get("embedding_score"),
+        rankingProvenance=row.get("ranking_provenance"),
     )
 
 
@@ -98,17 +133,20 @@ def _attempt_output(row):
             for item in row["queries_unused"]
         ],
         errorCode=row["error_code"],
+        rankingProvenance=row.get("ranking_provenance"),
     )
 
 
 class RetrievalService:
-    def __init__(self, database, provider=None):
+    def __init__(self, database, provider=None, embedding_provider=None):
         self.database = database
         self.provider = provider
+        self.embedding_provider = embedding_provider
 
     async def search(self, project_id):
         snapshot = await asyncio.to_thread(self._begin, project_id)
         started = time.monotonic()
+        snapshot["deadline"] = started + PIPELINE_TIMEOUT_SECONDS
         raw_count = skipped_count = duplicate_count = request_count = 0
         provider_cost_usd = None
         try:
@@ -128,6 +166,9 @@ class RetrievalService:
             provider_cost_usd = sum(costs) if costs else None
             if raw_count > snapshot["paper_limit"] or request_count > MAX_REQUESTS_PER_ATTEMPT:
                 raise RetrievalError("PROVIDER_INVALID_RESPONSE")
+            await self._rank(snapshot, deduplicated)
+            if time.monotonic() >= snapshot["deadline"]:
+                raise RetrievalError("SEARCH_TIMEOUT")
             try:
                 output = await asyncio.to_thread(
                     self._commit_success,
@@ -290,6 +331,91 @@ class RetrievalService:
             self._log(snapshot, "PROVIDER_UNAVAILABLE", started, 0, 0, 0, 0)
             raise RetrievalError("PROVIDER_UNAVAILABLE") from None
 
+    async def _rank(self, snapshot, deduplicated):
+        if not deduplicated.papers:
+            return
+        started = time.monotonic()
+        completed = False
+        inputs = [
+            EmbeddingInput(
+                id="context", text=context_text(snapshot["research_question"], snapshot["keywords"])
+            )
+        ] + [
+            EmbeddingInput(id=f"{paper.provider}:{paper.provider_id}", text=paper_text(paper))
+            for paper in deduplicated.papers
+        ]
+        try:
+            if self.embedding_provider is None:
+                raise EmbeddingError("model_missing")
+            remaining = min(60, snapshot["deadline"] - time.monotonic())
+            if remaining <= 0:
+                raise RetrievalError("SEARCH_TIMEOUT")
+            async with asyncio.timeout(remaining):
+                batch = validate_batch(inputs, await self.embedding_provider.embed(inputs))
+            if batch.dimension != 384:
+                raise EmbeddingError("invalid_response")
+            scores = [
+                similarity_score(batch.items[0].vector, item.vector) for item in batch.items[1:]
+            ]
+            snapshot["rankings"] = {
+                paper.provider_id: {
+                    "embedding_score": score,
+                    "ranking_provenance": make_provenance(
+                        item, input_item.text, snapshot["run_id"]
+                    ).model_dump(),
+                }
+                for paper, score, item, input_item in zip(
+                    deduplicated.papers, scores, batch.items[1:], inputs[1:], strict=True
+                )
+            }
+            snapshot["ranking_provenance"] = RunRankingProvenance(
+                **make_provenance(batch.items[0], inputs[0].text, snapshot["run_id"]).model_dump(),
+                rankedPaperCount=len(scores),
+                durationMs=(time.monotonic() - started) * 1000,
+                packageVersions=batch.package_versions,
+            ).model_dump()
+            # Frozen result wrapper contains a mutable ordered list, not metadata mutations.
+            deduplicated.papers[:] = rank_papers(deduplicated.papers, scores)
+            completed = True
+            logger.info(
+                "Local ranking run=%s status=succeeded papers=%s duration_ms=%.2f",
+                snapshot["run_id"],
+                len(scores),
+                (time.monotonic() - started) * 1000,
+            )
+        except TimeoutError:
+            code = (
+                "SEARCH_TIMEOUT"
+                if time.monotonic() >= snapshot["deadline"]
+                else "EMBEDDING_TIMEOUT"
+            )
+            raise RetrievalError(code) from None
+        except EmbeddingError as error:
+            code = "EMBEDDING_" + error.category.upper()
+            if error.category not in {
+                "model_missing",
+                "model_invalid",
+                "busy",
+                "timeout",
+                "invalid_response",
+                "unavailable",
+            }:
+                code = "EMBEDDING_UNAVAILABLE"
+            raise RetrievalError(code) from None
+        except (ValidationError, ValueError, TypeError):
+            raise RetrievalError("EMBEDDING_INVALID_RESPONSE") from None
+        except RetrievalError:
+            raise
+        except Exception:
+            raise RetrievalError("EMBEDDING_UNAVAILABLE") from None
+        finally:
+            if not completed:
+                logger.info(
+                    "Local ranking run=%s status=failed duration_ms=%.2f",
+                    snapshot["run_id"],
+                    (time.monotonic() - started) * 1000,
+                )
+
     async def _retrieve(self, snapshot):
         semaphore = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)
 
@@ -390,6 +516,8 @@ class RetrievalService:
                     "used_allocations": used,
                     "queries_used": used_json,
                     "queries_unused": unused_json,
+                    "research_question": project["research_question"],
+                    "keywords": project["keywords"],
                 }
                 run_snapshot = {
                     "researchQuestion": project["research_question"],
@@ -496,7 +624,8 @@ class RetrievalService:
                 ).returning(papers_table.c.id)
                 paper_id = connection.execute(statement).scalar_one()
                 paper_ids.append(paper_id)
-                inserted_papers.append(_paper_output(paper_id, values))
+                ranking = snapshot.get("rankings", {}).get(paper.provider_id, {})
+                inserted_papers.append(_paper_output(paper_id, {**values, **ranking}))
 
             # A slow database phase may outlive the lease even after HTTP completed.
             latest_run = (
@@ -514,6 +643,9 @@ class RetrievalService:
             ):
                 raise RetrievalError("SEARCH_STALE")
 
+            if time.monotonic() >= snapshot["deadline"]:
+                raise RetrievalError("SEARCH_TIMEOUT")
+
             connection.execute(
                 delete(associations).where(associations.c.project_id == snapshot["project_id"])
             )
@@ -526,6 +658,7 @@ class RetrievalService:
                             "paper_id": paper_id,
                             "search_run_id": snapshot["run_id"],
                             "ordinal": index,
+                            **snapshot["rankings"][deduplicated.papers[index].provider_id],
                         }
                         for index, paper_id in enumerate(paper_ids)
                     ],
@@ -545,6 +678,7 @@ class RetrievalService:
                     skipped_count=skipped_count,
                     duplicate_count=deduplicated.duplicate_count,
                     error_code=None,
+                    ranking_provenance=snapshot.get("ranking_provenance") or null(),
                 )
             )
             # Preserve provider rows still associated with any project's current results.
@@ -563,6 +697,7 @@ class RetrievalService:
                 skipped_count=skipped_count,
                 duplicate_count=deduplicated.duplicate_count,
                 error_code=None,
+                ranking_provenance=snapshot.get("ranking_provenance"),
             )
         attempt = _attempt_output(run_row)
         return SearchOutput(
@@ -639,7 +774,13 @@ class RetrievalService:
             )
             rows = (
                 connection.execute(
-                    select(papers, associations.c.ordinal)
+                    select(
+                        papers,
+                        associations.c.ordinal,
+                        associations.c.embedding_score,
+                        associations.c.search_run_id,
+                        associations.c.ranking_provenance,
+                    )
                     .select_from(associations.join(papers, associations.c.paper_id == papers.c.id))
                     .where(associations.c.project_id == project_id)
                     .order_by(associations.c.ordinal)
@@ -648,8 +789,18 @@ class RetrievalService:
                 .all()
             )
             outputs = [_paper_output(row["id"], row) for row in rows]
+            current_ranking = None
+            if rows:
+                current_ranking = connection.execute(
+                    select(runs.c.ranking_provenance).where(runs.c.id == rows[0]["search_run_id"])
+                ).scalar_one_or_none()
         attempt = _attempt_output(latest) if latest else None
-        return CurrentPapersOutput(projectId=project_id, latestAttempt=attempt, papers=outputs)
+        return CurrentPapersOutput(
+            projectId=project_id,
+            latestAttempt=attempt,
+            papers=outputs,
+            rankingProvenance=current_ranking,
+        )
 
     @staticmethod
     def _log(

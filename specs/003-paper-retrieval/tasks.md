@@ -84,7 +84,7 @@ paid API keys, feature 004/005 work, or fixing deferred BUG-PRJ-001.
 - [X] T030 Perform an AI/static security and architecture audit of `backend/researchpilot/`, migrations, `frontend/`, `.gitlab-ci.yml` and fixture cleanup: verify no LLM metadata flow, OpenAI request/key, raw query/body logging, unsafe URLs, unauthorized tables, broad test reset or hidden retries; record reviewer/findings/fixes in `docs/evidence-log.md` (Constitution I–VII). Static audit found no vendor imports outside integrations, no `innerHTML`, only migration 003 added, exact disposable-table cleanup, no configured API keys, and HTTPX URL-log leakage fixed by suppressing access-level logs. Details in `docs/evidence-log.md`.
 - [X] T031 Run the approved reference-host mock-provider performance protocol; retain raw output under `docs/evidence/` and report separately from live OpenAlex latency (FR-RET-002/006). Final audited run: 20/20 successful searches, 250 records/20 queries each, nearest-rank p95 207.47 ms; raw evidence at `docs/evidence/retrieval-performance.json`.
 - [X] T032 After audit fixes, run the entire application suite, migration/restart/rollback/concurrency/browser tests, approved local benchmark, Ruff, formatting, JavaScript syntax, quickstart and secret checks; record exact results in `docs/evidence-log.md`, then request a human keyboard/usability audit in the running app (SC-RET-001–004). Full suite: 358 passed, 1 existing warning; approved-host project/query/retrieval performance tests pass; Ruff/format/new files/JS/diff checks pass. Requesting your hands-on feature-003 review remains T033.
-- [ ] T033 Present the implemented feature and evidence for explicit user acceptance in `docs/evidence-log.md`; record known limitations and approval. Do not begin feature 004 or any excluded work without its own approved gates; do not make a live provider smoke call without separate permission.
+- [X] T033 Present the implemented feature and evidence for explicit user acceptance in `docs/evidence-log.md`; record known limitations and approval. User accepted on 2026-10-21 (reply: “accept feature 003”) after local review. Remote CI remains unverified; no agent-run live provider smoke call occurred. Feature 004 remains subject to its own gates.
 
 ## Dependencies and checkpoints
 
@@ -126,8 +126,8 @@ Explicit task approval (granted 2026-10-19)
    saved references in this feature.
 
 Counts: **33 total**; setup **3**, foundations **5**, US1 **8**, US2 **8**, polish /
-cross-cutting **9**. T001–T032 are implemented/verified; T033 awaits user keyboard/
-usability review and explicit acceptance.
+cross-cutting **9**. T001–T032 are implemented/verified; T033 user acceptance recorded
+on 2026-10-21. Remote CI remains unverified; acceptance is not a CI success claim.
 
 ## Requirement-to-task mapping
 

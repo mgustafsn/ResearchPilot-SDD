@@ -5,6 +5,7 @@ import logging
 import threading
 from datetime import date
 
+from conftest import FakeEmbeddingProvider
 from fastapi.testclient import TestClient
 from researchpilot.api import create_app
 from researchpilot.paper_domain import Paper
@@ -65,7 +66,8 @@ class BlockingProvider:
 
 
 def app_client(db, provider):
-    return TestClient(create_app(db, suggestion_provider=None, paper_provider=provider))
+    return TestClient(create_app(db, suggestion_provider=None, paper_provider=provider,
+                                 embedding_provider=FakeEmbeddingProvider()))
 
 
 def test_FR_RET_001_002_search_uses_exact_enabled_queries_and_inclusive_bounds(db):

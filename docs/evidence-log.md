@@ -1,5 +1,295 @@
 # Evidence log
 
+## Feature 004 initial user observation — 2026-10-21
+
+- User reported: “Yep it ranks now”. Recorded as user-observed ranking behavior
+  in the local app, not independent observation, a judgment of ranking usefulness,
+  blind human labels, or explicit final feature acceptance. T026/T029 remain pending.
+- No code, prompts, requirements or test outcomes changed; no application tests
+  rerun for this documentation-only update.
+
+## Feature 004 implementation and local verification — 2026-10-21
+
+- User authorization: “Start”, answering “Approve tasks and start implementation?”
+  Recorded task approval and implementation permission for 004 only. Loaded
+  `speckit-implement`; prerequisite command with `--json --require-tasks
+  --include-tasks` passed. No feature-004 checklist directory or extension hooks
+  exists. No delegates used. Actual branch `main`, starting commit
+  `5c78d19302071f550a03b7ced8fb2eb4814c5f0e`; prior acceptance/planning changes
+  preserved. Constitution 2.0.0 is ratified; no unresolved amendment blocker.
+- Baseline: `UV_CACHE_DIR=/tmp/opencode/uv-cache uv run --env-file .env pytest -q
+  --tb=short`: **358 passed, 1 existing warning in 43.26s**. Disposable PostgreSQL
+  container healthy; no production/original database reset. Existing cleanup table
+  allowlist/target guards retained unchanged.
+- Dependency commands `uv lock` and `uv sync` (same UV_CACHE_DIR): PASS; 33 new
+  packages installed. Python 3.13.15; sentence-transformers 6.2.0; torch
+  2.14.1+cpu, `torch.version.cuda is None`; Hub 2.2.0; transformers 5.20.2;
+  tokenizers 0.23.3. Major reported download sizes: torch 187.2 MiB, NumPy
+  15.9 MiB, SciPy 33.7 MiB, transformers 12.2 MiB, scikit-learn 8.7 MiB,
+  SymPy 6.0 MiB, tokenizers 3.2 MiB, HF Xet 4.0 MiB, NetworkX 2.0 MiB.
+  uv fell back from hardlinks to copies across filesystems; installation succeeded.
+  Offline/telemetry-disabled import check passed, without model download.
+
+### Tests-first and implementation evidence
+
+- RUN-RNK-RED-001: pure/schema suite (`backend/tests/test_ranking.py` and
+  `backend/tests/test_ranking_postgres.py`, `-q --tb=no`): **37 failed** (30 pure
+  rules raised intentional NotImplementedError; 7 schema behaviors absent). After
+  implementation: same command with short tracebacks **37 passed in 0.79s**.
+- RUN-RNK-RED-002: `uv run pytest backend/tests/test_local_embeddings.py -q
+  --tb=no`: **14 failed** on unimplemented setup/loader/worker behavior. Adapter
+  green: **14 passed in 1.24s**. Timeout/crash/busy/cancel tests use child workers;
+  setup downloads are mocked and partial user files are preserved.
+- RUN-RNK-RED-003: ranking API/browser files with guarded DB: **10 failed** because
+  score/provenance, embedding failure handling and UI were absent. Focused initial
+  integration run: **59 passed, 1 failed**; successful empty search exposed JSONB
+  null versus SQL NULL and was corrected using SQL null for empty run provenance.
+- AUD-RNK-IMPL-001: JSONB `None` serializes as JSON null under reflected SQLAlchemy
+  types, violating the object-only provenance constraint. Fixed only empty-success
+  assignment; test proves empty results succeed without invoking a missing model.
+- AUD-RNK-IMPL-002: whole-search deadline was initially labeled EMBEDDING_TIMEOUT.
+  Added a failing deadline test (focused run **20 passed, 1 failed**), then corrected
+  it to SEARCH_TIMEOUT when the overall budget is exhausted.
+- Supplemental score/tie/0%-retention, actual PostgreSQL commit rollback, ranking
+  barrier/expired-owner replacement/cancellation and browser refresh/truncation
+  regressions were added after initial integration. This deviates from T013's strict
+  author-before-T017 order; no prior red run is claimed for behavior already present.
+  Primary domain/setup/API/UI behavior tests did precede production logic.
+- Intermediate broad runs: **416 passed, 3 deselected** before added regressions;
+  then **420 passed, 1 failed, 4 deselected** due to a test calling asyncio.run after
+  Playwright left a loop active. Reused existing `run_async` fixture helper; this
+  was a test-harness fix, not a product behavior change. Focused safety rerun:
+  **35 passed in 4.33s**.
+- Implemented FR-RNK-001–009: NFC/versioned inputs, validated common structured
+  vectors, stable cosine/calibration/order, provider-only metadata, durable score/
+  input/token/model/run provenance, null legacy scores, atomic fail-preservation,
+  model missing/busy/invalid/timeout errors, bounded reaped offline CPU worker,
+  explicit setup and local scores/disclosures. No prompt changes or LLM calls.
+- Added top-level current-result rankingProvenance to GET papers, matching the
+  existing POST provenance, so old model/context-truncation disclosure survives a
+  later failed attempt. Documented this additive API detail in the contract; no
+  new route, external data flow, metadata source or user behavior is introduced.
+
+### Security/architecture review and actual model setup
+
+- Reviewer: OpenCode / GPT-6.1 Sol, static/AI review, not independent human
+  certification. AST import scan found no sentence-transformers/torch/Hub imports
+  outside integrations. No frontend innerHTML, model files excluded from Git/Docker,
+  only additive migration 004, provider metadata stays distinct from project scores.
+  Runtime model loading uses verified local safetensors, exact standard module
+  chain, no remote code, CPU-only, no implicit tokens or telemetry. Child blocks
+  socket connect/connect_ex and DNS; no raw inputs/vectors/paths/native exceptions
+  are emitted by the worker. Source/log review and API canary tests pass.
+- Ownership/failure review: no DB transaction spans inference; one nonqueued CPU
+  slot per application provider; children terminated/reaped on timeout/cancel/close;
+  final lease/token/deadline checks gate atomic score/provider/result writes.
+  Tests cover stale commits, rollback and unchanged old scores. No broad DB/file
+  deletion, references, clustering, cache, cloud embedding, hidden app retry or
+  original repository change. Setup cleans only its newly owned staging directory.
+- CI config now sets offline/telemetry flags and unsets provider/Hub tokens/model
+  overrides/real-model benchmark opt-in. Repeatable tests mock downloads/model
+  loading; actual model verification is separate. Remote CI was not invoked or
+  observed this turn; last known pending/no-runner status remains unverified.
+- After mocked tests and static review, explicitly executed
+  `PYTHONPATH=backend UV_CACHE_DIR=/tmp/opencode/uv-cache uv run python -m
+  researchpilot.integrations.setup_embeddings`: PASS. Installed **11 verified files,
+  91,578,415 bytes**, pinned revision
+  `1110a243fdf4706b3f48f1d95db1a4f5529b4d41`, Apache-2.0 model-card metadata.
+  No account token, project text, paper text or API key sent during setup. Weights
+  remain ignored; `.env` unchanged. This is the approved public-model download,
+  not a cloud inference call or a live OpenAlex search.
+
+### Final actual verification and remaining gates
+
+- Full application suite after fixes:
+  `UV_CACHE_DIR=/tmp/opencode/uv-cache uv run --env-file .env pytest -q --tb=short`:
+  **426 passed, 1 skipped in 53.26s**. The skip is the installed-model benchmark's
+  explicit opt-in gate. This run includes existing project/query/retrieval timing,
+  migrations/restart/concurrency and Chromium regressions, with fake provider data.
+- Separate real-model command:
+  `UV_CACHE_DIR=/tmp/opencode/uv-cache RUN_LOCAL_EMBEDDING_BENCHMARK=1
+  PERFORMANCE_OUTPUT=docs/evidence/ranking-performance.json uv run pytest
+  backend/tests/test_ranking_performance.py -m performance -q --tb=short`:
+  **1 passed in 211.08s**. Three warm-ups then 20 timed jobs of 251 inputs, all
+  actual 384-dimensional embeddings with 256-token truncation, in socket/DNS-denied
+  CPU children. Nearest-rank p95 **9,317.18 ms**, peak child RSS **799,476 KiB**;
+  raw timings/versions/load/hashes retained in that JSON. Synthetic timing text
+  is not scholarly metadata or a human-labeled quality evaluation.
+- Environment difference: CPU/RAM still Ryzen 7 5700X3D / ~31 GiB; kernel now
+  **Linux 7.2.11-1-cachyos**, previously approved reference **7.2.9-2-cachyos**.
+  Reported to user before acceptance claims. Timing is below the plan's 30-second
+  target on the current host, but unchanged-reference-environment performance
+  acceptance is not claimed. Current inference/domain/test/lock hashes verified
+  against the raw benchmark report after subsequent documentation edits.
+- Ruff check: PASS; Ruff formatting check of 12 new/formatted feature files:
+  PASS (legacy shared files not mass-reformatted). `node --check frontend/app.js`
+  and `git diff --check`: PASS. Limited secret/model-ignore and documentation
+  checks recorded separately below; none are a comprehensive security certificate.
+- Restarted only the agent-launched local Uvicorn PID after confirming exact
+  repository command; graceful shutdown observed. `./scripts/start-local.sh`
+  restarted successfully, local GET `/` returned **HTTP 200**, and a read-only
+  application DB check confirmed schema 001/002/003/004. No project contents were
+  read/copied and no live OpenAlex/OpenAI call was made. App remains on
+  `http://127.0.0.1:8000/`; new ranking requires explicit user Search.
+- T001–T025/T027–T028 implemented/verified (**27/29**); T026 and T029 remain
+  pending human quality dataset/labels/usefulness review and final acceptance.
+  `docs/evidence/ranking-quality.md` contains the honest pending protocol; no user
+  project data, fabricated citations or AI-generated human labels were added.
+  Feature 005 remains unauthorized; BUG-PRJ-001 remains deferred. Ranking accuracy,
+  remote CI success and final user acceptance are not claimed.
+- Final documentation/limited secret scan: PASS for 29 sequential task IDs with
+  exactly T026/T029 unchecked, local Markdown links, ignored model directory,
+  no tracked/unignored weights and no common private-key/AWS/OpenAI key patterns.
+  This bounded pattern scan is not a comprehensive secret/security audit.
+
+## Feature 004 plan approval and task preparation — 2026-10-21
+
+- Asked the user to approve the technical plan and contracts; user answered:
+  “I approve”. Recorded plan/supporting design/API/embedding contract approval
+  in `specs/004-relevance-ranking/` and `docs/scope.md`, including the plan's
+  deadline/performance protocols. This is not task approval or implementation
+  authorization; no packages or model weights were installed/downloaded.
+- Loaded `speckit-tasks`; `.specify/extensions.yml` absent, so no pre/post hooks.
+  `.specify/scripts/bash/setup-tasks.sh --json`: PASS; active feature 004 resolved
+  to the reviewed spec/plan and supporting artifacts, with the installed template.
+  Constitution VI overrides generic optional-test wording. No delegates used.
+- Generated `specs/004-relevance-ranking/tasks.md`: 29 unchecked tasks, comprising
+  3 setup, 5 foundations, 13 US1 (6 tests-first, 7 implementation/regression) and
+  8 audit/verification/acceptance tasks. Mapped all nine FR and four AC IDs; added
+  dependencies, file-independent authoring opportunities and fake-provider
+  independent journey. Actual branch remains `main`.
+- Tasks preserve red-first tests, additive legacy-safe schema, CPU-only compatible
+  dependencies, offline runtime, mock-tested explicit setup before weights download,
+  terminated/reaped inference children, atomic ownership/failure safety, safe
+  logs/paths and separate actual-model/human-quality evidence. Human labels and
+  final acceptance must stay pending without evidence; no excluded scope is added.
+- No runtime, prompt, secret or dependency changes; no application tests rerun.
+  Documentation assertions and whitespace checks are recorded below separately
+  from application verification. Task approval remains the next human gate.
+- Documentation assertions: PASS for 29 sequential unchecked IDs, 13 US1 labels,
+  task file paths, nine FR/four AC mappings and local Markdown links across feature
+  004 artifacts. `git diff --check`: PASS. These do not verify application behavior.
+
+## Feature 004 technical plan preparation — 2026-10-21
+
+- User requested: “Lets go I just want to implement”. Explained the constitution's
+  separate plan/task approval gates; proceeded with plan preparation, not inferred
+  approval of an unseen plan/task list or implementation.
+- Loaded `speckit-plan`; no `.specify/extensions.yml` exists, so pre/post hooks are
+  absent. Ran `SPECIFY_FEATURE_DIRECTORY=specs/004-relevance-ranking
+  .specify/scripts/bash/setup-plan.sh --json`: PASS; created the plan template and
+  advanced the ignored local feature pointer to 004. Actual Git branch remains
+  `main`; existing uncommitted acceptance/clarification updates were preserved.
+- Read constitution, approved 004 spec, existing retrieval/API/schema/fixtures and
+  template. Prepared plan, rationale, data model, API/embedding contracts and
+  quickstart in `specs/004-relevance-ranking/`. No task file generated yet.
+- Public model documentation/config/PyPI metadata reads identified revision
+  `1110a243fdf4706b3f48f1d95db1a4f5529b4d41`, 384 dimensions, 256-token limit and
+  the standard Transformer/mean Pooling/Normalize chain. PyPI reports Sentence
+  Transformers 6.2.0. No project/paper text was sent, model weights downloaded,
+  inference performed or dependency installed. Resolution/CPU wheels/imports are
+  still unverified implementation obligations. No OpenAlex/OpenAI request occurred.
+- Proposed managed child-process inference for hard cancellation, one nonqueued
+  ranking slot, 60-second local budget, 210-second pre-commit deadline, 240-second
+  lease, and reference-host p95 <30 seconds over 20 offline 251-input jobs including
+  model startup. These are unapproved proposals, not measured outcomes. Included
+  exact normalization/token hashes, legacy null scores, atomic failure preservation,
+  per-run provenance and separate human usefulness protocol.
+- AUD-RNK-PLAN-001: native inference cannot be stopped by canceling a Python thread;
+  plan uses a reaped child instead. AUD-RNK-PLAN-002: normalized text hashes alone
+  omit truncation coverage; retain actual consumed-token hashes/counts too.
+  AUD-RNK-PLAN-003: model config includes Normalize, so allow the exact three-module
+  chain rather than accidentally rejecting the approved installation.
+- Constitution I–VII pre/post design checks pass at design level, not verified
+  runtime compliance or human plan approval. No delegates used, per repository
+  instructions. No runtime/prompt/secret change; no application tests rerun.
+- Documentation assertions PASS across seven ranking Markdown files: local links,
+  nine unique FR-RNK requirements mapped to planned tests, no unresolved template
+  placeholders. `git diff --check`: PASS. These checks are not application or
+  ranking-quality verification. Plan/contracts and later tasks await human review.
+
+## Feature 004 specification approval — 2026-10-21
+
+- Presented the complete ranking specification for review: local MiniLM inference,
+  question/keywords versus title/abstract inputs, all papers visible, deterministic
+  score/title/source ordering, title-only handling for missing abstracts, provenance,
+  and atomic failure preservation without silent fallback.
+- Explicitly disclosed that the inherited cosine-to-percentage mapping is provisional
+  and unvalidated for the local model; embedding similarity is not a correctness
+  probability or scientific-quality measure. Exact model revision, dependencies,
+  truncation, resource/time budgets, and usefulness evaluation remain technical-plan
+  review items.
+- Asked: “Do you approve this specification, including the provisional score mapping,
+  or want any behavior changed?” User answered: “I apprvove”. Recorded approval in
+  `specs/004-relevance-ranking/spec.md` and `docs/scope.md`. Approval permits plan
+  preparation only; plan/contracts/tasks/implementation are not approved.
+- Documentation-only update: no requirement IDs, prompts, runtime code, dependencies,
+  model files, or active feature pointer changed; no external requests or application
+  tests ran. `git diff --check` checks documentation whitespace only, not runtime
+  correctness or ranking usefulness.
+
+## Feature 004 local model/setup approval — 2026-10-21
+
+- Proposed `sentence-transformers/all-MiniLM-L6-v2` for CPU-local English-language
+  similarity ranking, noting long-input truncation and the need to evaluate model
+  usefulness/calibration rather than infer accuracy from formula tests.
+- Asked: “Do you approve this model and a one-time download during setup?” with
+  the explicit boundary “This approves the design choice, not implementation yet.”
+  User answered: “I approve”. Recorded the approved model/setup choice as
+  FR-RNK-009 and in `docs/scope.md`.
+- Approved setup design: explicit one-time download, pinned revision, local-files-only
+  runtime without automatic downloads or telemetry, EmbeddingProvider isolation,
+  and safe failures preserving prior results. Exact revision/dependencies, token
+  limits, performance protocol, and ranking usefulness evaluation remain for review.
+  The complete feature specification, plan, tasks, and implementation are not approved.
+- No model download, installation, external request, runtime code, dependency,
+  prompt, or active-feature-pointer change occurred. Documentation-only update;
+  application tests were not rerun. `git diff --check` is the documentation check,
+  not application verification.
+
+## Feature 004 local-ranking clarification — 2026-10-21
+
+- User requested: “Yeah no lets no connect to something outside. Lets keep
+  everything local”. Asked whether this also prohibits OpenAlex; user clarified:
+  “OpenAlex can do real searches yes”. Recorded local-only embeddings/ranking
+  as FR-RNK-008 in `specs/004-relevance-ranking/spec.md` and `docs/scope.md`.
+- External embedding services are not permitted; explicit OpenAlex retrieval
+  remains allowed. No model download, installation, provider call, runtime change,
+  prompt change, or dependency change was made. Local model/setup and evaluation
+  decisions remain for review; the feature specification and subsequent gates
+  are not approved by this clarification.
+- Loaded `speckit-clarify`; no `.specify/extensions.yml` exists, so no hooks run.
+  Prerequisite paths still resolve feature 003; edited the explicitly discussed
+  feature-004 draft without changing the active feature pointer or accepted 003
+  requirements. No feature-004 quality checklist exists. One scope question was
+  asked and answered; integration/data-sharing ambiguity is resolved. Model/setup
+  details are deferred to design review; acceptance/evaluation details remain open.
+- Documentation-only update; no application tests rerun and no new runtime
+  verification claimed.
+
+## Feature 003 user acceptance — 2026-10-21
+
+- User requested a local launch. The initial launch failed because PostgreSQL was
+  stopped; `docker compose up -d --wait db` started the existing container and
+  reported healthy. `./scripts/start-local.sh` then started the app; a local GET
+  to `http://127.0.0.1:8000/` returned HTTP 200. No provider request was made by
+  the agent.
+- Presented the retrieval review journey and limitations: editable/enabled queries,
+  explicit OpenAlex search, pending/results/error states, source links, count/query
+  summary, refresh persistence, and keyboard usability. Ranking and saved references
+  are not included. Explained that clicking Search sends queries/filters to OpenAlex.
+- User reported “Yep works” and explicitly approved: “accept feature 003”. Recorded
+  acceptance and completed T033. This is the user's overall review report, not
+  independently observed proof of every manual check or a new automated test run.
+- Prior recorded full-suite evidence remains 358 passed with one existing warning
+  on 2026-10-19; no application tests rerun for this documentation-only update.
+  Remote GitLab CI remains unverified (last recorded pipeline had no assigned
+  runner). Deferred BUG-PRJ-001 remains open; no ranking accuracy, saved-reference
+  behavior, or live-provider performance acceptance is claimed.
+- No requirement IDs, prompts, runtime code, dependencies, or secrets changed.
+  Feature 004 specification/clarification/plan/tasks require their own review gates;
+  this acceptance does not authorize its implementation.
+
 ## Artifact preparation — 2026-10-11
 
 - User request (verbatim): "okay. can you create the SDD stuff from the current vibecoded version?"

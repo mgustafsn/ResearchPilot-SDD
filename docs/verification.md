@@ -13,7 +13,7 @@
 | FR-RET-001–006/009 | Mock OpenAlex responses, budgets, metadata, deduplication and UI tests |
 | FR-RET-007/008 | PostgreSQL atomicity, active ownership, lease expiry and stale-worker tests |
 | FR-RET-010 | Malicious metadata and URL-scheme browser/security tests |
-| FR-RNK-001–007 | Exact-vector fixtures, malformed-output injection, score/order/provenance tests |
+| FR-RNK-001–009 | Exact-vector fixtures, malformed-output injection, score/order/provenance tests, offline adapter/setup and real-model checks |
 | FR-REF-001–008 | Snapshot durability, concurrent save uniqueness and cross-project tests |
 
 Use stable test IDs in test names or metadata and record the specific requirement
@@ -40,11 +40,38 @@ assigned runner, so remote CI remains unverified. Feature 003 specification, pla
 approved on 2026-10-19; implementation is underway with fake-provider tests and a
 local mock-provider benchmark recorded in `docs/evidence/retrieval-traceability.md`
 and `docs/evidence/retrieval-performance.json`. Implementation/automated verification
-are complete locally (358 tests passed); human review/acceptance remain pending. No
-live OpenAlex call was made.
-Features 004–005 remain unapproved. Do not infer code
+are complete locally; feature 003 was accepted on 2026-10-21. No
+agent-run live OpenAlex call was made.
+Feature 004 spec/plan/contracts/tasks are approved and implemented, with current
+full-suite results and real offline inference recorded in the evidence log. Human
+quality evaluation and acceptance remain pending. Feature 005 remains unapproved. Do not infer code
 coverage, security compliance, suggestion quality, or ranking accuracy from
 documentation checks or earlier-slice tests.
+
+## Local ranking verification — feature 004
+
+- Repeatable fake-vector/mock-loader/API/PostgreSQL/Chromium tests:
+  `uv run --env-file .env pytest -m 'not performance' -q`.
+- Full suite (includes existing CRUD/mock retrieval benchmarks; installed-model
+  benchmark skips unless opted in): `uv run --env-file .env pytest -q`.
+- Explicit setup only: `PYTHONPATH=backend uv run python -m
+  researchpilot.integrations.setup_embeddings`; no account token, project text,
+  automatic startup/Search download or cloud fallback.
+- Real installed-model performance: `RUN_LOCAL_EMBEDDING_BENCHMARK=1
+  PERFORMANCE_OUTPUT=docs/evidence/ranking-performance.json uv run pytest
+  backend/tests/test_ranking_performance.py -m performance -q`. Inference child
+  denies sockets/DNS, uses CPU float32/four threads/one interop thread/batches of
+  32, max 256 tokens. Three warm-ups then 20 timed 251-input jobs, including child
+  startup, manifest verification, model loading, inference and cleanup; excluding
+  setup download, HTTP and PostgreSQL. Retain raw nearest-rank p95 and peak RSS.
+- Actual 2026-10-21 run: p95 9,317.18 ms versus proposed/plan-approved 30,000 ms
+  budget; peak child RSS 799,476 KiB. CPU/RAM match the earlier host; kernel is now
+  Linux 7.2.11-1-cachyos, not approved original 7.2.9-2-cachyos. This is a measured
+  current-host budget comparison, not unchanged-reference-environment acceptance.
+- Full application run: 426 passed, 1 skipped (explicit model benchmark); separate
+  model run passed. This does not demonstrate scientific accuracy, human usability
+  acceptance or remote CI success. See [traceability](evidence/ranking-traceability.md)
+  and [human evaluation protocol](evidence/ranking-quality.md).
 
 ## Project-management performance reference
 

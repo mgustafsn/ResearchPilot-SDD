@@ -29,3 +29,4 @@ dialog::backdrop { background: #182b3580; }
 #query-refresh { padding: .6rem; background: #fff4ce; border: 1px solid #856821; }
 #query-privacy { color: #45616f; }
 #generation-status:empty { display: none; }
+.embedding-similarity { font-weight: 600; }

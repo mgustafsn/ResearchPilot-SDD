@@ -1,6 +1,7 @@
 """All destructive fixture operations require an explicitly disposable database."""
 
 import asyncio
+import math
 import os
 import socket
 import subprocess
@@ -50,6 +51,36 @@ class FakeSuggestionProvider:
         if not await asyncio.to_thread(self.release.wait, 5):
             raise SuggestionProviderError("timeout")
         return SuggestionResult(batch=SuggestionBatch(queries=list(self.queries)))
+
+
+class FakeEmbeddingProvider:
+    """Test-only deterministic embeddings, not authoritative scholarly data."""
+
+    def __init__(self):
+        self.calls = []
+        self.failure = None
+
+    async def embed(self, inputs):
+        from researchpilot.embedding_provider import (
+            MODEL_ID,
+            MODEL_REVISION,
+            EmbeddingBatch,
+            EmbeddingError,
+            EmbeddingItem,
+        )
+        from researchpilot.ranking_domain import token_hash
+        self.calls.append(inputs)
+        if self.failure:
+            raise EmbeddingError(self.failure)
+        vectors = [[1.0, 0.0]]
+        for i in range(len(inputs) - 1):
+            cosine = 0.59 - i * 0.001
+            vectors.append([cosine, math.sqrt(1 - cosine**2)])
+        return EmbeddingBatch(model_id=MODEL_ID, model_revision=MODEL_REVISION, dimension=384,
+            package_versions={"fake": "test-only"}, items=[
+                EmbeddingItem(id=item.id, vector=vector + [0.0] * 382,
+                    token_hash=token_hash([101, 102]), token_count=2, truncated=False)
+                for item, vector in zip(inputs, vectors, strict=True)])
 
 
 def require_safe_test_database(test_url=None, app_url=None, opt_in=None):
@@ -152,13 +183,14 @@ def query_server(db):
     from researchpilot.api import create_app
 
     @contextmanager
-    def start(provider=None, paper_provider=None):
+    def start(provider=None, paper_provider=None, embedding_provider=None):
         with socket.socket() as sock:
             sock.bind(("127.0.0.1", 0))
             port = sock.getsockname()[1]
         base = f"http://127.0.0.1:{port}"
         server = uvicorn.Server(uvicorn.Config(
-            create_app(db, suggestion_provider=provider, paper_provider=paper_provider),
+            create_app(db, suggestion_provider=provider, paper_provider=paper_provider,
+                       embedding_provider=embedding_provider or FakeEmbeddingProvider()),
             host="127.0.0.1", port=port,
             log_level="warning", access_log=False,
         ))

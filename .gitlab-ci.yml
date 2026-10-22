@@ -10,6 +10,11 @@ test:
     TEST_DATABASE_URL: "postgresql+psycopg://researchpilot:disposable-ci-only@127.0.0.1:5432/researchpilot_sdd_test"
     ALLOW_TEST_DATABASE_RESET: "1"
     UV_CACHE_DIR: "$CI_PROJECT_DIR/.uv-cache"
+    HF_HUB_OFFLINE: "1"
+    TRANSFORMERS_OFFLINE: "1"
+    HF_HUB_DISABLE_TELEMETRY: "1"
+    HF_HUB_DISABLE_IMPLICIT_TOKEN: "1"
+    DO_NOT_TRACK: "1"
   before_script:
     - apt-get update -qq
     - apt-get install -y --no-install-recommends postgresql nodejs curl
@@ -20,11 +25,13 @@ test:
     - curl -LsSf https://astral.sh/uv/install.sh | sh
     - export PATH="$HOME/.local/bin:$PATH"
     - unset OPENAI_API_KEY OPENAI_QUERY_MODEL OPENALEX_API_KEY
+    - unset HF_TOKEN HUGGING_FACE_HUB_TOKEN EMBEDDING_MODEL_DIR RUN_LOCAL_EMBEDDING_BENCHMARK
     - uv sync --locked --python 3.12
     - uv run playwright install --with-deps chromium
   script:
     - export PATH="$HOME/.local/bin:$PATH"
     - unset OPENAI_API_KEY OPENAI_QUERY_MODEL OPENALEX_API_KEY
+    - unset HF_TOKEN HUGGING_FACE_HUB_TOKEN EMBEDDING_MODEL_DIR RUN_LOCAL_EMBEDDING_BENCHMARK
     - uv run ruff check backend
     - node --check frontend/app.js
     - uv run pytest -m "not performance" -q --junitxml=test-results/results.xml

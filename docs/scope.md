@@ -6,8 +6,12 @@ This scope-boundary approval does not approve individual plans, tasks, or
 implementation. Feature 001's specification/paper-count decision, feature 002's
 query specification/failure behavior, and feature 003's clarified retrieval
 specification are approved. Feature 003's plan/API/provider contracts/tasks were
-separately approved on 2026-10-19; implementation is authorized. Features 004–005
-remain separate review gates.
+separately approved on 2026-10-19; the implemented feature was accepted by the user
+on 2026-10-21. Feature 004's local-ranking specification, including provisional
+score mapping and showing all retrieved papers, was approved on 2026-10-21;
+its plan/supporting design/contracts were separately approved on 2026-10-21;
+tasks/implementation were authorized on 2026-10-21 (reply: “Start”). Feature 005
+remains a separate review gate.
 
 ## Objective and stakeholders
 
@@ -47,10 +51,11 @@ exports/Zotero; institutional access; PDF ingestion; embedding caches.
 | Query generation failure (approved in 002 spec, 2026-10-12) | Keep current list unchanged, show error; permit manual queries | Simplify baseline keyword/name fallback |
 | Retrieval failure (approved 2026-10-19) | Any enabled-query failure fails the attempt; retain old results. A successful empty result replaces current results; saved references remain unchanged. | Simplify partial-success behavior |
 | OpenAlex data flow (approved 2026-10-19) | Search is explicit; disclose that enabled query text and applied filters are sent to OpenAlex, not OpenAI. Search each enabled query as stored; do not append project question/keywords. | User-controlled, reproducible search |
-| Ranking | Retain calibrated embedding score; show all retrieved papers | Drop baseline automatic 40% filtering |
+| Ranking (specification approved 2026-10-21) | Run embeddings/ranking locally; retain provisional calibrated score; show all retrieved papers | No external embedding service; retain explicit OpenAlex retrieval; drop baseline automatic 40% filtering; calibration is not validated for the local model |
+| Local embedding model/setup (approved 2026-10-21) | `sentence-transformers/all-MiniLM-L6-v2`, CPU-local inference; one-time download during explicit setup; pinned revision and offline runtime without automatic downloads or telemetry | Design decision only; exact revision/dependencies and implementation require later review |
 | References | Provider-derived snapshots saved from search results only | Exclude baseline manual citations and editable metadata |
 | Search progress | Visible pending/success/failure; no staged history polling initially | Simplify baseline UI |
-| Ranking failure | Preserve previous result set; no silent lexical fallback | Explicit atomicity proposal |
+| Ranking failure (approved in 004 spec, 2026-10-21) | Preserve previous result set; no silent lexical fallback | Explicit atomicity requirement |
 | Interrupted work | Expiring search ownership token, stale writes rejected | Retain baseline safety intent |
 
 Except for separately approved decisions marked above, these are proposals, not

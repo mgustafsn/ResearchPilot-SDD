@@ -2,7 +2,7 @@
 
 **Feature Branch**: Proposed `003-paper-retrieval` (not created)
 **Created**: 2026-10-11
-**Status**: Approved by the user on 2026-10-19; plan, contracts, tasks, and implementation remain unapproved.
+**Status**: Specification approved on 2026-10-19; plan, contracts, tasks, and implementation separately authorized on 2026-10-19. Implemented feature accepted by the user on 2026-10-21 (reply: “accept feature 003”).
 **Input**: Retrieve real papers from OpenAlex using approved stored queries.
 
 ## Clarifications

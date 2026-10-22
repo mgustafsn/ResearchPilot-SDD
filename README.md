@@ -1,12 +1,34 @@
 # ResearchPilot-SDD
 
+## Local ranking (feature 004, implemented; human acceptance pending)
+
+Ranking uses `sentence-transformers/all-MiniLM-L6-v2` on CPU, pinned to revision
+`1110a243fdf4706b3f48f1d95db1a4f5529b4d41`. No embedding API key, cloud inference
+or telemetry is used. Explicit OpenAlex searches still send enabled queries/filters
+to OpenAlex; question/keywords and paper text stay local during ranking.
+
+The explicit setup CLI downloads only that public model:
+`PYTHONPATH=backend uv run python -m researchpilot.integrations.setup_embeddings`.
+Startup, GET and Search never download or repair model files automatically.
+Weights live in ignored `.models/`; optional server-only `EMBEDDING_MODEL_DIR`
+points to the same pinned installation, not another model ID or URL. Missing or
+invalid files produce an error and retain old results; do not delete/overwrite an
+existing partial installation without reviewing its contents.
+
+Inputs are English-focused and truncated to 256 model tokens. Similarity percentages
+use a provisional calibration, not probability or scientific-quality assessment.
+Existing results are not automatically reranked. See
+[`specs/004-relevance-ranking/plan.md`](specs/004-relevance-ranking/plan.md).
+
 A specification-driven rebuild of a deliberately smaller ResearchPilot MVP.
 Feature 001 project creation/listing/reopening/editing/deletion is implemented.
 Feature 002 manual query controls are implemented: add/edit/delete, enable/disable,
 20-query limits, and durable context-change notices. Explicit AI suggestion generation
 is implemented and tested only with fakes/mock HTTP; no live OpenAI call has been made.
 Feature 002 is accepted; the user does not want OpenAI connected now. Latest local verification:
-358 tests passed with one existing deprecation warning. Feature 002 query CRUD measured
+426 tests passed, one opt-in real-model benchmark skipped in the default run; that
+benchmark passed separately with 251 inputs/job and p95 9.32 seconds on the current
+kernel (changed from the earlier reference environment). Feature 002 query CRUD measured
 3.75 ms p95; feature 003's fake-provider retrieval pipeline measured 207.47 ms p95
 against the approved 2-second budget. See [query traceability](docs/evidence/query-traceability.md),
 [retrieval traceability](docs/evidence/retrieval-traceability.md), and the performance
@@ -71,12 +93,16 @@ citation numbering, authentication, exports, and PDF ingestion are excluded.
   [plan](specs/003-paper-retrieval/plan.md), [API contract](specs/003-paper-retrieval/contracts/api.md),
   [provider contract](specs/003-paper-retrieval/contracts/provider.md), and
   [task list](specs/003-paper-retrieval/tasks.md) are approved; implementation is
-  complete locally and awaits user keyboard/usability review and acceptance. All
-  automated tests use fakes; no live OpenAlex call was made. The user does not want
+   complete locally and was accepted on 2026-10-21. All
+   retrieval tests use fakes; no agent-run live OpenAlex call was made. The user does not want
   OpenAI connected. In the app, only clicking Search sends enabled query text and
   selected year filters to OpenAlex; project question/keywords are not sent.
-- Features 004–005 remain drafts and are not included in the current implementation.
-  Remote GitLab CI remains unverified because VPN access is currently unavailable.
+- Feature 004's specification/plan/contracts/tasks are approved and implemented.
+  Human ranking-usefulness evaluation and acceptance remain pending. Model setup
+  has been run locally; startup/Search never download or repair it automatically.
+  See [ranking traceability](docs/evidence/ranking-traceability.md).
+- Feature 005 remains a draft and is not implemented. Remote GitLab CI remains
+  unverified; last observed pipeline had no assigned runner.
 
 Initial artifacts were derived by an AI coding agent from the original repository
 without invoking Spec Kit commands. Feature 001 subsequently underwent the installed

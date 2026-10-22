@@ -18,6 +18,7 @@ venv/
 htmlcov/
 
 # Local build/runtime artifacts
+.models/
 node_modules/
 dist/
 build/

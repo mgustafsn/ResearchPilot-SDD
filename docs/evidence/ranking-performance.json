@@ -1,0 +1,76 @@
+{
+  "modelId": "sentence-transformers/all-MiniLM-L6-v2",
+  "modelRevision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+  "inferenceNetwork": "socket/DNS access denied inside inference child",
+  "inputKind": "synthetic timing text, not scholarly records or quality evidence",
+  "warmups": 3,
+  "timedJobs": 20,
+  "inputsPerJob": 251,
+  "maxTokens": 256,
+  "batchSize": 32,
+  "threads": 4,
+  "interopThreads": 1,
+  "device": "cpu",
+  "includes": [
+    "child startup",
+    "manifest hashes",
+    "model loading",
+    "inference",
+    "cleanup"
+  ],
+  "excludes": [
+    "download",
+    "HTTP",
+    "PostgreSQL"
+  ],
+  "samplesMs": [
+    9133.747212999879,
+    9151.977386998624,
+    9131.78276599865,
+    9114.376592999179,
+    9045.22400100177,
+    9092.319724997651,
+    9149.89133600102,
+    9114.227082998696,
+    9069.549343999824,
+    9007.564965999336,
+    9045.779427000525,
+    9066.914197999722,
+    9297.626146999391,
+    9257.23364499936,
+    9239.438731998234,
+    9296.177348998754,
+    9294.890867000504,
+    9317.182451002736,
+    9238.151779998589,
+    9344.859452998207
+  ],
+  "nearestRankP95Ms": 9317.182451002736,
+  "targetMs": 30000,
+  "peakChildRssKiB": 799476,
+  "platform": "Linux-7.2.11-1-cachyos-x86_64-with-glibc2.44",
+  "python": "3.13.15",
+  "hostLoad": [
+    3.4501953125,
+    2.4658203125,
+    1.53955078125
+  ],
+  "packageVersions": {
+    "sentence-transformers": "6.2.0",
+    "torch": "2.14.1+cpu",
+    "transformers": "5.20.2",
+    "tokenizers": "0.23.3"
+  },
+  "cpu": "AMD Ryzen 7 5700X3D 8-Core Processor",
+  "memory": "MemTotal:       32756252 kB",
+  "commit": "5c78d19302071f550a03b7ced8fb2eb4814c5f0e",
+  "dirty": true,
+  "sourceHashes": {
+    "pyproject.toml": "d71cb10f0ae7a4c48972d8905075c78064fd1ce3a6d7b52b7388be9c1a3893ac",
+    "uv.lock": "03214e5cc8519f2c3619de3c0de6a2181cbea25cf4ffa7244e097f161b2a308e",
+    "backend/researchpilot/integrations/local_embeddings.py": "8e5be8bac31170188d884e4da20548df2fb9cf2c88a70b4ae3f64510ac1d66d7",
+    "backend/researchpilot/ranking_domain.py": "00d92e1ddf05d4357b038e35f521e7f70a063108e96ffdaf96137558387ed317",
+    "backend/tests/test_ranking_performance.py": "d0c6765496ad91406dd695f1a889e5ad4f1253a9f021631c5d23e27c9f3d9cf1"
+  },
+  "pytest": "9.1.1"
+}

@@ -305,6 +305,18 @@ function renderPapers(state) {
     heading.textContent = paper.title;
     item.append(heading);
 
+    const similarity = document.createElement("p");
+    similarity.className = "embedding-similarity";
+    similarity.textContent = typeof paper.embeddingScore === "number"
+      ? `Embedding similarity: ${(paper.embeddingScore * 100).toFixed(1)}%`
+      : "Not ranked — search again to rank locally.";
+    item.append(similarity);
+    if (paper.rankingProvenance?.truncated) {
+      const truncation = document.createElement("p");
+      truncation.textContent = "Paper input was truncated to 256 model tokens for ranking.";
+      item.append(truncation);
+    }
+
     const details = document.createElement("p");
     const metadata = [];
     if (paper.authors?.length) metadata.push(paper.authors.join(", "));
@@ -341,6 +353,11 @@ function renderPapers(state) {
     return item;
   });
   byId("paper-list").replaceChildren(...items);
+  const ranking = state.rankingProvenance;
+  byId("ranking-model").textContent = ranking
+    ? `Local model: ${ranking.modelId} · revision ${ranking.modelRevision}` +
+      (ranking.truncated ? " · Research-question/keyword input was truncated to 256 model tokens." : "")
+    : "";
   const attempt = state.latestAttempt || state;
   const used = attempt.queriesUsed || [];
   const unused = attempt.queriesUnused || [];

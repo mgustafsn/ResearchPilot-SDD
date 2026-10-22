@@ -10,6 +10,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, field_validator, model_validator
 
+from researchpilot.ranking_domain import RankingProvenance, RunRankingProvenance
+
 
 class Paper(BaseModel):
     """Normalized provider facts; never populated from an LLM response."""
@@ -115,6 +117,8 @@ class PaperOutput(BaseModel):
     publicationUrl: str | None
     fullTextUrl: str | None
     isOpenAccess: StrictBool | None
+    embeddingScore: float | None = Field(default=None, ge=0, le=1, allow_inf_nan=False)
+    rankingProvenance: RankingProvenance | None = None
 
 
 class SearchQueryOutput(BaseModel):
@@ -138,6 +142,7 @@ class SearchAttemptOutput(BaseModel):
     queriesUsed: list[SearchQueryOutput]
     queriesUnused: list[SearchQueryOutput]
     errorCode: str | None = None
+    rankingProvenance: RunRankingProvenance | None = None
 
 
 class SearchOutput(SearchAttemptOutput):
@@ -151,6 +156,7 @@ class CurrentPapersOutput(BaseModel):
     projectId: UUID
     latestAttempt: SearchAttemptOutput | None
     papers: list[PaperOutput]
+    rankingProvenance: RunRankingProvenance | None = None
 
 
 def normalize_doi(value):

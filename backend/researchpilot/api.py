@@ -15,6 +15,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from researchpilot.domain import ProjectInput, ProjectOutput
 from researchpilot.integrations import openai_queries
+from researchpilot.integrations.local_embeddings import LocalEmbeddingProvider
 from researchpilot.integrations.openalex_papers import OpenAlexPaperProvider
 from researchpilot.paper_domain import CurrentPapersOutput, SearchOutput
 from researchpilot.persistence import Database
@@ -33,6 +34,7 @@ FRONTEND = Path(__file__).resolve().parents[2] / "frontend"
 logger = logging.getLogger("researchpilot")
 FROM_ENVIRONMENT = object()  # Production composition; tests inject a fake or None.
 OPENALEX_PROVIDER = object()  # Production composition; tests inject a fake or None.
+LOCAL_EMBEDDINGS = object()
 
 
 def error_response(status, code, message, fields=None):
@@ -41,11 +43,12 @@ def error_response(status, code, message, fields=None):
 
 
 def create_app(database=None, suggestion_provider=FROM_ENVIRONMENT,
-               paper_provider=OPENALEX_PROVIDER):
+                paper_provider=OPENALEX_PROVIDER, embedding_provider=LOCAL_EMBEDDINGS):
     @asynccontextmanager
     async def lifespan(app):
         owned = database is None
         storage = provider = retrieval_provider = None
+        embeddings = None
         try:
             try:
                 storage = database or Database(os.environ["DATABASE_URL"])
@@ -61,9 +64,13 @@ def create_app(database=None, suggestion_provider=FROM_ENVIRONMENT,
                 retrieval_provider = OpenAlexPaperProvider()
             else:
                 retrieval_provider = paper_provider
-            app.state.retrieval = RetrievalService(storage, retrieval_provider)
+            embeddings = (LocalEmbeddingProvider() if embedding_provider is LOCAL_EMBEDDINGS
+                          else embedding_provider)
+            app.state.retrieval = RetrievalService(storage, retrieval_provider, embeddings)
             yield
         finally:
+            if embedding_provider is LOCAL_EMBEDDINGS and embeddings is not None:
+                await embeddings.aclose()
             if suggestion_provider is FROM_ENVIRONMENT and provider is not None:
                 await provider.aclose()
             if paper_provider is OPENALEX_PROVIDER and retrieval_provider is not None:
