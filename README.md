@@ -1,4 +1,4 @@
-# ResearchPilot-SDD
+# ResearchPilot-SDD (Course project SWCON)
 
 ResearchPilot-SDD is a local, single-user tool for managing research projects,
 searching OpenAlex for scholarly papers, ranking results by local embedding
